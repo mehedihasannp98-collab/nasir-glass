@@ -163,7 +163,9 @@
   .inv-badge{background:var(--navy); color:#fff; padding:6px 12px; border-radius:8px; text-align:center; font-family:'Roboto Mono',monospace;}
   .inv-badge div:first-child{font-size:9px; opacity:.7; letter-spacing:1px;}
   .inv-badge div:last-child{font-size:13px; font-weight:700;}
-  .party-box{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; font-size:12.5px;}
+  .party-box{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:10px; font-size:12.5px;}
+  .party-box > div:first-child{flex:1 1 auto; min-width:0;}
+  .party-box > div:last-child{flex:0 0 auto;}
   .party-box .lbl{color:var(--slate); font-size:10.5px; text-transform:uppercase; letter-spacing:.5px;}
   .empty{text-align:center; color:var(--slate); padding:50px 10px;}
   .empty .big{font-size:38px; margin-bottom:8px;}
@@ -962,11 +964,15 @@ function renderInvoicePreview(inv){
         <div style="color:#4c6478;font-size:12px;">${inv.address||''}</div>
         <div style="color:#4c6478;font-size:12px;">${inv.mobile||''}</div>
       </div>
-      <div style="text-align:right;">
-        <div class="lbl">Party Code</div>
-        <div style="font-weight:600;">${inv.code||'-'}</div>
-        <div class="lbl" style="margin-top:8px;">DO No.</div>
-        <div style="font-weight:600;">${inv.doNo||'-'}</div>
+      <div style="border:1px solid var(--line); border-radius:8px; padding:8px 12px; background:#f7f9fa; min-width:150px;">
+        <div style="display:flex; justify-content:space-between; gap:14px;">
+          <span class="lbl">Party Code</span>
+          <span style="font-weight:600;">${inv.code||'-'}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; gap:14px; margin-top:6px; border-top:1px dashed var(--line); padding-top:6px;">
+          <span class="lbl">DO No.</span>
+          <span style="font-weight:600;">${inv.doNo||'-'}</span>
+        </div>
       </div>
     </div>
     <div class="scroll-wrap" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
