@@ -1,14 +1,17 @@
 {
-  "name": "Nasir Glass — অর্ডার ও ইনভয়েস",
-  "short_name": "Nasir Glass",
+  "name": "NGIL",
+  "short_name": "NGIL",
+  "description": "Nasir Glass, ডিস্ট্রিবিউটর ড্যাশবোর্ড ও TON COUNT — এক অ্যাপে",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#eef1f3",
-  "theme_color": "#123c3a",
   "orientation": "portrait",
+  "background_color": "#0f1720",
+  "theme_color": "#0f1720",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
