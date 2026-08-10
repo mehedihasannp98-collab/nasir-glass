@@ -2,1745 +2,492 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Nasir Glass">
-<meta name="theme-color" content="#123c3a">
-<title>Nasir Glass — অর্ডার ও ইনভয়েস</title>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#14171A">
+<title>TON COUNT — Nasir Glass</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ton Count">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Roboto+Mono:wght@500;700&display=swap');
-
   :root{
-    --navy:#123c3a;
-    --navy-dark:#0b2b29;
-    --slate:#4f6b66;
-    --paper:#fbfaf6;
-    --line:#d7dde2;
-    --accent:#d98c3f;
-    --good:#2f7a4f;
-    --bad:#b3432b;
+    --bg:#14171A;
+    --surface:#1D2226;
+    --surface-2:#262C31;
+    --surface-3:#2F363C;
+    --border:#363E44;
+    --text:#EDEFF1;
+    --muted:#8F9BA3;
+    --muted-2:#657078;
+    --accent:#4A90D9;
+    --accent-dim:#2E5F8C;
+    --good:#5CC98A;
+    --danger:#DE6B5F;
+
+    --c-tempered:#E3A034;
+    --c-clear:#9FDDE0;
+    --c-colour:#9385C4;
+    --c-reflective:#4A90D9;
+    --c-mirror:#C7CBCF;
+
+    --radius:14px;
+    --radius-sm:9px;
+    --font-head:Georgia,'Noto Serif Bengali','Times New Roman',serif;
+    --font-body:'Segoe UI','Noto Sans Bengali',system-ui,-apple-system,sans-serif;
+    --font-mono:ui-monospace,'SFMono-Regular','Cascadia Mono','Roboto Mono',monospace;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
   body{
-    margin:0; background:#eef1f3; color:#1c2a35;
-    font-family:'Hind Siliguri','Segoe UI',sans-serif;
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
     -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(72px + env(safe-area-inset-bottom));
+    min-height:100vh;
   }
+  ::selection{background:var(--accent-dim);}
+
+  /* ---------- top bar ---------- */
   .topbar{
-    background:var(--navy); color:#fff; padding:12px 20px;
-    display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; justify-content:space-between;
-    position:sticky; top:0; z-index:10; box-shadow:0 2px 8px rgba(0,0,0,.15);
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(180deg,var(--bg) 70%, transparent);
+    padding:18px 18px 8px;
   }
-  .brand{display:flex; align-items:center; gap:10px;}
-  .brand .mark{
-    width:34px;height:34px;border-radius:8px;background:var(--accent);
-    display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;
-    font-family:'Roboto Mono',monospace;
+  .brand{
+    display:flex; align-items:baseline; justify-content:space-between;
   }
-  .brand h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.2px;}
-  .brand span{display:block;font-size:11px;color:#b9c8d4;font-weight:400;}
-  nav{display:flex; gap:6px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; order:3; flex:1 1 100%;}
-  nav::-webkit-scrollbar{display:none;}
-  nav button{
-    background:transparent;border:1px solid rgba(255,255,255,.25); color:#e9eef2;
-    padding:8px 14px; border-radius:7px; cursor:pointer; font-family:inherit; font-size:14px;
-    transition:.15s; white-space:nowrap; flex-shrink:0;
+  .brand h1{
+    font-family:var(--font-head);
+    font-size:22px; font-weight:700; margin:0; letter-spacing:.3px;
   }
-  nav button.active{background:#fff;color:var(--navy);border-color:#fff;font-weight:600;}
-  nav button:hover:not(.active){background:rgba(255,255,255,.12);}
-  .logout-btn{
-    order:2; flex-shrink:0; background:rgba(255,255,255,.08); border:1.5px solid rgba(255,120,110,.55);
-    color:#ffcfc8; padding:8px 13px; border-radius:7px; font-family:inherit; font-size:13px;
-    cursor:pointer; white-space:nowrap;
+  .brand .sub{
+    font-size:11px; color:var(--muted-2); letter-spacing:1.5px; text-transform:uppercase;
+    font-family:var(--font-mono);
   }
-  .logout-btn:hover{background:rgba(255,90,80,.18);}
+  .menu-btn{
+    background:none;border:none;color:var(--muted);font-size:20px;padding:6px 4px;cursor:pointer;
+  }
 
-  /* Login screen */
-  #boot-check{position:fixed; inset:0; background:var(--navy); display:flex; align-items:center; justify-content:center; z-index:100;}
-  #boot-check .spin{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin .8s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  #login-screen{
-    position:fixed; inset:0; background:linear-gradient(160deg,var(--navy),var(--navy-dark)); z-index:90;
-    display:flex; align-items:center; justify-content:center; padding:20px;
-  }
-  .login-box{
-    background:#fff; border-radius:14px; padding:30px 26px; width:100%; max-width:360px;
-    box-shadow:0 12px 40px rgba(0,0,0,.35);
-  }
-  .login-box .mark{
-    width:52px;height:52px;border-radius:12px;background:var(--accent); margin:0 auto 14px;
-    display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px;
-    font-family:'Roboto Mono',monospace;
-  }
-  .login-box h1{margin:0 0 4px; text-align:center; font-size:18px; color:var(--navy);}
-  .login-box .sub{text-align:center; font-size:12.5px; color:var(--slate); margin-bottom:20px;}
-  .login-box .field{margin-bottom:12px;}
-  .login-box .field label{display:block; font-size:12px; color:var(--slate); margin-bottom:5px; font-weight:600;}
-  .login-box .field input{
-    width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:8px;
-    font-family:inherit; font-size:15px; background:#fdfdfb;
-  }
-  .login-box .field input:focus{outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent);}
-  .login-box .err{color:var(--bad); font-size:12.5px; min-height:16px; margin:2px 0 8px; text-align:center;}
-  .login-box button.btn-login{
-    width:100%; border:none; padding:12px; border-radius:8px; background:var(--accent); color:#fff;
-    font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; transition:.15s;
-  }
-  .login-box button.btn-login:hover{background:#a8621f;}
-  .login-box button.btn-login:disabled{opacity:.6; cursor:default;}
-  .login-box .toggle-mode{
-    text-align:center; margin-top:16px; font-size:12.5px; color:var(--slate);
-  }
-  .login-box .toggle-mode a{color:var(--accent); font-weight:600; text-decoration:none; cursor:pointer;}
-  .login-box .toggle-mode a:hover{text-decoration:underline;}
-  #login-screen.hidden, #boot-check.hidden{display:none;}
+  main{ padding:4px 16px 24px; max-width:520px; margin:0 auto; }
+  .screen{ display:none; animation:fade .18s ease; }
+  .screen.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
 
-  .wrap{max-width:960px; margin:22px auto 60px; padding:0 16px;}
+  /* ---------- glass pane stack (signature element) ---------- */
+  .pane-stack{
+    display:flex; height:14px; border-radius:7px; overflow:hidden;
+    background:var(--surface-2); border:1px solid var(--border);
+  }
+  .pane-stack .seg{ height:100%; min-width:0; transition:flex-basis .3s ease; }
+  .pane-stack.empty{ background:var(--surface-2); }
+  .pane-legend{
+    display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:11.5px; color:var(--muted);
+  }
+  .pane-legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .dot{ width:9px; height:9px; border-radius:3px; display:inline-block; flex:none; }
+
+  /* ---------- cards ---------- */
   .card{
-    background:#fff; border:1px solid var(--line); border-radius:12px;
-    padding:22px; margin-bottom:18px; box-shadow:0 1px 3px rgba(20,30,40,.05);
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px; margin-bottom:14px;
   }
-  .card h2{margin:0 0 16px; font-size:15px; color:var(--navy); letter-spacing:.3px;
-    text-transform:uppercase; font-weight:700; border-bottom:2px solid var(--line); padding-bottom:10px;}
+  .card h2{ font-family:var(--font-head); font-size:15px; margin:0 0 12px; color:var(--text); font-weight:600;}
+  .row-between{ display:flex; align-items:center; justify-content:space-between; }
 
-  .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
-  .field label{display:block; font-size:12px; color:var(--slate); margin-bottom:5px; font-weight:600;}
-  .field input, .field select{
-    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px;
-    font-family:inherit; font-size:14.5px; background:#fdfdfb;
+  /* ---------- big total ---------- */
+  .big-total{
+    text-align:center; padding:6px 0 14px;
   }
-  .field input:focus, .field select:focus{outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent);}
+  .big-total .num{
+    font-family:var(--font-mono); font-size:44px; font-weight:600; color:var(--accent);
+    letter-spacing:-1px; line-height:1;
+  }
+  .big-total .label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-top:6px;}
 
-  table.items{width:100%; border-collapse:collapse; margin-top:6px;}
-  #items-table{min-width:680px;}
-  table.items th{
-    background:var(--navy); color:#fff; font-size:12px; padding:9px 6px; text-align:center;
-    font-weight:600; white-space:nowrap;
+  /* ---------- form ---------- */
+  .field{ margin-bottom:12px; }
+  .field label{
+    display:flex; align-items:center; gap:7px; font-size:13px; color:var(--muted); margin-bottom:6px;
   }
-  table.items td{border:1px solid var(--line); padding:5px; text-align:center; font-size:13.5px; white-space:nowrap;}
-  table.items td input, table.items td select{
-    width:100%; border:none; text-align:center; padding:6px 2px; font-family:inherit; font-size:13.5px; background:transparent;
+  .field input[type=date]{
+    width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+    padding:11px 12px; border-radius:var(--radius-sm); font-size:15px; font-family:var(--font-body);
   }
-  table.items td input:focus, table.items td select:focus{outline:2px solid var(--accent); background:#fff8ee; border-radius:4px;}
-  table.items tr.readonly td{background:#f6f8f9; color:var(--slate);}
-  table.items td.num{font-family:'Roboto Mono',monospace; color:var(--navy); font-weight:600;}
-  .rm-row{cursor:pointer; color:var(--bad); font-weight:700; border:none; background:none; font-size:16px;}
+  .num-row{ display:grid; grid-template-columns:1fr; gap:10px; }
+  .num-field{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:8px 12px;
+  }
+  .num-field .dot{ width:11px; height:11px; }
+  .num-field .name{ flex:1; font-size:14.5px; }
+  .num-field input{
+    width:88px; text-align:right; background:transparent; border:none; color:var(--text);
+    font-family:var(--font-mono); font-size:17px; font-weight:600; padding:6px 2px; outline:none;
+  }
+  .num-field input:focus-visible{ outline:2px solid var(--accent); border-radius:6px; }
+  .num-field.tempered{ border-left:3px solid var(--c-tempered); }
+  .num-field.clear{ border-left:3px solid var(--c-clear); }
+  .num-field.colour{ border-left:3px solid var(--c-colour); }
+  .num-field.reflective{ border-left:3px solid var(--c-reflective); }
+  .num-field.mirror{ border-left:3px solid var(--c-mirror); }
 
-  .actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
-  button.btn{
-    border:none; padding:11px 18px; border-radius:8px; font-family:inherit; font-size:14.5px;
-    font-weight:600; cursor:pointer; transition:.15s;
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:13px; border-radius:var(--radius-sm); border:none;
+    font-size:15px; font-weight:600; cursor:pointer; font-family:var(--font-body);
   }
-  .btn-primary{background:var(--accent); color:#fff;}
-  .btn-primary:hover{background:#a8621f;}
-  .btn-outline{background:#fff; color:var(--navy); border:1.5px solid var(--navy);}
-  .btn-outline:hover{background:#f0f3f5;}
-  .btn-ghost{background:#eef1f3; color:var(--slate);}
-  .btn-danger{background:#fbe9e5; color:var(--bad);}
+  .btn-primary{ background:var(--accent); color:#0C1A26; }
+  .btn-primary:active{ background:#3f7fc2; }
+  .btn-whatsapp{ background:#1E8E5A; color:#EAF8EF; }
+  .btn-whatsapp:active{ background:#187348; }
+  .btn-ghost{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid #5A3833; }
+  .btn-row{ display:flex; gap:10px; margin-top:14px; }
+  .btn-row .btn{ flex:1; }
+  .btn-sm{ width:auto; padding:9px 14px; font-size:13px; }
 
-  .totals{margin-top:8px; display:flex; justify-content:flex-end;}
-  .totals table{border-collapse:collapse; min-width:320px;}
-  .totals td{padding:7px 14px; font-size:14px;}
-  .totals td:first-child{color:var(--slate); text-align:right;}
-  .totals td:last-child{font-family:'Roboto Mono',monospace; font-weight:700; text-align:right; color:var(--navy);}
-  .totals tr.grand td{border-top:2px solid var(--navy); font-size:16.5px; color:var(--accent);}
-  .totals-card{
-    margin-top:16px; border:1.5px solid var(--navy); border-radius:12px;
-    padding:14px 16px 12px; background:linear-gradient(180deg,#fbfaf6 0%,#f5f8f7 100%);
-    box-shadow:0 1px 0 rgba(18,60,58,.06) inset;
+  /* ---------- month selector ---------- */
+  .month-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .month-nav button{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+    width:38px; height:38px; border-radius:10px; font-size:17px; cursor:pointer;
   }
-  .quick-summary-box{
-    margin-top:14px; border:1.5px solid var(--navy); border-radius:12px;
-    padding:10px 16px; display:flex; flex-wrap:wrap; gap:6px 20px; justify-content:space-between;
-    background:#fbfaf6;
-  }
-  .quick-summary-box > div{display:flex; align-items:center; gap:8px; flex:1; min-width:140px;}
-  .quick-summary-box .q-lbl{font-size:11px; color:var(--slate); white-space:nowrap;}
-  .quick-summary-box .q-val{font-family:'Roboto Mono',monospace; font-weight:700; font-size:13.5px; color:var(--navy);}
+  .month-nav .month-label{ font-family:var(--font-head); font-size:18px; font-weight:700; text-align:center; }
+  .month-nav .month-label small{ display:block; font-family:var(--font-mono); font-size:11px; color:var(--muted); font-weight:400; margin-top:2px;}
 
-  /* Invoice preview */
-  .invoice-sheet{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; font-size:13px;}
-  .inv-head{display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid var(--navy); padding-bottom:8px; margin-bottom:10px;}
-  .inv-head h2{margin:0; color:var(--navy); font-size:18px;}
-  .inv-head .sub{color:var(--slate); font-size:11px; margin-top:4px;}
-  .inv-badge{background:var(--navy); color:#fff; padding:6px 12px; border-radius:8px; text-align:center; font-family:'Roboto Mono',monospace;}
-  .inv-badge div:first-child{font-size:9px; opacity:.7; letter-spacing:1px;}
-  .inv-badge div:last-child{font-size:13px; font-weight:700;}
-  .party-box{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px; font-size:12.5px;}
-  .party-box .lbl{color:var(--slate); font-size:10.5px; text-transform:uppercase; letter-spacing:.5px;}
-  .empty{text-align:center; color:var(--slate); padding:50px 10px;}
-  .empty .big{font-size:38px; margin-bottom:8px;}
-  .list-item{
-    display:flex; justify-content:space-between; align-items:center; padding:14px 16px;
-    border:1px solid var(--line); border-radius:9px; margin-bottom:10px; background:#fff;
+  /* ---------- summary grid (share format) ---------- */
+  .summary-grid{ display:flex; flex-direction:column; gap:9px; }
+  .summary-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:9px 4px; border-bottom:1px dashed var(--border); font-size:14.5px;
   }
-  .list-item .who{font-weight:600; color:var(--navy);}
-  .list-item .meta{font-size:12.5px; color:var(--slate); margin-top:2px;}
-  .list-item .amt{font-family:'Roboto Mono',monospace; font-weight:700; color:var(--accent); margin-right:16px;}
-  .hint{font-size:12px; color:var(--slate); margin-top:10px;}
-  .toast{
-    position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff;
-    padding:12px 22px; border-radius:8px; font-size:14px; box-shadow:0 4px 14px rgba(0,0,0,.25); z-index:50;
-    opacity:0; pointer-events:none; transition:.25s; max-width:90vw; text-align:center; white-space:normal;
-  }
-  .toast.show{opacity:1; transform:translate(-50%,-6px);}
+  .summary-row:last-child{ border-bottom:none; }
+  .summary-row .k{ display:flex; align-items:center; gap:8px; color:var(--muted); }
+  .summary-row .v{ font-family:var(--font-mono); font-weight:600; font-size:15.5px; }
+  .summary-row.total{ margin-top:4px; padding-top:12px; border-top:1px solid var(--border); border-bottom:none;}
+  .summary-row.total .k{ color:var(--text); font-weight:700; }
+  .summary-row.total .v{ color:var(--accent); font-size:18px; }
 
-  @media print{
-    @page{ size:A4; margin:9mm; }
-    body{background:#fff;}
-    .topbar, .no-print, nav, .logout-btn{display:none !important;}
-    #view-home, #view-tempered, #view-history, #view-settings, #view-dashboard{display:none !important;}
-    .wrap{max-width:100%; margin:0; padding:0;}
-    .card{border:none; padding:0; margin:0; box-shadow:none;}
-    .invoice-sheet{border:none; padding:0; box-shadow:none; font-size:11.5px;}
-    /* the item tables scroll horizontally on screen — for print, let them
-       shrink to the real page width instead of getting cut off/scrollbar'd */
-    .scroll-wrap{overflow-x:visible !important; width:auto !important;}
-    #items-table, .invoice-sheet table.items{min-width:0 !important; width:100% !important; table-layout:auto;}
-    table.items th, table.items td{padding:4px 3px; font-size:10.5px; white-space:normal;}
-    /* Item Name column: auto-fit — grows for a long name, shrinks for a
-       short one — capped so one long name can't squeeze every other
-       column. Only applies to the printed invoice table. */
-    .inv-items-table th.col-item, .inv-items-table td.col-item{
-      width:auto !important; max-width:105px !important; white-space:normal !important; word-break:break-word;
-    }
-    .actions, .hint, .ruler-box{display:none !important;}
-    .totals{page-break-inside:avoid; margin-top:2px;}
-    .totals-card{page-break-inside:avoid; margin-top:6px !important; padding:6px 10px 6px !important; border-width:1px !important;}
-    .totals table{min-width:0 !important;}
-    .totals td{padding:2px 8px !important; font-size:11px !important;}
-    .totals tr.grand td{font-size:13px !important;}
-    #commission-card{margin-top:3px !important; padding-top:3px !important;}
-    #commission-card > div:first-child{margin-bottom:1px !important;}
-    #commission-card [style*="grid-template-columns"]{gap:0px 6px !important; font-size:9.5px !important;}
-    #commission-card input{padding:0px 3px !important; font-size:9.5px !important;}
-    div[style*="margin-top:28px"]{margin-top:6px !important;}
+  /* ---------- entry log list ---------- */
+  .log-item{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 4px; border-bottom:1px solid var(--border); cursor:pointer;
   }
-
-  /* Same compaction as @media print above, but as a toggleable CLASS —
-     html2canvas (used for "PDF সেভ"/WhatsApp share) renders the DOM as
-     shown on screen and does NOT apply @media print rules, which is why
-     shared PDFs were coming out much taller/narrower than printed ones.
-     Applying this class right before capturing fixes that. */
-  .invoice-sheet.compact-capture{border:none; padding:0; box-shadow:none; font-size:11.5px;}
-  .compact-capture table.items th, .compact-capture table.items td{padding:4px 3px; font-size:10.5px; white-space:nowrap;}
-  /* Same auto-fit behavior as print, but for the WhatsApp/PDF share
-     capture (html2canvas doesn't apply @media print rules). */
-  .compact-capture .inv-items-table th.col-item, .compact-capture .inv-items-table td.col-item{
-    width:auto !important; max-width:105px !important; white-space:normal !important; word-break:break-word;
+  .log-item:last-child{ border-bottom:none; }
+  .log-item .date{
+    width:44px; flex:none; text-align:center;
   }
-  .compact-capture .totals{margin-top:2px;}
-  .compact-capture .totals-card{margin-top:6px !important; padding:6px 10px 6px !important; border-width:1px !important;}
-  .compact-capture .totals td{padding:2px 8px !important; font-size:11px !important;}
-  .compact-capture .totals tr.grand td{font-size:13px !important;}
-  .compact-capture .quick-summary-box{margin-top:6px !important; padding:6px 12px !important;}
-  .compact-capture #commission-card{margin-top:3px !important; padding-top:3px !important;}
-  .compact-capture #commission-card > div:first-child{margin-bottom:1px !important;}
-  .compact-capture #commission-card [style*="grid-template-columns"]{gap:0px 6px !important; font-size:9.5px !important;}
-  .compact-capture #commission-card input{padding:0px 3px !important; font-size:9.5px !important;}
-  .compact-capture div[style*="margin-top:28px"]{margin-top:6px !important;}
+  .log-item .date .d{ font-family:var(--font-mono); font-size:18px; font-weight:700; line-height:1; }
+  .log-item .date .m{ font-size:10px; color:var(--muted-2); text-transform:uppercase; letter-spacing:.5px; }
+  .log-item .mid{ flex:1; min-width:0; }
+  .log-item .mini-stack{ display:flex; height:7px; border-radius:4px; overflow:hidden; background:var(--surface-2); margin-bottom:5px;}
+  .log-item .mini-stack .seg{ height:100%; }
+  .log-item .cats{ font-size:11px; color:var(--muted-2); font-family:var(--font-mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .log-item .total{ font-family:var(--font-mono); font-weight:700; font-size:15px; flex:none; }
+  .empty-note{ text-align:center; color:var(--muted-2); font-size:13px; padding:26px 10px; }
 
-  /* Tempered calculator — size-snap ruler */
-  .ruler-box{margin-top:14px; background:#f4f7fc; border:1px dashed #b9c6ec; border-radius:9px; padding:12px 14px;}
-  .ruler-row{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; flex-wrap:wrap; gap:6px;}
-  .ruler-row .actual{font-size:12px; color:var(--slate);}
-  .ruler-row .snap{font-family:'Roboto Mono',monospace; font-weight:700; color:#2c4b9b; font-size:15px;}
-  .ruler-track{position:relative; height:8px; background:#dde4f5; border-radius:6px; overflow:hidden;}
-  .ruler-fill{position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#2c4b9b,#6f8fe0); border-radius:6px; transition:width .25s ease;}
-  .ruler-ticks{display:flex; justify-content:space-between; margin-top:4px; font-size:9.5px; color:var(--slate); font-family:'Roboto Mono',monospace;}
-  .tm-card-head{display:flex; align-items:center; gap:10px; margin:-22px -22px 16px; padding:16px 22px; background:linear-gradient(135deg,#2c4b9b,#3d5fc0); border-radius:12px 12px 0 0;}
-  .tm-card-head .badge{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-  .tm-card-head h2{margin:0; border:none; padding:0; color:#fff; text-transform:none; letter-spacing:0; font-size:16px;}
-  .tm-card-head .sub{color:#dbe3fb; font-size:11.5px; margin-top:2px;}
+  /* ---------- overview / year table ---------- */
+  .year-nav{ display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:16px; }
+  .year-nav button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:34px; height:34px; border-radius:9px; font-size:15px; cursor:pointer;}
+  .year-nav .yr{ font-family:var(--font-head); font-size:19px; font-weight:700; min-width:64px; text-align:center;}
+
+  .month-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:13px 15px; margin-bottom:10px;
+  }
+  .month-card.zero{ opacity:.45; }
+  .month-card .row-between{ margin-bottom:9px; }
+  .month-card .mname{ font-weight:700; font-size:14.5px; }
+  .month-card .mtotal{ font-family:var(--font-mono); font-weight:700; color:var(--accent); font-size:15px; }
+  .pill-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pill{
+    font-size:11px; font-family:var(--font-mono); padding:3px 8px; border-radius:20px;
+    background:var(--surface-2); border:1px solid var(--border); color:var(--muted);
+  }
+  .pill.has{ color:var(--text); border-color:transparent; }
+
+  .year-total-card{
+    background:linear-gradient(135deg,var(--surface-2),var(--surface)); border:1px solid var(--border);
+    border-radius:var(--radius); padding:18px; text-align:center; margin-top:6px; margin-bottom:16px;
+  }
+  .year-total-card .num{ font-family:var(--font-mono); font-size:32px; font-weight:700; color:var(--accent); }
+  .year-total-card .label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-top:4px;}
+
+  /* ---------- bottom nav ---------- */
+  nav.tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:30;
+    background:var(--surface); border-top:1px solid var(--border);
+    display:flex; padding:6px 10px calc(6px + env(safe-area-inset-bottom));
+  }
+  nav.tabbar button{
+    flex:1; background:none; border:none; color:var(--muted-2); cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 4px; font-family:var(--font-body);
+    font-size:11px;
+  }
+  nav.tabbar button svg{ width:21px; height:21px; }
+  nav.tabbar button.active{ color:var(--accent); }
+
+  /* ---------- toast ---------- */
+  #toast{
+    position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px);
+    background:var(--surface-3); color:var(--text); padding:10px 18px; border-radius:30px;
+    font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease; z-index:50;
+    border:1px solid var(--border); white-space:nowrap;
+  }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---------- menu sheet ---------- */
+  .sheet-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:40; opacity:0; pointer-events:none; transition:opacity .2s;
+  }
+  .sheet-backdrop.show{ opacity:1; pointer-events:auto; }
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:41;
+    background:var(--surface); border-radius:18px 18px 0 0; border:1px solid var(--border); border-bottom:none;
+    padding:10px 16px calc(20px + env(safe-area-inset-bottom));
+    transform:translateY(100%); transition:transform .25s ease;
+  }
+  .sheet.show{ transform:translateY(0); }
+  .sheet .handle{ width:36px; height:4px; background:var(--border); border-radius:3px; margin:6px auto 14px; }
+  .sheet button.item{
+    width:100%; text-align:left; background:none; border:none; color:var(--text); font-size:15px;
+    padding:13px 4px; border-bottom:1px solid var(--border); font-family:var(--font-body);
+  }
+  .sheet button.item:last-of-type{ border-bottom:none; }
+  .sheet button.item.danger{ color:var(--danger); }
+
+  small.hint{ display:block; color:var(--muted-2); font-size:11.5px; margin-top:8px; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
 
 <!-- BOOT CHECK: shown briefly while we ask Firebase "is anyone already logged in?" -->
-<div id="boot-check"><div class="spin"></div></div>
+<div id="boot-check" style="position:fixed;inset:0;background:#14171A;display:flex;align-items:center;justify-content:center;z-index:9999;color:#8F9BA3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;">লোড হচ্ছে…</div>
 
 <!-- LOGIN SCREEN -->
-<div id="login-screen" class="hidden">
-  <div class="login-box">
-    <div class="mark">PG</div>
-    <h1>Nasir Glass</h1>
-    <div class="sub">অর্ডার ও ইনভয়েস সফটওয়্যার — লগইন করুন</div>
+<div id="login-screen" class="hidden" style="position:fixed;inset:0;background:#14171A;z-index:9998;display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="width:100%;max-width:360px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:20px;font-weight:700;color:#EDEFF1;">TON COUNT</div>
+      <div style="font-size:13px;color:#8F9BA3;margin-top:4px;">Nasir Glass · টন হিসাব — লগইন করুন</div>
+    </div>
 
     <div id="login-form">
-      <div class="field"><label>ইমেইল</label><input type="email" id="login-email" autocomplete="username" placeholder="you@example.com"></div>
-      <div class="field"><label>পাসওয়ার্ড</label><input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin();"></div>
-      <div class="err" id="login-err"></div>
-      <button class="btn-login" id="login-btn" onclick="doLogin()">লগইন করুন</button>
-      <div class="toggle-mode">নতুন ব্যবহারকারী? <a onclick="showSignup()">অ্যাকাউন্ট তৈরি করুন</a></div>
+      <input type="email" id="login-email" placeholder="ইমেইল" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
+      <input type="password" id="login-pass" placeholder="পাসওয়ার্ড" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
+      <div id="login-err" style="color:#DE6B5F;font-size:13px;min-height:18px;margin-bottom:6px;"></div>
+      <button id="login-btn" onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:12px;background:#4A90D9;color:#fff;font-size:15px;font-weight:700;">লগইন করুন</button>
+      <div style="text-align:center;margin-top:16px;font-size:13px;color:#8F9BA3;">অ্যাকাউন্ট নেই? <a href="#" onclick="showSignup();return false;" style="color:#4A90D9;">তৈরি করুন</a></div>
     </div>
 
     <div id="signup-form" style="display:none;">
-      <div class="field"><label>ইমেইল</label><input type="email" id="signup-email" autocomplete="username" placeholder="you@example.com"></div>
-      <div class="field"><label>পাসওয়ার্ড (অন্তত ৬ ডিজিট/অক্ষর)</label><input type="password" id="signup-pass" autocomplete="new-password" placeholder="••••••••"></div>
-      <div class="field"><label>পাসওয়ার্ড আবার লিখুন</label><input type="password" id="signup-pass2" autocomplete="new-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doSignup();"></div>
-      <div class="err" id="signup-err"></div>
-      <button class="btn-login" id="signup-btn" onclick="doSignup()">অ্যাকাউন্ট তৈরি করুন</button>
-      <div class="toggle-mode">আগে থেকে অ্যাকাউন্ট আছে? <a onclick="showLogin()">লগইন করুন</a></div>
+      <input type="email" id="signup-email" placeholder="ইমেইল" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
+      <input type="password" id="signup-pass" placeholder="পাসওয়ার্ড (অন্তত ৬ অক্ষর)" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
+      <input type="password" id="signup-pass2" placeholder="পাসওয়ার্ড আবার লিখুন" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
+      <div id="signup-err" style="color:#DE6B5F;font-size:13px;min-height:18px;margin-bottom:6px;"></div>
+      <button id="signup-btn" onclick="doSignup()" style="width:100%;padding:13px;border:none;border-radius:12px;background:#4A90D9;color:#fff;font-size:15px;font-weight:700;">অ্যাকাউন্ট তৈরি করুন</button>
+      <div style="text-align:center;margin-top:16px;font-size:13px;color:#8F9BA3;">আগে থেকে অ্যাকাউন্ট আছে? <a href="#" onclick="showLogin();return false;" style="color:#4A90D9;">লগইন করুন</a></div>
     </div>
   </div>
 </div>
+<style>#boot-check.hidden, #login-screen.hidden{display:none !important;}</style>
 
-<!-- MAIN APP -->
 <div id="app-root" style="display:none;">
 
-
-<div class="topbar no-print">
+<div class="topbar">
   <div class="brand">
-    <div class="mark">PG</div>
     <div>
-      <h1>Nasir Glass</h1>
-      <span>অর্ডার ও ইনভয়েস সফটওয়্যার</span>
+      <h1>TON COUNT</h1>
+      <div class="sub">Nasir Glass · টন হিসাব</div>
     </div>
+    <button class="menu-btn" id="menuBtn" aria-label="মেনু">⋮</button>
   </div>
-  <button class="logout-btn no-print" id="logout-btn" onclick="doLogout()">⏻ লগআউট</button>
-  <nav>
-    <button id="nav-home" onclick="goto('home')">🏠 হোম</button>
-    <button id="nav-tempered" onclick="goto('tempered')">🔷 টেম্পার্ড</button>
-    <button id="nav-invoice" onclick="goto('invoice')">🧾 ইনভয়েস</button>
-    <button id="nav-history" onclick="goto('history')">📁 সংরক্ষিত (<span id="hist-count">0</span>)</button>
-    <button id="nav-settings" onclick="goto('settings')">⚙️ সেটিংস</button>
-    <button id="nav-dashboard" onclick="goto('dashboard')">📊 Dashboard</button>
-  </nav>
 </div>
 
-<div class="wrap">
+<main>
 
-  <!-- HOME VIEW -->
-  <div id="view-home">
-    <div class="card">
-      <h2>ক্রেতার তথ্য</h2>
-      <div class="grid">
-        <div class="field">
-          <label>পার্টি কোড</label>
-          <input list="party-codes" id="in-code" placeholder="যেমন 0503" oninput="onCodeChange()">
-          <datalist id="party-codes"></datalist>
-          <div id="code-status" style="font-size:11.5px; margin-top:4px; min-height:14px;"></div>
-        </div>
-        <div class="field"><label>নাম</label><input id="in-name" placeholder="স্বয়ংক্রিয়" onchange="checkDateDuplicate()"></div>
-        <div class="field"><label>ঠিকানা</label><input id="in-address" placeholder="স্বয়ংক্রিয়"></div>
-        <div class="field"><label>মোবাইল</label><input id="in-mobile" placeholder="স্বয়ংক্রিয়"></div>
-        <div class="field"><label>DO নম্বর</label><input id="in-do" placeholder="DO No."></div>
-        <div class="field"><label>তারিখ</label><input type="date" id="in-date" onchange="checkDateDuplicate()"></div>
-      </div>
-      <div id="date-dup-warning" style="display:none; margin-top:10px; background:#3a1f00; border:1px solid #a35b00; color:#ffb85c; border-radius:8px; padding:10px 12px; font-size:12.5px; line-height:1.6;"></div>
-    </div>
+  <!-- ================= ENTRY SCREEN ================= -->
+  <section class="screen active" id="screen-entry">
 
     <div class="card">
-      <h2>মালামালের বিবরণ</h2>
-      <div class="scroll-wrap" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
-      <table class="items" id="items-table">
-        <thead>
-          <tr>
-            <th style="width:34px">#</th>
-            <th style="width:220px">কোড</th>
-            <th>প্রস্থ (in)</th>
-            <th>উচ্চতা (in)</th>
-            <th>সংখ্যা</th>
-            <th>SFT</th>
-            <th>রেট/SFT</th>
-            <th>MT</th>
-            <th>টাকা</th>
-            <th style="width:30px" class="no-print"></th>
-          </tr>
-        </thead>
-        <tbody id="items-body"></tbody>
-      </table>
-      </div>
-      <datalist id="rate-codes"></datalist>
-      <div class="bulk-add-row" style="display:flex; gap:8px; align-items:center; margin:12px 0; flex-wrap:wrap; background:var(--bg2,#f5f7f6); padding:10px; border-radius:8px;">
-        <span style="font-size:13px; font-weight:600; color:var(--muted,#667); width:100%;">🔁 একই কোডে (ইচ্ছে হলে একই মাপেও) একসাথে অনেক ঘর যোগ করুন</span>
-        <input type="text" id="bulk-code" list="rate-codes" placeholder="কোড, যেমন C 2.5" style="flex:1; min-width:120px; padding:9px 10px; font-size:14px; font-weight:700; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
-        <input type="number" step="any" inputmode="decimal" id="bulk-w" placeholder="প্রস্থ (in) — ঐচ্ছিক" style="width:130px; padding:9px 10px; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
-        <input type="number" step="any" inputmode="decimal" id="bulk-h" placeholder="উচ্চতা (in) — ঐচ্ছিক" style="width:130px; padding:9px 10px; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
-        <input type="number" step="any" inputmode="decimal" id="bulk-qty" placeholder="সংখ্যা — ঐচ্ছিক" style="width:120px; padding:9px 10px; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
-        <input type="number" id="bulk-count" placeholder="কয়টি সারি" min="1" step="1" inputmode="numeric" style="width:100px; padding:9px 10px; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
-        <button class="btn btn-ghost" onclick="addRowsWithCode()">+ যোগ করুন</button>
-      </div>
-      <div class="actions">
-        <button class="btn btn-ghost" onclick="addRow()">+ নতুন সারি</button>
-        <button class="btn btn-ghost" onclick="clearForm(true)">🗑 সব মুছুন</button>
-
-      </div>
-      <div class="totals">
-        <table>
-          <tr><td>মোট SFT</td><td id="t-sft">0.00</td></tr>
-          <tr><td>মোট MT</td><td id="t-mt">0.0000</td></tr>
-          <tr class="grand"><td>সর্বমোট টাকা</td><td id="t-amt">৳ 0</td></tr>
-        </table>
-      </div>
-      <div class="actions">
-        <button class="btn btn-primary" onclick="goto('invoice')">ইনভয়েস তৈরি করুন →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TEMPERED CALCULATOR VIEW -->
-  <div id="view-tempered" style="display:none;">
-    <div class="card">
-      <div class="tm-card-head">
-        <div class="badge">🔷</div>
-        <div>
-          <h2>টেম্পার্ড সাইজ ক্যালকুলেটর</h2>
-          <div class="sub">স্ট্যান্ডার্ড সাইজে রাউন্ড করে সরাসরি হোমের তালিকায় যোগ করুন</div>
-        </div>
-      </div>
-      <div class="grid">
-        <div class="field">
-          <label>Item Type</label>
-          <select id="tp-itemType">
-            <option value="TSTD">Standard Door — TSTD</option>
-            <option value="TD">Door — TD</option>
-            <option value="THD">Hanging Door — THD</option>
-            <option value="TPD">Pair Door — TPD</option>
-            <option value="TSD">Shower Door — TSD</option>
-            <option value="TTT">Table Top — TTT</option>
-            <option value="TS" selected>Sheet — TS</option>
-            <option value="DBG">Double Glazing — DBG</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Glass Colour</label>
-          <select id="tp-color">
-            <option>CLEAR</option><option>BRONZE</option><option>F-GREEN</option>
-            <option>GREY</option><option>BLUE</option><option>METALLIC</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Thickness (mm)</label>
-          <select id="tp-thickness">
-            <option>4</option><option>5</option><option>6</option><option>8</option>
-            <option selected>10</option><option>12</option><option>15</option><option>19</option>
-          </select>
-        </div>
-        <div class="field"><label>সংখ্যা (PCS)</label><input id="tp-pcs" type="number" min="1" value="1"></div>
+      <div class="field">
+        <label for="entryDate">তারিখ</label>
+        <input type="date" id="entryDate">
       </div>
 
-      <div class="grid" style="margin-top:14px;">
-        <div class="field"><label>প্রস্থ — ইঞ্চি</label><input id="tp-wInch" type="number" min="0" placeholder="যেমন 42"></div>
-        <div class="field">
-          <label>প্রস্থ — সুতা (১ ইঞ্চি = ৮ সুতা)</label>
-          <select id="tp-wShuta">
-            <option value="0">0 সুতা</option><option value="1">1 সুতা</option><option value="2">2 সুতা</option>
-            <option value="3">3 সুতা</option><option value="4" selected>4 সুতা</option><option value="5">5 সুতা</option>
-            <option value="6">6 সুতা</option><option value="7">7 সুতা</option>
-          </select>
+      <div class="num-row" id="numInputs">
+        <div class="num-field tempered">
+          <span class="dot" style="background:var(--c-tempered)"></span>
+          <span class="name">Tempered</span>
+          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-tempered" placeholder="0">
         </div>
-        <div class="field"><label>উচ্চতা — ইঞ্চি</label><input id="tp-hInch" type="number" min="0" placeholder="যেমন 81"></div>
-        <div class="field">
-          <label>উচ্চতা — সুতা</label>
-          <select id="tp-hShuta">
-            <option value="0">0 সুতা</option><option value="1">1 সুতা</option><option value="2">2 সুতা</option>
-            <option value="3">3 সুতা</option><option value="4">4 সুতা</option><option value="5" selected>5 সুতা</option>
-            <option value="6">6 সুতা</option><option value="7">7 সুতা</option>
-          </select>
+        <div class="num-field clear">
+          <span class="dot" style="background:var(--c-clear)"></span>
+          <span class="name">Clear</span>
+          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-clear" placeholder="0">
+        </div>
+        <div class="num-field colour">
+          <span class="dot" style="background:var(--c-colour)"></span>
+          <span class="name">Colour</span>
+          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-colour" placeholder="0">
+        </div>
+        <div class="num-field reflective">
+          <span class="dot" style="background:var(--c-reflective)"></span>
+          <span class="name">Reflective</span>
+          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-reflective" placeholder="0">
+        </div>
+        <div class="num-field mirror">
+          <span class="dot" style="background:var(--c-mirror)"></span>
+          <span class="name">Mirror</span>
+          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-mirror" placeholder="0">
         </div>
       </div>
 
-      <div class="ruler-box">
-        <div class="ruler-row">
-          <span class="actual" id="tp-actualSizeText">প্রকৃত মাপ: —</span>
-          <span class="snap" id="tp-snapSizeText">স্ট্যান্ডার্ড → —</span>
-        </div>
-        <div class="ruler-track"><div class="ruler-fill" id="tp-rulerFill" style="width:0%"></div></div>
-        <div class="ruler-ticks"><span id="tp-rulerLow">—</span><span id="tp-rulerHigh">—</span></div>
+      <div class="big-total">
+        <div class="num" id="entryTotal">0.00</div>
+        <div class="label">Total Ton</div>
       </div>
 
-      <div class="actions">
-        <button class="btn" style="background:#2c4b9b;color:#fff;" onclick="addTemperedRow()">➕ হোমের আইটেম তালিকায় যোগ করুন</button>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="saveBtn">সেভ করুন</button>
       </div>
-      <div class="hint">রাউন্ড হওয়া স্ট্যান্ডার্ড সাইজ অনুযায়ী এই আইটেমটি সরাসরি হোম পেজের আইটেম টেবিলে যোগ হবে — সেখান থেকেই ইনভয়েস তৈরি হবে (একই ইনভয়েস, PDF, শেয়ার, সেভ — সব আগের মতোই)। নতুন কোডের রেট প্রথমবার ০ থাকবে, সেটিংস থেকে বসিয়ে দিন।</div>
-    </div>
-  </div>
-
-  <!-- INVOICE VIEW -->
-  <div id="view-invoice" style="display:none;">
-    <div class="invoice-sheet" id="invoice-render"></div>
-    <div class="actions no-print" style="margin-top:16px; align-items:center;">
-      <button class="btn btn-outline" onclick="goto('home')">← হোমে ফিরুন / এডিট করুন</button>
-      <button class="btn btn-primary" onclick="saveInvoice()">💾 সেভ করুন</button>
-      <button class="btn btn-ghost" onclick="editInvoice()">✏️ এডিট করুন</button>
-      <select id="page-size" class="field" style="width:auto; padding:10px 12px; border:1.5px solid var(--line); border-radius:8px; font-family:inherit;">
-        <option value="a4">A4 সাইজ</option>
-        <option value="legal">Legal সাইজ</option>
-      </select>
-      <button class="btn btn-ghost" onclick="downloadPDF()">⬇️ PDF সেভ করুন (ফোনে)</button>
-      <button class="btn btn-ghost" onclick="sharePDF()" style="background:#e7f6ec; color:var(--good);">📲 WhatsApp-এ শেয়ার করুন</button>
-      <button class="btn btn-ghost" onclick="printInvoice()">🖨 প্রিন্ট করুন</button>
-      <button class="btn btn-ghost no-print" onclick="toggleCommission()">🧮 কমিশন</button>
-      <button class="btn btn-ghost no-print" onclick="toggleTon()">📐 Ton</button>
-      <button class="btn btn-ghost no-print" onclick="toggleTM()" id="tm-toggle-btn" style="background:#eef3ff;color:#2c4b9b;">🔷 TM (টেম্পার্ড)</button>
-    </div>
-    <div class="hint no-print" id="pdf-status" style="margin-top:6px;"></div>
-  </div>
-
-  <!-- HISTORY VIEW -->
-  <div id="view-history" style="display:none;">
-    <div class="card">
-      <h2>সংরক্ষিত ইনভয়েস তালিকা</h2>
-      <div id="history-list"></div>
-    </div>
-  </div>
-
-  <!-- SETTINGS VIEW -->
-  <div id="view-settings" style="display:none;">
-    <div class="card">
-      <h2>🔗 অটো-ট্রান্সফার (Dealer Dashboard ও TON COUNT)</h2>
-      <div class="field"><label>এই তারিখ থেকে সব ইনভয়েস অটোমেটিক ট্রান্সফার হবে</label>
-        <input type="date" id="in-sync-start-date">
+      <div class="btn-row">
+        <button class="btn btn-whatsapp" id="shareEntryBtn">WhatsApp-এ শেয়ার</button>
       </div>
-      <div class="actions">
-        <button class="btn btn-primary" onclick="saveSyncStartDate()">🔒 তারিখ সিল করুন</button>
-        <button class="btn btn-ghost" onclick="clearSyncStartDate()">অটো-ট্রান্সফার বন্ধ করুন</button>
+      <div class="btn-row" id="deleteEntryRow" style="display:none;">
+        <button class="btn btn-danger" id="deleteEntryBtn">এই তারিখের এন্ট্রি মুছুন</button>
       </div>
-      <div class="hint" id="sync-start-hint">এই তারিখ বা তার পরের যেকোনো ইনভয়েস সেভ/ডিলিট করলে সেটা Dealer Dashboard আর TON COUNT-এও যোগ/মুছে যাবে। এই তারিখের আগের ইনভয়েসে হাত দেওয়া হবে না (যাতে আগে থেকে হাতে দেওয়া পুরনো ডাটা দুইবার না যোগ হয়)।</div>
     </div>
 
     <div class="card">
-      <h2>মূল্য তালিকা (রেট / MT ডিভাইজর)</h2>
-      <table class="items">
-        <thead><tr><th style="width:40px">#</th><th>কোড</th><th>রেট (টাকা/SFT)</th><th>MT ডিভাইজর</th><th style="width:40px"></th></tr></thead>
-        <tbody id="rate-settings-body"></tbody>
-      </table>
-      <div class="actions">
-        <button class="btn btn-ghost" onclick="addRateRow()">+ নতুন কোড যোগ করুন</button>
-        <button class="btn btn-primary" onclick="saveRates()">💾 দাম সেভ করুন</button>
+      <div class="row-between">
+        <h2>সাম্প্রতিক এন্ট্রি</h2>
       </div>
-      <div class="hint">কোড ও রেট বদলে "দাম সেভ করুন" চাপুন — এরপর হোম পেজে সব জায়গায় নতুন দাম কাজ করবে।</div>
+      <div id="recentList"></div>
+    </div>
+
+  </section>
+
+  <!-- ================= MONTH SCREEN ================= -->
+  <section class="screen" id="screen-month">
+
+    <div class="month-nav">
+      <button id="monthPrev">‹</button>
+      <div class="month-label"><span id="monthLabel">—</span><small id="monthSub">&nbsp;</small></div>
+      <button id="monthNext">›</button>
     </div>
 
     <div class="card">
-      <h2>পার্টি তালিকা</h2>
-      <table class="items">
-        <thead><tr><th style="width:40px">#</th><th>কোড</th><th>নাম</th><th>ঠিকানা</th><th>মোবাইল</th><th style="width:40px"></th></tr></thead>
-        <tbody id="party-settings-body"></tbody>
-      </table>
-      <div class="actions">
-        <button class="btn btn-ghost" onclick="addPartyRow()">+ নতুন পার্টি যোগ করুন</button>
-        <button class="btn btn-primary" onclick="saveParties()">💾 পার্টি সেভ করুন</button>
-      </div>
-      <div class="hint">নতুন পার্টি/কোড বসিয়ে "পার্টি সেভ করুন" চাপুন — হোম পেজে কোড লিখলেই নাম-ঠিকানা অটো আসবে।</div>
+      <div class="pane-stack empty" id="monthPaneStack"></div>
+      <div class="pane-legend" id="monthLegend"></div>
     </div>
-  </div>
 
-  <!-- DASHBOARD VIEW -->
-  <div id="view-dashboard" style="display:none;">
     <div class="card">
-      <h2>সার্বিক সারাংশ</h2>
-      <div id="dash-summary" class="grid" style="grid-template-columns:repeat(3,1fr);"></div>
-    </div>
-    <div class="card">
-      <h2>পার্টি লেজার</h2>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <div class="field" style="max-width:260px;">
-          <label>পার্টি কোড দিন</label>
-          <input list="party-codes" id="ledger-code" placeholder="যেমন 0503" oninput="renderPartyLedger()">
-        </div>
-        <div class="field" style="max-width:170px;">
-          <label>তারিখ থেকে</label>
-          <input type="date" id="ledger-from" onchange="renderPartyLedger()">
-        </div>
-        <div class="field" style="max-width:170px;">
-          <label>তারিখ পর্যন্ত</label>
-          <input type="date" id="ledger-to" onchange="renderPartyLedger()">
-        </div>
+      <div class="row-between">
+        <h2>মাসিক সামারি</h2>
+        <button class="btn btn-whatsapp btn-sm" id="shareMonthBtn">Share</button>
       </div>
-      <div id="ledger-result" style="margin-top:14px;"></div>
+      <div class="summary-grid" id="monthSummary"></div>
     </div>
-  </div>
 
+    <div class="card">
+      <h2>দৈনিক লগ (<span id="monthLogCount">0</span> এন্ট্রি)</h2>
+      <div id="monthLog"></div>
+    </div>
+
+  </section>
+
+  <!-- ================= OVERVIEW SCREEN ================= -->
+  <section class="screen" id="screen-overview">
+
+    <div class="year-nav">
+      <button id="yearPrev">‹</button>
+      <div class="yr" id="yearLabel">2026</div>
+      <button id="yearNext">›</button>
+    </div>
+
+    <div class="year-total-card">
+      <div class="num" id="yearTotal">0.00</div>
+      <div class="label">বছরের মোট টন</div>
+    </div>
+
+    <div id="monthsOverview"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-whatsapp" id="shareYearBtn">বছরের সামারি শেয়ার করুন</button>
+    </div>
+
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button data-tab="entry" class="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    এন্ট্রি
+  </button>
+  <button data-tab="month">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+    মাসের হিসাব
+  </button>
+  <button data-tab="overview">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+    ওভারভিউ
+  </button>
+</nav>
+
+<div id="toast"></div>
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<div class="sheet" id="menuSheet">
+  <div class="handle"></div>
+  <button class="item" id="exportBtn">ডেটা ব্যাকআপ (JSON) ডাউনলোড</button>
+  <button class="item" id="installBtn">অ্যাপ ইনস্টল করুন</button>
+  <button class="item danger" id="resetBtn">সব ডেটা মুছে ফেলুন</button>
+  <button class="item" id="logoutBtn" onclick="doLogout()">লগআউট</button>
 </div>
 
-<div class="toast no-print" id="toast"></div>
-
-</div><!-- /app-root -->
+</div><!-- /#app-root -->
 
 <script>
-const defaultPartyList = [
-  {code:'0509',name:'Sharif Glass Desing',address:'Kawnia Barishal',mobile:'01712-045460'},
-  {code:'01265',name:'Kaba Thai Aluminium',address:'kashipur, Barishal',mobile:'01705-574520'},
-  {code:'0510',name:'Sharif Metal',address:'Rupatoli, Barishal',mobile:'01740-654263'},
-  {code:'0503',name:'Nasir Glass',address:'Nutullabad Barishal',mobile:'01712-872237'},
-  {code:'0511',name:'Sumon Thai & Glass',address:'C&B Hatimali, Barishal',mobile:'01715-267575'},
-  {code:'0512',name:'Glass Works',address:'Chakbazar, Barishal',mobile:'01711-194218'},
-  {code:'0497',name:'Mokka Thai & Glass',address:'BM Collage, Barishal',mobile:'01716-679440'},
-  {code:'0501',name:'Nasir Thai Aluminium Center',address:'C&B Nutullabad, Barishal',mobile:'01712-434829'},
-  {code:'0502',name:'New Al Amin Glass House',address:'Sadar Road Barishal',mobile:'01712-709817'},
-  {code:'0508',name:'Shahin Glass House',address:'Sadar Road Barishal',mobile:'01726-512077'},
-  {code:'0495',name:'Khan Thai Aluminium',address:'Sadar Road Barishal',mobile:'01711-325373'},
-  {code:'0963',name:'Glass Point',address:'C&B Nutullabad, Barishal',mobile:'01711-900239'},
-  {code:'0490',name:'Arifa Glass House',address:'C&B Nutullabad, Barishal',mobile:'01758-752580'},
-  {code:'0500',name:'Nasir Glass House',address:'Sadar Road Barishal',mobile:'01721-539780'},
-  {code:'0494',name:'Howlader Thai & Ciramic House',address:'Muladi,Babugonz,Barishal',mobile:'01728-582407'},
-  {code:'0505',name:'S D Glass Jhalakathi',address:'Jhalukathi, Barishal',mobile:'01711-943146'},
-  {code:'0498',name:'Monor Traders',address:'Jhalukathi, Barishal',mobile:'01714-361085'},
-  {code:'0504',name:'Ripon Glass House',address:'Jhalukathi, Barishal',mobile:'01711-204949'},
-  {code:'0493',name:'Gazi Glass & Thai',address:'Nal chity Jhalukathi, Barishal',mobile:'01712-065804'},
-  {code:'0928',name:'Khan Aluminium',address:'Pirojpur',mobile:'01711-709764'},
-  {code:'0496',name:'Khan Traders',address:'Pirojpur',mobile:'01763-900823'},
-  {code:'0929',name:'M/S Shardar Thai Aluminium & Glass',address:'Pirojpur',mobile:'01739-212270'},
-  {code:'0491',name:'Alif Glass House',address:'Motbariya Pirojpur',mobile:'01739212270'},
-  {code:'0499',name:'M/S Rupali Thai',address:'Motbariya Pirojpur',mobile:'01763900823'},
-  {code:'0492',name:'Fazlul Haque Enterprise',address:'Akota Bazar',mobile:''},
-  {code:'0506',name:'Siam Glass House',address:'Akota Bazar',mobile:''},
-  {code:'0507',name:'Shah Enterprise',address:'Akota Bazar',mobile:''},
-  {code:'01173',name:'South Bangla Traders',address:'Akota Bazar',mobile:''},
-  {code:'01462',name:'Vhai Vhai Glass & Hardwear Store',address:'Batazor Barishal',mobile:'01710745098'}
-];
+/* ============================================================
+   DATA LAYER
+   ============================================================ */
+const STORE_KEY = 'tonCountEntries_v1';
+const SEED_FLAG = 'tonCountSeeded_v1';
+const CATS = ['tempered','clear','colour','reflective','mirror'];
+const CAT_LABEL = {tempered:'Tempered', clear:'Clear', colour:'Colour', reflective:'Reflective', mirror:'Mirror'};
 
-const defaultRateTable = [
-  {code:'C 2/5',rate:75,div:1721},{code:'C 3/5',rate:87,div:1229},{code:'C/5',rate:129,div:860},
-  {code:'C/6',rate:147,div:717},{code:'C/8',rate:181,div:538},{code:'C 10',rate:208,div:430},
-  {code:'C/12',rate:224,div:358},{code:'D/B 5',rate:165,div:860},{code:'D/G 5',rate:165,div:860},
-  {code:'D/B 8',rate:247,div:538},{code:'D/B 10',rate:287,div:430},{code:'N/B 5',rate:150,div:860},
-  {code:'N/G 5',rate:150,div:860},{code:'RNB/5',rate:183,div:860},{code:'RNB/5.5',rate:190,div:782},
-  {code:'RNB/6',rate:197,div:717},{code:'R G/5',rate:183,div:860},{code:'RG/5.5',rate:190,div:782},
-  {code:'R/G 6',rate:197,div:717},{code:'RLB/5',rate:177,div:860},{code:'RLB/5.5',rate:184,div:782},
-  {code:'RLB /6',rate:193,div:717},{code:'BMS/3.5',rate:104,div:1229},{code:'AMS/2.5',rate:70,div:1721},
-  {code:'BMS/5',rate:137,div:860},{code:'BMS/5 (Colour)',rate:143,div:860}
-];
+const SEED_DATA = {"2026-07-08": {"tempered": 0.58, "clear": 0.0, "colour": 0.0, "reflective": 0.0, "mirror": 0.0}, "2026-07-09": {"tempered": 0.0, "clear": 7.67, "colour": 0.0, "reflective": 0.55, "mirror": 1.03}, "2026-07-13": {"tempered": 0.0, "clear": 1.7, "colour": 1.25, "reflective": 7.54, "mirror": 0.0}, "2026-07-16": {"tempered": 0.0, "clear": 0.61, "colour": 0.0, "reflective": 4.35, "mirror": 0.0}, "2026-07-20": {"tempered": 0.0, "clear": 11.1, "colour": 0.0, "reflective": 0.0, "mirror": 0.0}, "2026-07-21": {"tempered": 0.0, "clear": 4.5, "colour": 0.0, "reflective": 2.07, "mirror": 0.0}, "2026-07-23": {"tempered": 0.0, "clear": 5.42, "colour": 0.0, "reflective": 6.61, "mirror": 1.03}, "2026-07-27": {"tempered": 0.0, "clear": 6.24, "colour": 0.0, "reflective": 5.54, "mirror": 0.68}, "2026-06-02": {"tempered": 0.19, "clear": 10.49, "colour": 0.0, "reflective": 0.0, "mirror": 1.98}, "2026-06-03": {"tempered": 0.29, "clear": 14.63, "colour": 0.0, "reflective": 0.0, "mirror": 2.1}, "2026-06-04": {"tempered": 0, "clear": 2.5, "colour": 0.0, "reflective": 8.02, "mirror": 1.15}, "2026-06-08": {"tempered": 0.22, "clear": 10.83, "colour": 0.0, "reflective": 0.0, "mirror": 1.54}, "2026-06-09": {"tempered": 0.19, "clear": 10.91, "colour": 0.0, "reflective": 0.0, "mirror": 1.37}, "2026-06-10": {"tempered": 6.6, "clear": 0.0, "colour": 0.0, "reflective": 0.0, "mirror": 0}, "2026-06-21": {"tempered": 0.46, "clear": 11.68, "colour": 0.0, "reflective": 0.0, "mirror": 0.49}, "2026-06-28": {"tempered": 0.0, "clear": 4.37, "colour": 8.21, "reflective": 0.0, "mirror": 0.0}, "2026-06-29": {"tempered": 0.0, "clear": 6.42, "colour": 12.12, "reflective": 0.0, "mirror": 0.0}, "2026-06-30": {"tempered": 0.0, "clear": 0.0, "colour": 5.64, "reflective": 9.88, "mirror": 0.0}, "2026-05-14": {"tempered": 0, "clear": 9.37, "colour": 0, "reflective": 0, "mirror": 0}, "2026-05-17": {"tempered": 0, "clear": 5.92, "colour": 0, "reflective": 0, "mirror": 2.49}, "2026-04-12": {"tempered": 0, "clear": 0, "colour": 7.89, "reflective": 0, "mirror": 0}, "2026-04-13": {"tempered": 0, "clear": 0, "colour": 8.62, "reflective": 0, "mirror": 0}, "2026-04-23": {"tempered": 0, "clear": 0, "colour": 2.66, "reflective": 0, "mirror": 0}, "2026-04-30": {"tempered": 0, "clear": 0, "colour": 7.85, "reflective": 0, "mirror": 0}, "2026-03-01": {"tempered": 0, "clear": 0.0, "colour": 7.02, "reflective": 140.67, "mirror": 1.46}, "2026-03-05": {"tempered": 0, "clear": 0, "colour": 1.65, "reflective": 0, "mirror": 0}, "2026-02-01": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 35.64, "mirror": 2.08}, "2026-02-02": {"tempered": 0, "clear": 1.38, "colour": 0.0, "reflective": 52.5, "mirror": 0.74}, "2026-02-03": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 19.5, "mirror": 0.0}, "2026-02-05": {"tempered": 0, "clear": 0.0, "colour": 1.35, "reflective": 11.03, "mirror": 0.0}, "2026-02-08": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 14.92, "mirror": 0.0}, "2026-02-16": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 8.018, "mirror": 0.0}, "2026-02-25": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 12.53, "mirror": 0.0}, "2026-01-03": {"tempered": 0, "clear": 3.14, "colour": 0.39, "reflective": 8.63, "mirror": 0.0}, "2026-01-04": {"tempered": 0, "clear": 0.0, "colour": 1.16, "reflective": 11.37, "mirror": 0.0}, "2026-01-05": {"tempered": 0, "clear": 5.27, "colour": 0.0, "reflective": 17.6, "mirror": 1.39}, "2026-01-06": {"tempered": 0, "clear": 1.79, "colour": 0.0, "reflective": 9.97, "mirror": 0.0}, "2026-01-07": {"tempered": 0, "clear": 1.17, "colour": 0.0, "reflective": 3.64, "mirror": 0.0}, "2026-01-08": {"tempered": 0, "clear": 0.74, "colour": 0.34, "reflective": 11.38, "mirror": 0.0}, "2026-01-11": {"tempered": 0, "clear": 0.0, "colour": 0.49, "reflective": 11.9, "mirror": 0.0}, "2026-01-13": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 12.03, "mirror": 0.0}, "2026-01-14": {"tempered": 0, "clear": 1.04, "colour": 0.0, "reflective": 11.03, "mirror": 0.52}, "2026-01-18": {"tempered": 0, "clear": 1.1, "colour": 0.0, "reflective": 21.53, "mirror": 0.0}, "2026-01-27": {"tempered": 0, "clear": 1.04, "colour": 3.6, "reflective": 8.15, "mirror": 0.0}, "2026-01-28": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 11.29, "mirror": 0.0}};
 
-let rateTable = [];
-let partyList = [];
-let rows = [];
-let rowSeq = 0;
-
-function newRow(){ return {id:++rowSeq, code:'', w:'', h:'', qty:''}; }
-
-// ---------- Tempered Calculator ----------
-// Standard glass sheet sizes (inches). Any actual measurement rounds UP to
-// the nearest value in this list — this mirrors the printed size chart.
-const STANDARD_SIZES = [6,9,12,15,18,21,24,30,36,42,48,51,54,60,72,84,96,102,108,120,132,144];
-
-function roundToStandard(actualInches){
-  for(const s of STANDARD_SIZES){ if(actualInches <= s + 0.0001) return s; }
-  return null; // out of range (> 144")
-}
-function bracketFor(actualInches){
-  let lo = 0;
-  for(const s of STANDARD_SIZES){ if(actualInches <= s + 0.0001) return {lo, hi:s}; lo = s; }
-  return {lo:STANDARD_SIZES[STANDARD_SIZES.length-1], hi:null};
-}
-
-const TEMPERED_TYPE_NAMES = {
-  TSTD:'STANDARD DOOR', TD:'DOOR', THD:'HANGING DOOR', TPD:'PAIR DOOR',
-  TSD:'SHOWER DOOR', TTT:'TABLE TOP', TS:'SHEET', DBG:'DOUBLE GLAZING'
-};
-// Runtime extension of nameMap so codes generated here (e.g. "TS-CLEAR/10")
-// show a proper item name in the invoice, same pipeline as everything else.
-let temperedNameMap = {};
-
-function updateTemperedRuler(){
-  const wI = parseFloat(document.getElementById('tp-wInch').value)||0;
-  const wS = parseInt(document.getElementById('tp-wShuta').value)||0;
-  const hI = parseFloat(document.getElementById('tp-hInch').value)||0;
-  const hS = parseInt(document.getElementById('tp-hShuta').value)||0;
-  const wAct = wI + wS/8, hAct = hI + hS/8;
-
-  if(wAct<=0 && hAct<=0){
-    document.getElementById('tp-actualSizeText').textContent = 'প্রকৃত মাপ: —';
-    document.getElementById('tp-snapSizeText').textContent = 'স্ট্যান্ডার্ড → —';
-    document.getElementById('tp-rulerFill').style.width='0%';
-    document.getElementById('tp-rulerLow').textContent='—';
-    document.getElementById('tp-rulerHigh').textContent='—';
-    return;
-  }
-  const wRound = roundToStandard(wAct), hRound = roundToStandard(hAct);
-  document.getElementById('tp-actualSizeText').textContent = `প্রকৃত মাপ: ${wAct.toFixed(3)}" × ${hAct.toFixed(3)}"`;
-  document.getElementById('tp-snapSizeText').textContent = `স্ট্যান্ডার্ড → ${wRound??'?'}" × ${hRound??'?'}"`;
-
-  const refActual = Math.max(wAct,hAct);
-  const b = bracketFor(refActual);
-  const pct = b.hi ? Math.min(100, ((refActual-b.lo)/(b.hi-b.lo))*100) : 100;
-  document.getElementById('tp-rulerFill').style.width = pct+'%';
-  document.getElementById('tp-rulerLow').textContent = b.lo+'"';
-  document.getElementById('tp-rulerHigh').textContent = (b.hi??'∞')+'"';
-}
-['tp-wInch','tp-wShuta','tp-hInch','tp-hShuta'].forEach(id=>{
-  const el = document.getElementById(id);
-  if(el){ el.addEventListener('input', updateTemperedRuler); el.addEventListener('change', updateTemperedRuler); }
-});
-
-function addTemperedRow(){
-  const wI = parseFloat(document.getElementById('tp-wInch').value);
-  const hI = parseFloat(document.getElementById('tp-hInch').value);
-  const pcs = parseInt(document.getElementById('tp-pcs').value)||0;
-  if(!wI || !hI || pcs<=0){ showToast('প্রস্থ, উচ্চতা ও সংখ্যা সঠিকভাবে দিন'); return; }
-  const wS = parseInt(document.getElementById('tp-wShuta').value)||0;
-  const hS = parseInt(document.getElementById('tp-hShuta').value)||0;
-  const wAct = wI + wS/8, hAct = hI + hS/8;
-  const wR = roundToStandard(wAct), hR = roundToStandard(hAct);
-  if(!wR || !hR){ showToast('মাপ 144" এর বেশি — স্ট্যান্ডার্ড টেবিলে নেই'); return; }
-
-  const type = document.getElementById('tp-itemType').value;
-  const color = document.getElementById('tp-color').value;
-  const thickness = parseFloat(document.getElementById('tp-thickness').value);
-  const prefixKey = `${type}-${color}`.toUpperCase();
-  temperedNameMap[prefixKey] = `${TEMPERED_TYPE_NAMES[type]} - ${color} (TEMPERED)`;
-  const code = `${type}-${color}/${thickness}`;
-
-  // Auto-register a rate-table entry for this code if it doesn't exist yet
-  // (rate starts at 0 — set the real Tk/SFT price once in Settings, after
-  // that every future item with this same code/thickness prices correctly).
-  if(!findRate(code)){
-    const div = Math.round(4306.5/thickness); // same MT formula as the rest of the price list
-    rateTable.push({code, rate:0, div});
-  }
-
-  const r = newRow();
-  r.code = code; r.w = wR; r.h = hR; r.qty = pcs;
-  rows.push(r);
-  renderRows();
-  showToast(`✓ ${wR}"×${hR}" — ${pcs} পিস হোমের তালিকায় যোগ হয়েছে`);
-
-  document.getElementById('tp-wInch').value='';
-  document.getElementById('tp-hInch').value='';
-  document.getElementById('tp-pcs').value=1;
-  updateTemperedRuler();
-  goto('home');
-}
-
-function initForm(){
-  document.getElementById('in-date').value = new Date().toISOString().slice(0,10);
-  refreshPartyDatalist();
-  rows = [newRow()];
-  renderRows();
-}
-
-function refreshPartyDatalist(){
-  const dl = document.getElementById('party-codes');
-  dl.innerHTML = partyList.map(p=>`<option value="${p.code}">${p.name}</option>`).join('');
-}
-
-function findParty(raw){
-  const code = (raw||'').trim();
-  if(!code) return null;
-  const norm = s => (s||'').toString().trim().replace(/^0+(?=\d)/,'').toLowerCase();
-  let p = partyList.find(x=>x.code.trim()===code);
-  if(p) return p;
-  p = partyList.find(x=>norm(x.code)===norm(code));
-  if(p) return p;
-  // fall back to matching by name, in case a name got typed/selected instead of a code
-  p = partyList.find(x=>x.name.trim().toLowerCase()===code.toLowerCase());
-  return p || null;
-}
-
-function onCodeChange(){
-  const raw = document.getElementById('in-code').value;
-  const code = raw.trim();
-  const status = document.getElementById('code-status');
-  const p = findParty(code);
-  document.getElementById('in-name').value = p ? p.name : '';
-  document.getElementById('in-address').value = p ? p.address : '';
-  document.getElementById('in-mobile').value = p ? p.mobile : '';
-  if(!code){ status.textContent=''; }
-  else if(p){ status.style.color='var(--good)'; status.textContent='✅ পাওয়া গেছে: '+p.name; }
-  else { status.style.color='var(--bad)'; status.textContent='❌ এই কোডে কোনো পার্টি পাওয়া যায়নি — সেটিংস থেকে যোগ করুন, অথবা নাম-ঠিকানা নিজে টাইপ করুন'; }
-  checkDateDuplicate();
-}
-
-// ---------- warn ONLY on a real duplicate: SAME party (code/name) AND date
-// match 100% — either as another saved invoice in this app, or already
-// entered directly in Dealer Dashboard. (TON COUNT has no party field, so
-// that one still just checks the date, to avoid double-counting tonnage.)
-// Kept deliberately strict so it doesn't pop up for every unrelated invoice
-// that merely shares a date. ----------
-let dateDupCheckToken = 0;
-async function checkDateDuplicate(){
-  const box = document.getElementById('date-dup-warning');
-  if(!box) return;
-  const dateStr = document.getElementById('in-date').value;
-  const partyCode = (document.getElementById('in-code').value || '').trim();
-  const partyName = (document.getElementById('in-name').value || '').trim();
-  box.style.display = 'none';
-  box.innerHTML = '';
-  if(!dateStr || !db) return;
-  if(!partyCode && !partyName) return; // nothing to match against yet
-  const samePartyAs = (code, name) => (partyCode && code === partyCode) || (partyName && name === partyName);
-  const myToken = ++dateDupCheckToken; // avoid stale results if user changes date again quickly
+function loadEntries(){
   try{
-    const msgs = [];
-
-    // Nasir Glass-এর নিজের সংরক্ষিত ইনভয়েস তালিকায় এই তারিখে একই পার্টির এন্ট্রি আছে কিনা
-    const invList = await loadInvoices();
-    if(myToken !== dateDupCheckToken) return;
-    const dupInvoices = invList.filter(x => (x.date||'') === dateStr && x.id !== editingInvoiceId && samePartyAs(x.code, x.name));
-    if(dupInvoices.length){
-      msgs.push(`এই অ্যাপেই ${dateStr} তারিখে এই একই পার্টির (${partyName||partyCode}) ইনভয়েস আগে থেকে সংরক্ষিত আছে`);
+    const raw = localStorage.getItem(STORE_KEY);
+    let data = raw ? JSON.parse(raw) : {};
+    if(!localStorage.getItem(SEED_FLAG)){
+      data = Object.assign({}, SEED_DATA, data); // existing user data wins over seed
+      localStorage.setItem(SEED_FLAG, '1');
+      localStorage.setItem(STORE_KEY, JSON.stringify(data));
     }
-
-    const dealerUid = await ensureDealerAuth();
-    if(myToken !== dateDupCheckToken) return;
-    if(dealerDb && dealerUid){
-      const dSnap = await dealerDb.collection('dealerDashboard').doc(dealerUid).get();
-      if(myToken !== dateDupCheckToken) return;
-      if(dSnap.exists){
-        const dupEntries = (dSnap.data().entries || []).filter(e => e.date === dateStr && !e.sourceInvoiceId && samePartyAs(e.code, e.party));
-        if(dupEntries.length){
-          msgs.push(`ডিলার ড্যাশবোর্ডে ${dateStr} তারিখে এই একই পার্টির (${partyName||partyCode}) এন্ট্রি আগে থেকে আছে`);
-        }
-      }
-    }
-
-    const tSnap = await db.collection('toncount').doc('entries').get();
-    if(myToken !== dateDupCheckToken) return;
-    if(tSnap.exists){
-      const payload = tSnap.data();
-      const day = (payload.data || {})[dateStr];
-      const autoContrib = payload.autoContrib || {};
-      const hasAutoForDate = Object.values(autoContrib).some(c => c && c.date === dateStr);
-      if(day && !hasAutoForDate){
-        const total = ['tempered','clear','colour','reflective','mirror'].reduce((s,c)=> s + (day[c] || 0), 0);
-        if(total > 0) msgs.push(`TON COUNT-এ ${dateStr} তারিখে আগে থেকেই টন এন্ট্রি আছে (মোট ${total.toFixed(2)} টন)`);
-      }
-    }
-
-    if(msgs.length){
-      box.innerHTML = '⚠️ ' + msgs.join('<br>⚠️ ') + '<br><small>এই ইনভয়েস সেভ করলে ডেটা দুইবার যোগ হতে পারে — আগে থেকে দেওয়া এন্ট্রি চেক করে নিন।</small>';
-      box.style.display = '';
-    }
-  }catch(e){ console.error('date duplicate check failed', e); }
+    return data;
+  }catch(e){ console.error('load error', e); return {}; }
+}
+function saveEntries(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }
+  catch(e){ toast('সেভ করতে সমস্যা হয়েছে'); }
+  pushToCloud();
 }
 
-function addRow(){ rows.push(newRow()); renderRows(); }
+let entries = loadEntries();
 
-// Add several rows at once, all pre-filled with the same code — e.g. type
-// "C 2.5" and "3", and it creates 3 blank rows for that code so only the
-// width/height/qty need to be typed per row, instead of re-typing the code
-// each time.
-function addRowsWithCode(){
-  const codeInput = document.getElementById('bulk-code');
-  const countInput = document.getElementById('bulk-count');
-  const wInput = document.getElementById('bulk-w');
-  const hInput = document.getElementById('bulk-h');
-  const qtyInput = document.getElementById('bulk-qty');
-  const code = (codeInput.value || '').trim();
-  const count = parseInt(countInput.value, 10);
-  const w = (wInput.value || '').trim();
-  const h = (hInput.value || '').trim();
-  const qty = (qtyInput.value || '').trim();
-  if(!code){ alert('আগে কোডটা লিখুন — যেমন C 2.5'); codeInput.focus(); return; }
-  if(!count || count < 1){ alert('কয়টি সারি লাগবে সেটা লিখুন — যেমন 3'); countInput.focus(); return; }
-  // If the table currently has just one totally-empty starter row, replace
-  // it instead of leaving a stray blank row above the new ones.
-  if(rows.length===1 && !rows[0].code && !rows[0].w && !rows[0].h && !rows[0].qty){ rows = []; }
-  const firstNewId = rowSeq + 1;
-  for(let i=0;i<count;i++){
-    const r = newRow();
-    r.code = code;
-    if(w) r.w = w;
-    if(h) r.h = h;
-    if(qty) r.qty = qty;
-    rows.push(r);
-  }
-  renderRows();
-  codeInput.value = '';
-  wInput.value = '';
-  hInput.value = '';
-  qtyInput.value = '';
-  countInput.value = '';
-  codeInput.focus();
-  // Jump straight to the first still-empty box of the first new row (width,
-  // unless it was already filled in above — then height, unless that was
-  // also filled — then qty) so typing can continue immediately without
-  // tapping into the table by hand.
-  const firstRow = document.getElementById('row-'+firstNewId);
-  if(firstRow){
-    const numberInputs = firstRow.querySelectorAll('input[type="number"]');
-    let idx = 0;
-    if(w) idx = 1;
-    if(w && h) idx = 2;
-    if(w && h && qty) idx = -1; // everything already filled — nothing to focus
-    const target = idx >= 0 ? numberInputs[idx] : null;
-    if(target) target.focus();
-  }
-}
-function removeRow(id){ rows = rows.filter(r=>r.id!==id); if(rows.length===0) rows.push(newRow()); renderRows(); }
-
-function findRate(raw){
-  const code = (raw||'').toString().trim();
-  if(!code) return null;
-  const norm = s => (s||'').toString().trim().toLowerCase().replace(/\s+/g,'');
-  let rt = rateTable.find(x=>x.code.trim()===code);
-  if(rt) return rt;
-  rt = rateTable.find(x=>norm(x.code)===norm(code));
-  return rt || null;
-}
-
-function calcRow(r){
-  const w=parseFloat(r.w)||0, h=parseFloat(r.h)||0, q=parseFloat(r.qty)||0;
-  const sft = (w*h*q)/144;
-  const rt = findRate(r.code);
-  const rate = rt ? rt.rate : 0;
-  const mt = rt && rt.div ? sft/rt.div : 0;
-  const amt = sft*rate;
-  return {sft,rate,mt,amt};
-}
-
-function refreshRateDatalist(){
-  const dl = document.getElementById('rate-codes');
-  if(dl) dl.innerHTML = rateTable.map(rt=>`<option value="${rt.code}"></option>`).join('');
-}
-
-function renderRows(){
-  refreshRateDatalist();
-  const body = document.getElementById('items-body');
-  body.innerHTML = rows.map((r,i)=>{
-    const c = calcRow(r);
-    const found = !!findRate(r.code);
-    const codeColor = r.code ? (found ? '' : 'color:var(--bad);') : '';
-    return `<tr id="row-${r.id}">
-      <td>${i+1}</td>
-      <td><input type="text" list="rate-codes" value="${r.code}" placeholder="কোড লিখুন" tabindex="-1" oninput="updateRow(${r.id},'code',this.value)" style="width:100%; box-sizing:border-box; text-align:center; padding:9px 6px; font-size:15px; font-weight:700; border:1.5px solid var(--line); border-radius:6px; ${codeColor}"></td>
-      <td><input type="number" step="any" inputmode="decimal" value="${r.w}" oninput="updateRow(${r.id},'w',this.value)"></td>
-      <td><input type="number" step="any" inputmode="decimal" value="${r.h}" oninput="updateRow(${r.id},'h',this.value)"></td>
-      <td><input type="number" step="any" inputmode="decimal" value="${r.qty}" oninput="updateRow(${r.id},'qty',this.value)"></td>
-      <td class="num cell-sft">${c.sft?c.sft.toFixed(2):''}</td>
-      <td class="num cell-rate">${c.rate||''}</td>
-      <td class="num cell-mt">${c.mt?c.mt.toFixed(4):''}</td>
-      <td class="num cell-amt">${c.amt?Math.round(c.amt).toLocaleString('en-IN'):''}</td>
-      <td class="no-print"><button class="rm-row" tabindex="-1" onclick="removeRow(${r.id})" title="মুছুন">✕</button></td>
-    </tr>`;
-  }).join('');
-  renderTotals();
-}
-
-// Updates only the calculated cells for one row, in place — never rebuilds
-// the row's own <input> elements, so the cursor/focus never jumps while
-// someone is still typing (including while typing a product code).
-function updateRow(id, field, val){
-  const r = rows.find(x=>x.id===id);
-  if(!r) return;
-  r[field] = val;
-  const tr = document.getElementById('row-'+id);
-  if(!tr){ renderRows(); return; }
-  const c = calcRow(r);
-  tr.querySelector('.cell-sft').textContent = c.sft ? c.sft.toFixed(2) : '';
-  tr.querySelector('.cell-rate').textContent = c.rate || '';
-  tr.querySelector('.cell-mt').textContent = c.mt ? c.mt.toFixed(4) : '';
-  tr.querySelector('.cell-amt').textContent = c.amt ? Math.round(c.amt).toLocaleString('en-IN') : '';
-  if(field === 'code'){
-    const codeInput = tr.querySelector('input[list="rate-codes"]');
-    if(codeInput){ codeInput.style.color = val ? (findRate(val) ? '' : 'var(--bad)') : ''; }
-  }
-  renderTotals();
-}
-
-function renderTotals(){
-  let sft=0, mt=0, amt=0;
-  rows.forEach(r=>{ const c=calcRow(r); sft+=c.sft; mt+=c.mt; amt+=c.amt; });
-  document.getElementById('t-sft').textContent = sft.toFixed(2);
-  document.getElementById('t-mt').textContent = mt.toFixed(4);
-  document.getElementById('t-amt').textContent = '৳ ' + Math.round(amt).toLocaleString('en-IN');
-  return {sft,mt,amt};
-}
-
-function clearForm(confirmFirst){
-  if(confirmFirst && !confirm('সব তথ্য মুছে ফেলবেন?')) return;
-  editingInvoiceId = null;
-  document.getElementById('in-code').value='';
-  document.getElementById('in-name').value='';
-  document.getElementById('in-address').value='';
-  document.getElementById('in-mobile').value='';
-  document.getElementById('in-do').value='';
-  document.getElementById('in-date').value = new Date().toISOString().slice(0,10);
-  rows = [newRow()];
-  renderRows();
-  invoiceNote = '';
-  const noteInput = document.getElementById('invoice-note-input');
-  if(noteInput) noteInput.value = '';
-}
-
-function gatherInvoice(){
-  const totals = renderTotals();
-  return {
-    id: null,
-    savedAt: new Date().toISOString(),
-    code: document.getElementById('in-code').value,
-    name: document.getElementById('in-name').value,
-    address: document.getElementById('in-address').value,
-    mobile: document.getElementById('in-mobile').value,
-    doNo: document.getElementById('in-do').value,
-    date: document.getElementById('in-date').value,
-    rows: rows.filter(r=>r.code).map(r=>({...r, ...calcRow(r)})),
-    totals,
-    note: invoiceNote,
-    commission: {
-      visible: commissionVisible,
-      pct1: commissionPct1,
-      pct2: commissionPct2,
-      cr: crAmount,
-      bankName: bankName,
-      bankPayment: bankPayment,
-      netPayable: netPayableManual,
-      tmVisible: tmVisible,
-      tmCommissionPct: tmCommissionPct
-    }
-  };
-}
-
-let currentInvoice = null; // whatever invoice is currently shown in the Invoice view
-
-// Split a product code like "RNB/5.5" or "C 2/5" into an Item Name and a
-// Thickness, then group hierarchically — Item Name, then Thickness inside
-// it, then each Size — exactly like the real paper Delivery Challan.
-function splitCode(code){
-  const raw = (code||'').trim();
-  const m = raw.match(/^(.*?)[\s/]*([\d]+(?:\.\d+)?)/);
-  const nameMap = {
-    'C':'CLEAR GLASS',
-    'OB':'OCEAN BLUE',
-    'DB':'DEEP BRONZE',
-    'LB':'LIGHT BRONZE',
-    'G':'GREEN',
-    'DG':'DARK GRAY',
-    'NB':'NAVY BLUE',
-    'LKB':'LACK BLUE',
-    'RNB':'REFLECTIVE NAVY BLUE',
-    'RG':'REFLECTIVE GREEN',
-    'RLB':'REFLECTIVE LACK BLUE',
-    'AMS':'MIRROR SINGLE',
-    'AMD':'MIRROR DOUBLE',
-    'BMS':'BELGIUM MIRROR SINGLE',
-    'BMD':'BELGIUM MIRROR DOUBLE'
-  };
-  if(!m) return { item: raw || '-', thickness: '' };
-  const prefixKey = m[1].trim().toUpperCase().replace(/[\s/]+/g,'');
-  const item = temperedNameMap[prefixKey] || nameMap[prefixKey] || (m[1].trim().toUpperCase() || raw);
-  return { item, thickness: m[2] };
-}
-
-// Broad category for the tonnage report: Clear / Reflective / Mirror / Color
-function categoryOf(itemName){
-  const n = (itemName||'').toUpperCase();
-  if(n === 'CLEAR GLASS') return 'Clear';
-  if(n.startsWith('REFLECTIVE')) return 'Reflective';
-  if(n.includes('MIRROR')) return 'Mirror';
-  return 'Color';
-}
-
-// A row is "Tempered" if its code was generated by the Tempered Calculator
-// (TSTD-, TD-, THD-, TPD-, TSD-, TTT-, TS-, DBG- prefixes) — these never
-// overlap with the regular glass codes (C, OB, RNB, etc.).
-function isTemperedCode(code){
-  return /^(TSTD|THD|TPD|TSD|TTT|TS|TD|DBG)-/i.test((code||'').trim());
-}
-
-// Canonical item order — matches Nasir Glass's own "Product Category List"
-// serial numbering (1 → 37), so invoices always list items/thicknesses in
-// the same fixed order no matter what order they were typed into the entry
-// form. Anything not on the list (e.g. Ocean Blue, Mirror Double) just falls
-// to the end, in whatever order it was typed.
-const CATEGORY_ORDER = [
-  'CLEAR GLASS', 'DARK GRAY', 'DEEP BRONZE', 'GREEN', 'LACK BLUE',
-  'LIGHT BRONZE', 'NAVY BLUE', 'REFLECTIVE GREEN', 'REFLECTIVE LACK BLUE',
-  'REFLECTIVE NAVY BLUE', 'BELGIUM MIRROR SINGLE', 'MIRROR SINGLE', 'BELGIUM MIRROR DOUBLE'
-];
-function categoryRank(itemName){
-  const i = CATEGORY_ORDER.indexOf((itemName||'').toUpperCase());
-  return i === -1 ? CATEGORY_ORDER.length : i;
-}
-
-function renderInvoicePreview(inv){
-  currentInvoice = inv; // remember exactly what's being shown, for PDF/print/share to reuse as-is
-
-  // If this invoice was loaded from a saved record (has its own commission
-  // data attached), restore those values so re-opening a saved invoice shows
-  // exactly what was entered for it — not whatever is currently in memory.
-  if(inv.commission){
-    commissionVisible = !!inv.commission.visible;
-    commissionPct1 = inv.commission.pct1 ?? commissionPct1;
-    commissionPct2 = inv.commission.pct2 ?? commissionPct2;
-    crAmount = inv.commission.cr ?? crAmount;
-    bankName = inv.commission.bankName ?? bankName;
-    bankPayment = inv.commission.bankPayment ?? bankPayment;
-    netPayableManual = inv.commission.netPayable ?? netPayableManual;
-    tmVisible = inv.commission.tmVisible ?? tmVisible;
-    tmCommissionPct = inv.commission.tmCommissionPct ?? tmCommissionPct;
-  }
-  if(inv.note !== undefined) invoiceNote = inv.note;
-
-  const itemGroups = [];
-  const itemIdx = {};
-  inv.rows.forEach(r=>{
-    const { item, thickness } = splitCode(r.code);
-    if(!(item in itemIdx)){ itemIdx[item] = itemGroups.length; itemGroups.push({ item, thickIdx:{}, thicknessGroups: [] }); }
-    const ig = itemGroups[itemIdx[item]];
-    if(!(thickness in ig.thickIdx)){ ig.thickIdx[thickness] = ig.thicknessGroups.length; ig.thicknessGroups.push({ thickness, rows: [] }); }
-    ig.thicknessGroups[ig.thickIdx[thickness]].rows.push(r);
-  });
-
-  // Sort everything into the standard order regardless of the order rows
-  // were typed in: items follow the Product Category List serial (1→37),
-  // thicknesses go small→large within each item, and individual sizes
-  // (WxH) go small→large (by area) within each thickness.
-  itemGroups.sort((a,b) => categoryRank(a.item) - categoryRank(b.item));
-  itemGroups.forEach(ig=>{
-    ig.thicknessGroups.sort((a,b) => (parseFloat(a.thickness)||0) - (parseFloat(b.thickness)||0));
-    ig.thicknessGroups.forEach(tg=>{
-      tg.rows.sort((a,b) => ((parseFloat(a.w)||0)*(parseFloat(a.h)||0)) - ((parseFloat(b.w)||0)*(parseFloat(b.h)||0)));
-    });
-  });
-
-  let grandPcs=0, grandSft=0, grandMt=0, grandAmt=0;
-  let sl = 0;
-  const rowsHtml = itemGroups.map(ig=>{
-    sl++;
-    const itemRowSpan = ig.thicknessGroups.reduce((sum,tg)=> sum + tg.rows.length + 1, 0);
-    let firstItemCellDone = false;
-    return ig.thicknessGroups.map(tg=>{
-      let subPcs=0, subSft=0, subMt=0, subAmt=0;
-      const thicknessRowSpan = tg.rows.length + 1;
-      let firstThicknessCellDone = false;
-      const sizeRows = tg.rows.map(r=>{
-        subPcs += (parseFloat(r.qty)||0);
-        subSft += r.sft; subMt += r.mt; subAmt += r.amt;
-        let tr = '<tr>';
-        if(!firstItemCellDone){
-          tr += `<td rowspan="${itemRowSpan}" style="vertical-align:middle;font-weight:700;">${sl}</td><td class="col-item" rowspan="${itemRowSpan}" style="vertical-align:middle;font-weight:700;text-align:left;white-space:normal;word-break:break-word;">${ig.item}</td>`;
-          firstItemCellDone = true;
-        }
-        if(!firstThicknessCellDone){
-          tr += `<td rowspan="${thicknessRowSpan}" style="vertical-align:middle;">${tg.thickness}</td>`;
-          firstThicknessCellDone = true;
-        }
-        tr += `<td>${r.w} x ${r.h}</td><td>${r.qty}</td><td>${r.sft.toFixed(2)}</td><td>${r.mt.toFixed(4)}</td><td style="text-align:center;font-weight:700;font-size:15px;font-family:'Roboto Mono',monospace;color:var(--navy);">${Math.round(r.amt).toLocaleString('en-IN')}</td></tr>`;
-        return tr;
-      }).join('');
-      grandPcs += subPcs; grandSft += subSft; grandMt += subMt; grandAmt += subAmt;
-      const subTotalRow = `<tr style="font-weight:700;"><td style="text-align:right;">Sub Total :</td><td>${subPcs}</td><td>${subSft.toFixed(2)}</td><td>${subMt.toFixed(4)}</td><td style="text-align:center;font-size:15px;">${Math.round(subAmt).toLocaleString('en-IN')}</td></tr>`;
-      return sizeRows + subTotalRow;
-    }).join('');
-  }).join('') || `<tr><td colspan="8" style="color:#9aa7b0;padding:20px;">No items yet — add items from Home</td></tr>`;
-
-  const grandTotalRow = itemGroups.length ? `
-    <tr style="font-weight:700; background:var(--navy); color:#fff;">
-      <td colspan="4" style="text-align:right;">Grand Total :</td>
-      <td>${grandPcs}</td><td>${grandSft.toFixed(2)}</td><td>${grandMt.toFixed(4)}</td>
-      <td style="text-align:center;font-size:16px;">${Math.round(grandAmt).toLocaleString('en-IN')}</td>
-    </tr>
-  ` : '';
-
-  // MT breakdown by broad category (Clear / Reflective / Mirror / Color / TM)
-  // for THIS invoice — only shown when the "📐 Ton" toggle button is on.
-  // Tempered items are pulled out into their own "TM" line (checked first,
-  // by code prefix) instead of falling into the Color catch-all bucket.
-  let tonBreakdownRows = '';
-  if(tonVisible){
-    const tonByCategory = { Clear: 0, Reflective: 0, Mirror: 0, Color: 0, TM: 0 };
-    inv.rows.forEach(r=>{
-      const { item } = splitCode(r.code);
-      const cat = isTemperedCode(r.code) ? 'TM' : categoryOf(item);
-      tonByCategory[cat] += (parseFloat(r.mt)||0);
-    });
-    const catLabels = { Clear: 'Clear', Reflective: 'Reflective', Mirror: 'Mirror', Color: 'Color', TM: 'TM (Tempered)' };
-    const catColor = cat => cat==='TM' ? '#2c4b9b' : 'var(--slate)';
-    tonBreakdownRows = Object.keys(tonByCategory)
-      .filter(cat => tonByCategory[cat] > 0)
-      .map(cat => `<tr><td style="padding-left:14px;font-size:11.5px;color:${catColor(cat)};${cat==='TM'?'font-weight:700;':''}">${catLabels[cat]} MT</td><td style="font-size:11.5px;color:${catColor(cat)};${cat==='TM'?'font-weight:700;':''}">${tonByCategory[cat].toFixed(4)}</td></tr>`)
-      .join('');
-  }
-
-  // Tempered vs Regular breakdown for THIS invoice — only shown when the
-  // "🔷 TM" toggle button is on. Tempered glass has its own separate
-  // commission rate, so it needs to be split out from regular glass clearly.
-  let tmBreakdownRows = '';
-  let tmSft=0, tmMt=0, tmAmt=0;
-  if(tmVisible){
-    inv.rows.forEach(r=>{
-      if(isTemperedCode(r.code)){ tmSft += (parseFloat(r.sft)||0); tmMt += (parseFloat(r.mt)||0); tmAmt += (parseFloat(r.amt)||0); }
-    });
-    const regAmt = (inv.totals ? inv.totals.amt : 0) - tmAmt;
-    if(tmAmt > 0){
-      tmBreakdownRows = `
-        <tr><td style="padding-left:14px;font-size:11.5px;color:#2c4b9b;"><b>TM</b> Tempered SFT</td><td style="font-size:11.5px;color:#2c4b9b;">${tmSft.toFixed(2)}</td></tr>
-        <tr><td style="padding-left:14px;font-size:11.5px;color:#2c4b9b;"><b>TM</b> Tempered MT</td><td style="font-size:11.5px;color:#2c4b9b;">${tmMt.toFixed(4)}</td></tr>
-        <tr><td style="padding-left:14px;font-size:11.5px;color:#2c4b9b;"><b>TM</b> Tempered Amount</td><td style="font-size:11.5px;color:#2c4b9b;">৳ ${Math.round(tmAmt).toLocaleString('en-IN')}</td></tr>
-        <tr><td style="padding-left:14px;font-size:11.5px;color:var(--slate);">Regular (Non-Tempered) Amount</td><td style="font-size:11.5px;color:var(--slate);">৳ ${Math.round(regAmt).toLocaleString('en-IN')}</td></tr>
-      `;
-    } else {
-      tmBreakdownRows = `<tr><td style="padding-left:14px;font-size:11.5px;color:var(--slate);" colspan="2">এই ইনভয়েসে কোনো টেম্পার্ড আইটেম নেই</td></tr>`;
-    }
-  }
-
-  document.getElementById('invoice-render').innerHTML = `
-    <div class="inv-head">
-      <div>
-        <h2>Nasir Glass</h2>
-      </div>
-      <div class="inv-badge">
-        <div>DATE</div>
-        <div>${inv.date || '-'}</div>
-      </div>
-    </div>
-    <div class="party-box">
-      <div>
-        <div class="lbl">Buyer</div>
-        <div style="font-weight:600;font-size:14px;">${inv.name||'-'}</div>
-        <div style="color:#4c6478;font-size:12px;">${inv.address||''}</div>
-        <div style="color:#4c6478;font-size:12px;">${inv.mobile||''}</div>
-      </div>
-      <div class="code-do-box" style="text-align:right; padding-right:26px;">
-        <div class="lbl">Party Code</div>
-        <div style="font-weight:700;font-size:14px;">${inv.code||'-'}</div>
-        <div class="lbl" style="margin-top:8px;">DO No.</div>
-        <div style="font-weight:700;font-size:14px;">${inv.doNo||'-'}</div>
-      </div>
-    </div>
-    <div class="scroll-wrap" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
-    <table class="items inv-items-table">
-      <thead><tr>
-        <th>SL</th><th class="col-item">Item Name</th><th>Thickness</th><th style="width:80px;">Size Name (WxH)</th><th>Pcs</th>
-        <th>Sft</th><th>Mtn</th><th>Amount</th>
-      </tr></thead>
-      <tbody>${rowsHtml}${grandTotalRow}</tbody>
-    </table>
-    </div>
-    <div class="totals-card">
-      <div class="totals">
-        <table>
-          <tr><td>Total SFT</td><td>${inv.totals.sft.toFixed(2)}</td></tr>
-          <tr><td>Total MT</td><td>${inv.totals.mt.toFixed(4)}</td></tr>
-          ${tonBreakdownRows}
-          ${tmBreakdownRows}
-          <tr class="grand"><td>Grand Total</td><td>Tk ${Math.round(inv.totals.amt).toLocaleString('en-IN')}</td></tr>
-        </table>
-      </div>
-      <div id="commission-card" style="display:${commissionVisible?'':'none'}; margin-top:8px; border-top:1px dashed var(--line); padding-top:8px;">
-        <div style="font-size:9.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--slate); margin-bottom:4px; text-align:right;">Commission &amp; Deductions</div>
-        <div style="display:grid; grid-template-columns:auto auto 1fr; gap:2px 6px; align-items:center; font-size:11px; max-width:340px; margin-left:auto;">
-          <div style="color:var(--slate); text-align:right;">Comm 1</div>
-          <div><input type="number" step="any" id="comm1-pct" value="${commissionPct1}" oninput="updateCommission()" style="width:40px; text-align:right; padding:2px 4px; border:1px solid var(--line); border-radius:4px; font-family:inherit; font-size:11px;"> %</div>
-          <div id="comm1-amt" style="font-family:'Roboto Mono',monospace; font-weight:700; color:var(--bad); text-align:right;"></div>
-
-          <div style="color:var(--slate); text-align:right;">Comm 2</div>
-          <div><input type="number" step="any" id="comm2-pct" value="${commissionPct2}" oninput="updateCommission()" style="width:40px; text-align:right; padding:2px 4px; border:1px solid var(--line); border-radius:4px; font-family:inherit; font-size:11px;"> %</div>
-          <div id="comm2-amt" style="font-family:'Roboto Mono',monospace; font-weight:700; color:var(--bad); text-align:right;"></div>
-
-          ${tmVisible ? `
-          <div style="color:#2c4b9b; text-align:right; font-weight:700;">TM কমিশন</div>
-          <div><input type="number" step="any" id="tm-comm-pct" value="${tmCommissionPct}" oninput="updateCommission()" style="width:40px; text-align:right; padding:2px 4px; border:1px solid #2c4b9b; border-radius:4px; font-family:inherit; font-size:11px; color:#2c4b9b;"> %</div>
-          <div id="tm-comm-amt" style="font-family:'Roboto Mono',monospace; font-weight:700; color:#2c4b9b; text-align:right;"></div>
-          ` : ''}
-
-          <div style="color:var(--slate); text-align:right;">CR</div>
-          <div style="grid-column:span 2;"><input type="number" step="any" id="cr-amt-input" value="${crAmount}" oninput="updateCommission()" style="width:80px; text-align:right; padding:2px 5px; border:1px solid var(--line); border-radius:4px; font-family:'Roboto Mono',monospace; font-size:11px; color:var(--bad);"> Tk</div>
-
-          <div style="color:var(--slate); text-align:right;">Bank Name</div>
-          <div style="grid-column:span 2;"><input type="text" id="bank-name-input" value="${bankName}" oninput="updateCommission()" placeholder="Bank name" style="width:110px; box-sizing:border-box; padding:2px 5px; border:1px solid var(--line); border-radius:4px; font-family:inherit; font-size:11px;"></div>
-
-          <div style="color:var(--slate); text-align:right; font-weight:700;">Bank Payment</div>
-          <div style="grid-column:span 2;"><input type="number" step="any" id="bank-pay-input" value="${bankPayment}" oninput="updateCommission()" style="width:80px; text-align:right; padding:3px 6px; border:1.5px solid var(--bad); border-radius:4px; font-family:'Roboto Mono',monospace; font-size:12.5px; font-weight:700; color:var(--bad);"> <b>Tk</b></div>
-
-          <div style="grid-column:span 3; border-top:1.5px solid var(--navy); margin-top:3px; padding-top:4px; display:flex; justify-content:flex-end; align-items:center; gap:6px;">
-            <span style="font-weight:700; font-size:12px;">Net Payable</span>
-            <input type="number" step="any" id="net-payable-input" value="${netPayableManual}" oninput="updateCommission()" placeholder="Type" style="width:85px; text-align:right; padding:3px 5px; border:1.5px solid var(--navy); border-radius:4px; font-family:'Roboto Mono',monospace; font-size:12.5px; font-weight:700; color:var(--navy);"> <span style="font-size:11px;">Tk</span>
-          </div>
-          <div style="grid-column:span 3; text-align:right; font-size:9.5px; color:var(--slate);">Calculated (ref): <span id="net-payable-suggestion"></span></div>
-        </div>
-      </div>
-    </div>
-    <div class="quick-summary-box">
-      <div><span class="q-lbl">Bank Name</span><span class="q-val" id="quick-bankname">-</span></div>
-      <div><span class="q-lbl">Bank Payment</span><span class="q-val" id="quick-bankpay">-</span></div>
-      <div><span class="q-lbl">Net Amount</span><span class="q-val" id="quick-netamount">-</span></div>
-    </div>
-    <div style="margin-top:14px;">
-      <div style="font-size:10.5px; color:var(--slate); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">নোট</div>
-      <textarea id="invoice-note-input" placeholder="এখানে নোট লিখুন..." oninput="updateNote()" style="width:100%; box-sizing:border-box; min-height:44px; padding:7px 9px; border:1px solid var(--line); border-radius:8px; font-family:inherit; font-size:12px; font-weight:700; color:#d0301f; resize:vertical; background:#fff;">${invoiceNote}</textarea>
-    </div>
-    <div style="margin-top:28px; text-align:center;">
-      <div style="display:inline-block; text-align:center;">
-        <div style="border-top:1px solid var(--slate); padding-top:4px; min-width:220px;">
-          <div style="font-weight:600; color:var(--navy); font-size:11px;">Md. Mehedi Hasan — Area Sales Manager, Barishal — 01730-273061</div>
-        </div>
-        <div style="font-size:9px; color:var(--slate); text-transform:uppercase; letter-spacing:.8px; margin-top:2px;">Authorized By</div>
-      </div>
-    </div>
-  `;
-  updateCommission();
-  const tmBtn = document.getElementById('tm-toggle-btn');
-  if(tmBtn){ tmBtn.style.background = tmVisible ? '#2c4b9b' : '#eef3ff'; tmBtn.style.color = tmVisible ? '#fff' : '#2c4b9b'; }
-  // Grow the note box to fit whatever text is already in it, so a longer
-  // saved note is never cropped when printed/exported (the PDF capture
-  // only draws what's visibly on screen, not scrolled-away text).
-  const noteEl = document.getElementById('invoice-note-input');
-  if(noteEl){ noteEl.style.height = 'auto'; noteEl.style.height = noteEl.scrollHeight + 'px'; }
-}
-
-let commissionVisible = false;
-let commissionPct1 = 1;
-let commissionPct2 = 20;
-let crAmount = 0;
-let bankName = '';
-let bankPayment = 0;
-let netPayableManual = '';
-let tonVisible = false;
-let tmVisible = false;
-let tmCommissionPct = 2;
-let invoiceNote = '';
-
-function updateNote(){
-  const noteInput = document.getElementById('invoice-note-input');
-  if(!noteInput) return;
-  invoiceNote = noteInput.value;
-  if(currentInvoice) currentInvoice.note = invoiceNote;
-  noteInput.style.height = 'auto';
-  noteInput.style.height = noteInput.scrollHeight + 'px';
-}
-
-function toggleCommission(){
-  commissionVisible = !commissionVisible;
-  const card = document.getElementById('commission-card');
-  if(card){ card.style.display = commissionVisible ? '' : 'none'; }
-  if(currentInvoice){
-    if(!currentInvoice.commission) currentInvoice.commission = {};
-    currentInvoice.commission.visible = commissionVisible;
-  }
-  if(commissionVisible) updateCommission();
-}
-
-function toggleTon(){
-  tonVisible = !tonVisible;
-  if(currentInvoice) renderInvoicePreview(currentInvoice);
-}
-
-function toggleTM(){
-  tmVisible = !tmVisible;
-  const btn = document.getElementById('tm-toggle-btn');
-  if(btn){ btn.style.background = tmVisible ? '#2c4b9b' : '#eef3ff'; btn.style.color = tmVisible ? '#fff' : '#2c4b9b'; }
-  if(currentInvoice){
-    if(!currentInvoice.commission) currentInvoice.commission = {};
-    currentInvoice.commission.tmVisible = tmVisible;
-    renderInvoicePreview(currentInvoice);
-  }
-}
-
-function updateCommission(){
-  const p1 = document.getElementById('comm1-pct');
-  const p2 = document.getElementById('comm2-pct');
-  const crInput = document.getElementById('cr-amt-input');
-  const bankNameInput = document.getElementById('bank-name-input');
-  const bankPayInput = document.getElementById('bank-pay-input');
-  const netInput = document.getElementById('net-payable-input');
-  const tmPctInput = document.getElementById('tm-comm-pct');
-  if(!p1 || !p2 || !crInput || !bankPayInput || !netInput) return;
-  commissionPct1 = parseFloat(p1.value) || 0;
-  commissionPct2 = parseFloat(p2.value) || 0;
-  crAmount = parseFloat(crInput.value) || 0;
-  bankName = bankNameInput ? bankNameInput.value : '';
-  bankPayment = parseFloat(bankPayInput.value) || 0;
-  netPayableManual = netInput.value; // typed directly by the user — never overwritten automatically
-  if(tmPctInput) tmCommissionPct = parseFloat(tmPctInput.value) || 0;
-
-  // Commission 1 and 2 auto-calculate and cascade (each on what's left after
-  // the previous deduction); CR and Bank Payment are typed straight amounts.
-  // Net Payable itself is typed by hand — this is just a reference figure.
-  //
-  // When the 🔷 TM toggle is on, Tempered glass has its own separate
-  // commission rate — so Comm 1/2 are applied only to the REGULAR (non-
-  // tempered) amount, and the TM% is applied only to the Tempered amount.
-  // With TM off, Comm 1/2 apply to the whole invoice as before.
-  const totalAmt = renderTotals().amt;
-  let tmAmt = 0;
-  if(tmVisible && currentInvoice && currentInvoice.rows){
-    currentInvoice.rows.forEach(r=>{ if(isTemperedCode(r.code)) tmAmt += (parseFloat(r.amt)||0); });
-  }
-  const baseForComm = tmVisible ? (totalAmt - tmAmt) : totalAmt;
-
-  let running = baseForComm;
-  const c1 = running * commissionPct1/100;
-  running -= c1;
-  const c2 = running * commissionPct2/100;
-  running -= c2;
-
-  let tmComm = 0;
-  if(tmVisible){
-    tmComm = tmAmt * tmCommissionPct/100;
-    running += (tmAmt - tmComm); // add back the tempered amount, net of its own commission
-    const tmAmtEl = document.getElementById('tm-comm-amt');
-    if(tmAmtEl) tmAmtEl.textContent = '− ৳ ' + Math.round(tmComm).toLocaleString('en-IN');
-  }
-
-  running -= crAmount;
-  running -= bankPayment;
-
-  document.getElementById('comm1-amt').textContent = '− ৳ ' + Math.round(c1).toLocaleString('en-IN');
-  document.getElementById('comm2-amt').textContent = '− ৳ ' + Math.round(c2).toLocaleString('en-IN');
-  document.getElementById('net-payable-suggestion').textContent = '৳ ' + Math.round(running).toLocaleString('en-IN');
-
-  // Keep the top summary box (Bank Name / Bank Payment / Net Amount) in sync
-  // with whatever is typed in the commission section below.
-  const qBankName = document.getElementById('quick-bankname');
-  const qBankPay = document.getElementById('quick-bankpay');
-  const qNetAmt = document.getElementById('quick-netamount');
-  if(qBankName) qBankName.textContent = bankName ? bankName : '-';
-  if(qBankPay) qBankPay.textContent = bankPayment ? ('৳ ' + Math.round(bankPayment).toLocaleString('en-IN')) : '-';
-  if(qNetAmt) qNetAmt.textContent = netPayableManual ? ('৳ ' + Math.round(parseFloat(netPayableManual)||0).toLocaleString('en-IN')) : '-';
-
-  // Keep the in-memory invoice snapshot in sync too — otherwise a later
-  // re-render (opening the Ton view, building the PDF, printing) would
-  // reset these fields back to whatever they were when the invoice view
-  // was first opened, wiping out anything typed since then.
-  if(currentInvoice){
-    currentInvoice.commission = {
-      visible: commissionVisible,
-      pct1: commissionPct1,
-      pct2: commissionPct2,
-      cr: crAmount,
-      bankName: bankName,
-      bankPayment: bankPayment,
-      netPayable: netPayableManual,
-      tmVisible: tmVisible,
-      tmCommissionPct: tmCommissionPct
-    };
-  }
-}
-
-// ---------- PDF export & share ----------
-function pdfFileName(inv){
-  const who = (inv.name || 'Invoice').replace(/[^\w\u0980-\u09FF]+/g,'_');
-  const d = inv.date || new Date().toISOString().slice(0,10);
-  return `${who}_${d}.pdf`;
-}
-
-async function buildPDFBlob(){
-  // Use exactly what's currently on screen in the Invoice view. If someone
-  // opened a saved invoice from history, that's what gets exported/shared —
-  // not whatever happens to be sitting in the Home entry form right now.
-  const inv = currentInvoice || gatherInvoice();
-  const size = document.getElementById('page-size').value; // 'a4' | 'legal' (used for page WIDTH only)
-  renderInvoicePreview(inv); // re-render to make sure it's fully up to date
-  const element = document.getElementById('invoice-render');
-
-  // Make sure the Bengali web font has actually finished loading before we
-  // rasterize the page — otherwise the browser silently falls back to a
-  // different font for the snapshot, which is why saved PDFs looked "off".
-  try{
-    if(document.fonts){
-      await Promise.all([
-        document.fonts.load('400 16px "Hind Siliguri"'),
-        document.fonts.load('600 16px "Hind Siliguri"'),
-        document.fonts.load('700 16px "Hind Siliguri"'),
-      ]);
-      await document.fonts.ready;
-    }
-  }catch(e){ /* ignore — worst case it falls back to a system font */ }
-
-  // Shrink to the same compact sizing used for real printing, BEFORE taking
-  // the snapshot — otherwise the shared PDF/image comes out much taller and
-  // narrower-looking than it needs to be (letterboxed when viewed on a
-  // phone), because it was using the bigger on-screen font sizes.
-  element.classList.add('compact-capture');
-
-  // Render the invoice at a WIDE virtual width for the snapshot (like a
-  // desktop screen), not the narrow phone width. Row heights stay the same
-  // regardless of column width (text doesn't wrap), so widening this just
-  // spreads the same content across more width — which is what actually
-  // fixes the "too tall/narrow" page shape, not font size.
-  const prevElementWidth = element.style.width;
-  const prevElementMaxWidth = element.style.maxWidth;
-  element.style.width = '900px';
-  element.style.maxWidth = 'none';
-
-  // The items table sits inside a horizontally-scrollable wrapper (for easy
-  // viewing on narrow phone screens). html2canvas can only capture what's
-  // visible inside a scrollable box, so anything scrolled off to the side
-  // would get cut out of the PDF/print — that's the "page not showing
-  // fully" bug. Temporarily let those wrappers expand to their full width
-  // just for the snapshot, then put them back exactly as they were.
-  const scrollWrappers = Array.from(element.querySelectorAll('div')).filter(d=>{
-    const cs = getComputedStyle(d);
-    return cs.overflowX === 'auto' || cs.overflowX === 'scroll';
-  });
-  const prevStyles = scrollWrappers.map(d => ({ el: d, overflow: d.style.overflowX, width: d.style.width }));
-  scrollWrappers.forEach(d => { d.style.overflowX = 'visible'; d.style.width = 'max-content'; d.style.minWidth = '100%'; });
-
-  // Give the browser two paint frames to actually finish reflowing after the
-  // width/overflow changes above before we measure anything. Running inside
-  // the Hub's iframe (instead of standalone, full-width) made this reflow
-  // land a frame later than before — reading scrollWidth too early was
-  // capturing the OLD, narrower layout, which is exactly why the right edge
-  // (Amount/Net Payable columns) was getting sliced off in the shared PDF.
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-  // <input> boxes (Commission %, CR, Bank Name/Payment, Net Payable) don't
-  // always rasterize their typed value cleanly with html2canvas — that's
-  // why those numbers looked faint/blurry in the exported PDF. Swap each
-  // one for a plain text label with the exact same value just for the
-  // snapshot, then put the real inputs back so they're still editable.
-  const liveInputs = Array.from(element.querySelectorAll('input'));
-  const restoreInputs = liveInputs.map(inp=>{
-    const label = document.createElement('span');
-    label.textContent = inp.value || '';
-    label.style.display = 'inline-block';
-    label.style.font = getComputedStyle(inp).font;
-    label.style.color = getComputedStyle(inp).color;
-    label.style.fontWeight = getComputedStyle(inp).fontWeight;
-    label.style.minWidth = getComputedStyle(inp).width;
-    label.style.textAlign = 'right';
-    label.style.padding = '2px 3px';
-    const prevDisplay = inp.style.display;
-    inp.style.display = 'none';
-    inp.insertAdjacentElement('afterend', label);
-    return () => { label.remove(); inp.style.display = prevDisplay; };
-  });
-
-  // Rasterize the ENTIRE invoice (full scroll height) into one tall canvas.
-  // Cap the final canvas size to a dimension every phone's browser can
-  // actually produce — many budget Android devices silently truncate a
-  // canvas (rather than erroring) once it gets too large, which is exactly
-  // why the right/bottom edge of wide or tall invoices was quietly getting
-  // cut off in the shared PDF. Scale down (never up) just enough to stay
-  // under that safe limit.
-  const MAX_CANVAS_DIM = 4096;
-  let scale = 2.5;
-  const naturalMaxDim = Math.max(element.scrollWidth, element.scrollHeight);
-  if(naturalMaxDim * scale > MAX_CANVAS_DIM){ scale = MAX_CANVAS_DIM / naturalMaxDim; }
-  const fullCanvas = await html2canvas(element, {
-    useCORS: true,
-    scale: scale,
-    width: element.scrollWidth,
-    height: element.scrollHeight,
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
-  });
-
-  // restore the scroll wrappers back to normal for on-screen viewing
-  prevStyles.forEach(p => { p.el.style.overflowX = p.overflow; p.el.style.width = p.width; });
-  restoreInputs.forEach(fn => fn());
-  element.classList.remove('compact-capture');
-  element.style.width = prevElementWidth;
-  element.style.maxWidth = prevElementMaxWidth;
-
-  // Build a PDF using the REAL, standard A4/Legal page WIDTH — full edge to
-  // edge, no empty gaps on the sides — and a page HEIGHT that matches the
-  // content exactly. Always a single page. (We tried a fixed standard-A4
-  // HEIGHT too, but on a phone screen — much taller/narrower than an A4
-  // sheet — that made WhatsApp/gallery previews show big empty bars above
-  // and below the invoice. Matching the height to content avoids that.)
-  const { jsPDF } = window.jspdf;
-  const marginPt = 24;
-  const pageWidthPt = size === 'legal' ? 612 : 595.28; // standard Legal/A4 width
-  const usableWidthPt = pageWidthPt - marginPt*2;
-
-  const pxPerPtAtFullWidth = fullCanvas.width / usableWidthPt;
-  const contentHeightPt = fullCanvas.height / pxPerPtAtFullWidth;
-  const pageHeightPt = contentHeightPt + marginPt*2;
-
-  const doc = new jsPDF({
-    unit: 'pt',
-    format: [pageWidthPt, pageHeightPt],
-    // jsPDF defaults to portrait orientation, and SILENTLY SWAPS width/height
-    // whenever width > height to force that — which is exactly what was
-    // slicing off the right edge (Amount/Net Payable columns) on short
-    // invoices: our page came out shorter than it is wide, jsPDF swapped it
-    // to "fix" that, and the content — sized for the ORIGINAL width — no
-    // longer fit the now-narrower swapped page. Telling it explicitly which
-    // orientation we actually want stops it from ever doing that swap.
-    orientation: pageWidthPt > pageHeightPt ? 'l' : 'p'
-  });
-  const imgData = fullCanvas.toDataURL('image/png');
-  doc.addImage(imgData, 'PNG', marginPt, marginPt, usableWidthPt, contentHeightPt);
-
-  return { blob: doc.output('blob'), inv };
-}
-
-function detectPlatformNote(fileName){
-  const ua = navigator.userAgent || '';
-  if(/android/i.test(ua)){
-    return `✅ সেভ হয়েছে: <b>${fileName}</b><br>ফোনের <b>Files</b> অ্যাপ খুলুন → <b>Downloads</b> ফোল্ডারে পাবেন। (কোনো কোনো ফোনে "My Files" বা "Storage → Download" নামে থাকে)`;
-  }
-  if(/iphone|ipad|ipod/i.test(ua)){
-    return `✅ সেভ হয়েছে: <b>${fileName}</b><br>ফোনের নীল <b>Files</b> অ্যাপ খুলুন → <b>On My iPhone</b> বা <b>Downloads</b> ফোল্ডারে পাবেন। (Safari দিয়ে ডাউনলোড করলে বেশিরভাগ সময় এখানেই যায়)`;
-  }
-  return `✅ সেভ হয়েছে: <b>${fileName}</b><br>আপনার কম্পিউটারের <b>Downloads</b> ফোল্ডারে পাবেন।`;
-}
-
-async function downloadPDF(){
-  const status = document.getElementById('pdf-status');
-  status.textContent = 'PDF তৈরি হচ্ছে...';
-  try{
-    const { blob, inv } = await buildPDFBlob();
-    const fileName = pdfFileName(inv);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 3000);
-    status.innerHTML = detectPlatformNote(fileName);
-  }catch(e){
-    status.textContent = '⚠️ PDF তৈরি করতে সমস্যা হয়েছে — ইন্টারনেট সংযোগ ঠিক আছে কিনা দেখুন';
-  }
-}
-
-async function sharePDF(){
-  const status = document.getElementById('pdf-status');
-  status.textContent = 'PDF তৈরি হচ্ছে...';
-  try{
-    const { blob, inv } = await buildPDFBlob();
-    const file = new File([blob], pdfFileName(inv), { type: 'application/pdf' });
-    if(navigator.canShare && navigator.canShare({ files: [file] })){
-      await navigator.share({
-        files: [file],
-        title: 'Nasir Glass — Invoice',
-        text: `Nasir Glass ইনভয়েস — ${inv.name || ''}`
-      });
-      status.textContent = '✅ শেয়ার শীট খোলা হয়েছে';
-    } else {
-      // Device/browser can't share files directly — download it and guide the user
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = pdfFileName(inv);
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url), 3000);
-      status.textContent = '📥 এই ফোনে সরাসরি শেয়ার সাপোর্ট নেই, তাই PDF ডাউনলোড হয়েছে — এখন WhatsApp খুলে Attach থেকে ফাইলটা পাঠান';
-    }
-  }catch(e){
-    if(e && e.name === 'AbortError'){ status.textContent = ''; return; }
-    status.textContent = '⚠️ শেয়ার করতে সমস্যা হয়েছে, আবার চেষ্টা করুন';
-  }
-}
-
-async function printInvoice(){
-  // Guaranteed single A4 page, no matter how many rows the invoice has.
-  // Native browser printing (window.print) leaves pagination up to the
-  // browser's own guesswork, which kept spilling onto a 2nd page for big
-  // invoices. This instead renders the exact same invoice image used for
-  // "PDF সেভ"/WhatsApp (so it looks identical), then places it on ONE real
-  // A4 page — shrinking it down by calculation if needed so it always,
-  // certainly, fits on a single sheet.
-  const status = document.getElementById('pdf-status');
-  if(status) status.textContent = 'প্রিন্টের জন্য প্রস্তুত হচ্ছে...';
-  try{
-    const { blob } = await buildSinglePageA4PDFBlob();
-    const url = URL.createObjectURL(blob);
-    const win = window.open(url, '_blank');
-    if(win){
-      setTimeout(()=>{ try{ win.print(); }catch(e){} }, 700);
-      if(status) status.textContent = '';
-    } else {
-      if(status) status.textContent = '⚠️ নতুন উইন্ডো খোলা যায়নি — পপ-আপ ব্লক করা থাকলে অনুমতি দিন, অথবা "PDF সেভ করুন" দিয়ে ডাউনলোড করে প্রিন্ট করুন';
-    }
-  }catch(e){
-    if(status) status.textContent = '⚠️ প্রিন্ট তৈরি করতে সমস্যা হয়েছে, আবার চেষ্টা করুন';
-  }
-}
-
-async function buildSinglePageA4PDFBlob(){
-  const inv = currentInvoice || gatherInvoice();
-  renderInvoicePreview(inv);
-  const element = document.getElementById('invoice-render');
-
-  try{
-    if(document.fonts){
-      await Promise.all([
-        document.fonts.load('400 16px "Hind Siliguri"'),
-        document.fonts.load('600 16px "Hind Siliguri"'),
-        document.fonts.load('700 16px "Hind Siliguri"'),
-      ]);
-      await document.fonts.ready;
-    }
-  }catch(e){}
-
-  element.classList.add('compact-capture');
-  const prevElementWidth2 = element.style.width;
-  const prevElementMaxWidth2 = element.style.maxWidth;
-  element.style.width = '900px';
-  element.style.maxWidth = 'none';
-
-  const scrollWrappers = Array.from(element.querySelectorAll('div')).filter(d=>{
-    const cs = getComputedStyle(d);
-    return cs.overflowX === 'auto' || cs.overflowX === 'scroll';
-  });
-  const prevStyles = scrollWrappers.map(d => ({ el: d, overflow: d.style.overflowX, width: d.style.width }));
-  scrollWrappers.forEach(d => { d.style.overflowX = 'visible'; d.style.width = 'max-content'; d.style.minWidth = '100%'; });
-
-  // See buildPDFBlob() above — same reflow-timing fix, needed here too so
-  // printing never slices off the right edge of wide invoices either.
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-  const liveInputs = Array.from(element.querySelectorAll('input'));
-  const restoreInputs = liveInputs.map(inp=>{
-    const label = document.createElement('span');
-    label.textContent = inp.value || '';
-    label.style.display = 'inline-block';
-    label.style.font = getComputedStyle(inp).font;
-    label.style.color = getComputedStyle(inp).color;
-    label.style.fontWeight = getComputedStyle(inp).fontWeight;
-    label.style.minWidth = getComputedStyle(inp).width;
-    label.style.textAlign = 'right';
-    label.style.padding = '2px 3px';
-    const prevDisplay = inp.style.display;
-    inp.style.display = 'none';
-    inp.insertAdjacentElement('afterend', label);
-    return () => { label.remove(); inp.style.display = prevDisplay; };
-  });
-
-  // Same safe-canvas-size cap as the share/download path — avoids the
-  // right/bottom edge silently getting truncated on lower-end phones.
-  const MAX_CANVAS_DIM_PRINT = 4096;
-  let printScale = 2.5;
-  const naturalMaxDimPrint = Math.max(element.scrollWidth, element.scrollHeight);
-  if(naturalMaxDimPrint * printScale > MAX_CANVAS_DIM_PRINT){ printScale = MAX_CANVAS_DIM_PRINT / naturalMaxDimPrint; }
-  const fullCanvas = await html2canvas(element, {
-    useCORS: true,
-    scale: printScale,
-    width: element.scrollWidth,
-    height: element.scrollHeight,
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
-  });
-
-  prevStyles.forEach(p => { p.el.style.overflowX = p.overflow; p.el.style.width = p.width; });
-  restoreInputs.forEach(fn => fn());
-  element.classList.remove('compact-capture');
-  element.style.width = prevElementWidth2;
-  element.style.maxWidth = prevElementMaxWidth2;
-
-  const { jsPDF } = window.jspdf;
-  const marginPt = 14;
-  const pageWidthPt = 595.28;   // standard A4 width
-  const pageHeightPt = 841.89;  // standard A4 height — ALWAYS exactly this, one page only
-  const usableWidthPt = pageWidthPt - marginPt*2;
-  const usableHeightPt = pageHeightPt - marginPt*2;
-
-  const pxPerPtIfWidthFit = fullCanvas.width / usableWidthPt;
-  const pxPerPtIfHeightFit = fullCanvas.height / usableHeightPt;
-  // Whichever ratio is bigger is the one that actually constrains us —
-  // using it guarantees BOTH width and height fit inside the one page.
-  const pxPerPt = Math.max(pxPerPtIfWidthFit, pxPerPtIfHeightFit);
-
-  const finalWidthPt = fullCanvas.width / pxPerPt;
-  const finalHeightPt = fullCanvas.height / pxPerPt;
-  const offsetXPt = marginPt + (usableWidthPt - finalWidthPt) / 2;   // centered
-  const offsetYPt = marginPt; // start from the top like a normal document
-
-  const doc = new jsPDF({ unit: 'pt', format: [pageWidthPt, pageHeightPt], orientation: 'p' }); // always A4 portrait — width < height, but explicit anyway for safety
-  const imgData = fullCanvas.toDataURL('image/png');
-  doc.addImage(imgData, 'PNG', offsetXPt, offsetYPt, finalWidthPt, finalHeightPt);
-
-  return { blob: doc.output('blob'), inv };
-}
-
-// ---------- Firebase (Firestore) — this is what syncs data across every device ----------
+// ---------- Firebase (Firestore) — syncs data across every device (same account as Nasir Glass) ----------
 const firebaseConfig = {
   apiKey: "AIzaSyAW72RV5Bt9zOZlwBkfneh3ulIZWSuhgtU",
   authDomain: "nasir-glass-3edec.firebaseapp.com",
@@ -1758,70 +505,36 @@ try{
   auth = firebase.auth();
 }catch(e){ console.error('Firebase init failed', e); }
 
-// ---------- Secondary Firebase connection: the REAL Dealer Dashboard project ----------
-// Dealer Dashboard lives in its own separate Firebase project (dealer-dashboard-b2271)
-// with its own login — it is NOT the same project as Nasir Glass/TON COUNT
-// (nasir-glass-3edec). Writing to a "dealerDashboard" collection on the
-// nasir-glass-3edec `db` above silently lands in the WRONG project — the
-// real Dealer app never sees it, even though the write "succeeds" with no
-// error. This second app instance logs into the actual dealer-dashboard-b2271
-// project so pushes/removes/checks land where the Dealer app actually reads.
-const dealerFirebaseConfig = {
-  apiKey: "AIzaSyBMSPRutn3EparvkTj1gh_-iLLlJNlwM6k",
-  authDomain: "dealer-dashboard-b2271.firebaseapp.com",
-  projectId: "dealer-dashboard-b2271",
-  storageBucket: "dealer-dashboard-b2271.firebasestorage.app",
-  messagingSenderId: "581371844256",
-  appId: "1:581371844256:web:10d565de1df521d320dbc5"
-};
-const DEALER_LOGIN_EMAIL = "nasirglass.barishal2023@gmail.com";
-const DEALER_LOGIN_PASSWORD = "Mehedi8316";
-let dealerDb = null;
-let dealerAuth = null;
-let dealerSignInPromise = null;
-try{
-  const dealerApp = firebase.initializeApp(dealerFirebaseConfig, 'dealerApp');
-  dealerDb = dealerApp.firestore();
-  dealerAuth = dealerApp.auth();
-}catch(e){ console.error('Dealer Firebase init failed', e); }
-// Signs in once (subsequent calls reuse the same in-flight/settled promise)
-// and returns dealerAuth.currentUser.uid — the SAME uid the real Dealer app
-// uses for its own document path, since it's the same login.
-let dealerAuthLastError = null;
-function ensureDealerAuth(){
-  if(!dealerAuth) return Promise.resolve(null);
-  if(dealerAuth.currentUser) return Promise.resolve(dealerAuth.currentUser.uid);
-  if(!dealerSignInPromise){
-    dealerSignInPromise = dealerAuth.signInWithEmailAndPassword(DEALER_LOGIN_EMAIL, DEALER_LOGIN_PASSWORD)
-      .then(cred => { dealerAuthLastError = null; return cred.user.uid; })
-      .catch(e => { console.error('Dealer auto-login failed', e); dealerAuthLastError = e; dealerSignInPromise = null; return null; });
+async function pushToCloud(){
+  if(!db) return;
+  try{ await db.collection('toncount').doc('entries').set({data: entries}); }
+  catch(e){
+    console.error('Firestore save failed (toncount):', e);
+    toast('⚠️ ক্লাউডে সেভ হয়নি — এই ডিভাইসে সেভ আছে');
   }
-  return dealerSignInPromise;
+}
+async function pullFromCloud(){
+  if(!db) return;
+  try{
+    const snap = await db.collection('toncount').doc('entries').get();
+    if(snap.exists){
+      // Cloud is the single source of truth (every save uploads the FULL data set),
+      // so we replace local data with it — this makes deletions sync correctly too.
+      entries = snap.data().data || {};
+      localStorage.setItem(STORE_KEY, JSON.stringify(entries));
+    } else {
+      // nothing in the cloud yet — push whatever we have locally so it becomes the baseline
+      await pushToCloud();
+    }
+  }catch(e){ console.error('Firestore load failed (toncount):', e); }
 }
 
 // ---------- login gate ----------
-// If Firebase itself failed to load (offline install, blocked script, etc.)
-// we don't lock the person out of their own offline data — just boot straight in,
-// same as the app always did before login existed.
 function showApp(){
   document.getElementById('boot-check').classList.add('hidden');
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app-root').style.display = '';
   boot();
-  startInvoiceLiveSync();
-}
-
-// ---------- live auto-sync: keep this device's screen updated the instant
-// invoices are saved/edited/deleted from ANY device or app, no reload needed ----------
-let invoiceLiveUnsub = null;
-function startInvoiceLiveSync(){
-  if(!db || invoiceLiveUnsub) return;
-  invoiceLiveUnsub = db.collection('nasirglass').doc('invoices').onSnapshot(snap=>{
-    const list = snap.exists ? (snap.data().list || []) : [];
-    try{ localStorage.setItem('nasirglass_invoices', JSON.stringify(list)); }catch(_){}
-    if(currentView==='history') refreshHistory();
-    if(currentView==='dashboard') renderDashboard();
-  }, err=>console.error('invoice live sync error', err));
 }
 function showLoginScreen(){
   document.getElementById('boot-check').classList.add('hidden');
@@ -1846,14 +559,9 @@ async function doLogin(){
   errBox.textContent = '';
   if(!email || !pass){ errBox.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
   btn.disabled = true; btn.textContent = 'লগইন হচ্ছে...';
-  try{
-    await auth.signInWithEmailAndPassword(email, pass);
-    // onAuthStateChanged below will handle showing the app
-  }catch(e){
-    errBox.textContent = loginErrorMessage(e);
-  }finally{
-    btn.disabled = false; btn.textContent = 'লগইন করুন';
-  }
+  try{ await auth.signInWithEmailAndPassword(email, pass); }
+  catch(e){ errBox.textContent = loginErrorMessage(e); }
+  finally{ btn.disabled = false; btn.textContent = 'লগইন করুন'; }
 }
 async function doSignup(){
   const email = document.getElementById('signup-email').value.trim();
@@ -1866,14 +574,9 @@ async function doSignup(){
   if(pass.length < 6){ errBox.textContent = 'পাসওয়ার্ড অন্তত ৬ ডিজিট/অক্ষর হতে হবে'; return; }
   if(pass !== pass2){ errBox.textContent = 'দুই পাসওয়ার্ড মিলছে না'; return; }
   btn.disabled = true; btn.textContent = 'তৈরি হচ্ছে...';
-  try{
-    await auth.createUserWithEmailAndPassword(email, pass);
-    // onAuthStateChanged below will handle showing the app
-  }catch(e){
-    errBox.textContent = loginErrorMessage(e);
-  }finally{
-    btn.disabled = false; btn.textContent = 'অ্যাকাউন্ট তৈরি করুন';
-  }
+  try{ await auth.createUserWithEmailAndPassword(email, pass); }
+  catch(e){ errBox.textContent = loginErrorMessage(e); }
+  finally{ btn.disabled = false; btn.textContent = 'অ্যাকাউন্ট তৈরি করুন'; }
 }
 function loginErrorMessage(e){
   const code = e && e.code || '';
@@ -1888,512 +591,405 @@ function loginErrorMessage(e){
 async function doLogout(){
   if(!confirm('আপনি কি লগআউট করতে চান?')) return;
   try{ await auth.signOut(); }catch(e){}
-  // onAuthStateChanged below will handle showing the login screen
 }
 
 if(auth){
-  auth.onAuthStateChanged(user => {
-    if(user){ showApp(); }
-    else{ showLoginScreen(); }
+  auth.onAuthStateChanged(async user => {
+    if(user){
+      await pullFromCloud();
+      showApp();
+      startEntriesLiveSync();
+    } else {
+      showLoginScreen();
+    }
   });
 } else {
-  // Firebase didn't initialize (e.g. offline on first install before caching) —
-  // fall back to the app's original behaviour: boot straight in with local data.
-  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
   showApp();
 }
 
-// ---------- storage (Firestore, with a local cache as an offline fallback) ----------
-async function loadInvoices(){
-  if(db){
-    try{
-      const snap = await db.collection('nasirglass').doc('invoices').get();
-      const list = snap.exists ? (snap.data().list || []) : [];
-      try{ localStorage.setItem('nasirglass_invoices', JSON.stringify(list)); }catch(_){}
-      return list;
-    }catch(e){ /* fall through to local cache below */ }
-  }
-  try{
-    const v = localStorage.getItem('nasirglass_invoices');
-    return v ? JSON.parse(v) : [];
-  }catch(e){ return []; }
-}
-async function persistInvoices(list){
-  try{ localStorage.setItem('nasirglass_invoices', JSON.stringify(list)); }catch(_){}
-  if(db){
-    try{ await db.collection('nasirglass').doc('invoices').set({list}); }
-    catch(e){
-      console.error('Firestore save failed (invoices):', e);
-      showToast('⚠️ ক্লাউডে সেভ হয়নি: ' + (e.code || e.message || 'unknown error') + ' — এই ডিভাইসে সেভ আছে');
-    }
-  }
-}
-
-let editingInvoiceId = null; // set when editing a previously-saved invoice
-
-// ---------- Auto-sync to Dealer Dashboard + Ton Count — ONLY for invoices
-// dated on/after the "sealed" syncStartDate set in Settings. Invoices before
-// that date are left alone (they may already be entered by hand elsewhere,
-// so auto-adding them too would double them up). ----------
-const TONCOUNT_CATS = ['tempered','clear','colour','reflective','mirror'];
-
-async function pushInvoiceToDealer(inv){
-  const uid = await ensureDealerAuth();
-  if(!dealerDb || !uid) throw new Error('Dealer অ্যাকাউন্টে লগইন ব্যর্থ' + (dealerAuthLastError ? (': ' + (dealerAuthLastError.code || dealerAuthLastError.message || dealerAuthLastError)) : ''));
-  const gross = (inv.totals && inv.totals.amt) || 0;
-  const comm = inv.commission || {};
-  const pct1 = comm.pct1 || 0;
-  const pct2 = comm.pct2 || 0;
-  const less = pct1 ? Math.round(gross * pct1/100) : 0;
-  const bankPay = comm.bankPayment || 0;
-  const netTyped = comm.netPayable ? (parseFloat(comm.netPayable)||0) : 0;
-  const net = netTyped || Math.round(gross - less - bankPay);
-  const dateStr = inv.date || new Date().toISOString().slice(0,10);
-  const entry = {
-    sl: parseInt(String(inv.id).replace(/\D/g,''), 10) || Date.now(),
-    month: dateStr.slice(0,7), date: dateStr,
-    party: inv.name || '', code: inv.code || '',
-    do: inv.doNo || '',
-    gross: gross, less: less, net: net,
-    bankPay: bankPay, bankName: comm.bankName || '',
-    comm: pct1 ? (pct1 + (pct2 ? ('+'+pct2) : '')) : '',
-    cr: comm.cr || 0,
-    weight: (inv.totals && inv.totals.mt) || 0,
-    note: inv.note || '',
-    source: 'nasirglass', sourceInvoiceId: inv.id
-  };
-  const ref = dealerDb.collection('dealerDashboard').doc(uid);
-  await dealerDb.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const data = snap.exists ? snap.data() : {};
-    const entries = data.entries || [];
-    const idx = entries.findIndex(e=>e.sourceInvoiceId === inv.id);
-    if(idx>=0) entries[idx] = entry; else entries.push(entry);
-    tx.set(ref, { entries, customParties: data.customParties||[], customBanks: data.customBanks||[], updatedAt: Date.now() }, {merge:true});
-  });
-}
-
-async function removeInvoiceFromDealer(invId){
-  const uid = await ensureDealerAuth();
-  if(!dealerDb || !uid) throw new Error('Dealer অ্যাকাউন্টে লগইন ব্যর্থ' + (dealerAuthLastError ? (': ' + (dealerAuthLastError.code || dealerAuthLastError.message || dealerAuthLastError)) : ''));
-  const ref = dealerDb.collection('dealerDashboard').doc(uid);
-  await dealerDb.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
+// ---------- live auto-sync: keep this device's screen updated the instant
+// entries are saved/deleted from ANY device or app (e.g. Nasir Glass auto-sync), no reload needed ----------
+let entriesLiveUnsub = null;
+function startEntriesLiveSync(){
+  if(!db || entriesLiveUnsub) return;
+  entriesLiveUnsub = db.collection('toncount').doc('entries').onSnapshot(snap=>{
     if(!snap.exists) return;
-    const data = snap.data();
-    const entries = (data.entries||[]).filter(e=>e.sourceInvoiceId !== invId);
-    tx.set(ref, { entries, customParties: data.customParties||[], customBanks: data.customBanks||[], updatedAt: Date.now() }, {merge:true});
+    entries = snap.data().data || {};
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }catch(_){}
+    renderRecentList();
+    if(typeof renderMonth==='function') renderMonth();
+    if(typeof renderOverview==='function') renderOverview();
+  }, err=>console.error('toncount live sync error', err));
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+const EN_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+
+function pad2(n){ return n.toString().padStart(2,'0'); }
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+function fmt(n){
+  n = Number(n)||0;
+  return n.toFixed(2);
+}
+function entryTotal(e){
+  return CATS.reduce((s,c)=> s + (Number(e[c])||0), 0);
+}
+function monthKey(dateStr){ return dateStr.slice(0,7); }
+function monthEntries(ym){
+  return Object.keys(entries).filter(d => d.startsWith(ym)).sort();
+}
+function monthSums(ym){
+  const sums = {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
+  monthEntries(ym).forEach(d=>{
+    CATS.forEach(c => sums[c] += Number(entries[d][c])||0);
+  });
+  return sums;
+}
+function catColor(c){ return getComputedStyle(document.documentElement).getPropertyValue('--c-'+c).trim(); }
+
+function buildPaneStack(el, sums){
+  const total = CATS.reduce((s,c)=>s+sums[c],0);
+  el.innerHTML = '';
+  el.classList.toggle('empty', total<=0);
+  if(total<=0) return;
+  CATS.forEach(c=>{
+    if(sums[c]<=0) return;
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.style.background = `var(--c-${c})`;
+    seg.style.flex = (sums[c]/total).toFixed(4);
+    el.appendChild(seg);
   });
 }
 
-async function pushInvoiceToTonCount(inv, isDelete){
-  if(!db) return;
-  const ref = db.collection('toncount').doc('entries');
-  await db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const payload = snap.exists ? snap.data() : {};
-    const data = payload.data || {};
-    const autoContrib = payload.autoContrib || {};
-
-    const prev = autoContrib[inv.id];
-    if(prev){
-      const day = data[prev.date];
-      if(day) TONCOUNT_CATS.forEach(c=>{ day[c] = Math.max(0, (day[c]||0) - (prev[c]||0)); });
-      delete autoContrib[inv.id];
-    }
-
-    if(!isDelete){
-      const dateStr = inv.date || new Date().toISOString().slice(0,10);
-      const catTotals = {tempered:0, clear:0, colour:0, reflective:0, mirror:0};
-      (inv.rows||[]).forEach(r=>{
-        const mt = parseFloat(r.mt)||0;
-        if(mt<=0) return;
-        if(isTemperedCode(r.code)){ catTotals.tempered += mt; return; }
-        const {item} = splitCode(r.code);
-        const cat = categoryOf(item);
-        if(cat==='Clear') catTotals.clear += mt;
-        else if(cat==='Reflective') catTotals.reflective += mt;
-        else if(cat==='Mirror') catTotals.mirror += mt;
-        else catTotals.colour += mt;
-      });
-      const day = data[dateStr] || {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
-      TONCOUNT_CATS.forEach(c=>{ day[c] = (day[c]||0) + catTotals[c]; });
-      data[dateStr] = day;
-      autoContrib[inv.id] = Object.assign({date: dateStr}, catTotals);
-    }
-
-    tx.set(ref, { data, autoContrib }, {merge:true});
-  });
-}
-
-// true only when this invoice's date is on/after the sealed start date
-function isSyncEligible(dateStr){
-  return !!syncStartDate && !!dateStr && dateStr >= syncStartDate;
-}
-
-async function saveInvoice(){
-  const inv = gatherInvoice();
-  if(inv.rows.length===0){ showToast('অন্তত একটি আইটেম যোগ করুন'); return; }
-  const list = await loadInvoices();
-
-  // Warn before creating what looks like a duplicate of an already-saved
-  // invoice (same party + DO number + date) — easy to do by accident when
-  // re-opening an old invoice to check something and hitting Save again.
-  if(!editingInvoiceId){
-    const dup = list.find(x =>
-      ((inv.code||'').trim() || (inv.doNo||'').trim()) &&
-      (x.code||'').trim() === (inv.code||'').trim() &&
-      (x.doNo||'').trim() === (inv.doNo||'').trim() &&
-      (x.date||'') === (inv.date||'')
-    );
-    if(dup){
-      const ok = confirm(`⚠️ এই পার্টি, তারিখ ${dup.date}, DO ${dup.doNo||'-'} — এরকম একটা ইনভয়েস আগে থেকেই সেভ করা আছে (৳${Math.round((dup.totals&&dup.totals.amt)||0).toLocaleString('en-IN')})।\n\nআপনি কি তারপরও আরেকটা নতুন ইনভয়েস হিসেবে সেভ করতে চান?`);
-      if(!ok) return;
-    }
-  }
-
-  if(editingInvoiceId){
-    const idx = list.findIndex(x=>x.id===editingInvoiceId);
-    inv.id = editingInvoiceId;
-    if(idx>=0){ list[idx] = inv; } else { list.unshift(inv); }
-    editingInvoiceId = null;
-    await persistInvoices(list);
-    showToast('✅ ইনভয়েস আপডেট হয়েছে (সব ডিভাইসে)');
-  } else {
-    inv.id = 'INV-' + Date.now();
-    list.unshift(inv);
-    await persistInvoices(list);
-    showToast('✅ ইনভয়েস সেভ হয়েছে (সব ডিভাইসে)');
-  }
-  await refreshHistory();
-  if(isSyncEligible(inv.date)){
-    pushInvoiceToDealer(inv)
-      .then(()=>showToast('✅ ডিলার ড্যাশবোর্ডেও যোগ হয়েছে'))
-      .catch(e=>{ console.error('dealer sync failed', e); showToast('⚠️ ডিলার ড্যাশবোর্ডে সিঙ্ক ব্যর্থ: ' + (e && e.message ? e.message : e)); });
-    pushInvoiceToTonCount(inv, false).catch(e=>{ console.error('toncount sync failed', e); showToast('⚠️ Ton Count-এ সিঙ্ক ব্যর্থ: ' + (e && e.message ? e.message : e)); });
-  }
-}
-
-function editInvoice(){
-  if(!currentInvoice) return;
-  editingInvoiceId = currentInvoice.id || null;
-  document.getElementById('in-code').value = currentInvoice.code || '';
-  document.getElementById('in-name').value = currentInvoice.name || '';
-  document.getElementById('in-address').value = currentInvoice.address || '';
-  document.getElementById('in-mobile').value = currentInvoice.mobile || '';
-  document.getElementById('in-do').value = currentInvoice.doNo || '';
-  document.getElementById('in-date').value = currentInvoice.date || new Date().toISOString().slice(0,10);
-  rows = (currentInvoice.rows || []).map(r => ({ id: ++rowSeq, code: r.code, w: r.w, h: r.h, qty: r.qty }));
-  if(rows.length === 0) rows = [newRow()];
-  renderRows();
-  showToast('✏️ এডিট মোডে আছেন — পরিবর্তন করে "সেভ করুন" চাপুন');
-  goto('home');
-}
-
-async function editFromHistory(id){
-  const list = await loadInvoices();
-  const inv = list.find(x=>x.id===id);
-  if(!inv) return;
-  currentInvoice = inv;
-  editInvoice();
-}
-
-async function refreshHistory(){
-  const list = await loadInvoices();
-  document.getElementById('hist-count').textContent = list.length;
-  const box = document.getElementById('history-list');
-  if(list.length===0){
-    box.innerHTML = `<div class="empty"><div class="big">🗂</div>কোনো ইনভয়েস সংরক্ষিত নেই এখনও।<br>হোম থেকে একটি ইনভয়েস তৈরি করে সেভ করুন।</div>`;
-    return;
-  }
-  box.innerHTML = list.map(inv=>`
-    <div class="list-item">
-      <div>
-        <div class="who">${inv.name || 'নাম নেই'} <span style="color:#9aa7b0;font-weight:400;">(${inv.code||'-'})</span></div>
-        <div class="meta">${inv.date || ''} &nbsp;•&nbsp; DO: ${inv.doNo||'-'} &nbsp;•&nbsp; ${inv.rows.length} আইটেম</div>
-      </div>
-      <div style="display:flex;align-items:center;">
-        <span class="amt">৳ ${Math.round(inv.totals.amt).toLocaleString('en-IN')}</span>
-        <button class="btn btn-outline" style="margin-right:8px;" onclick="viewSaved('${inv.id}')">দেখুন / প্রিন্ট</button>
-        <button class="btn btn-ghost" style="margin-right:8px;" onclick="editFromHistory('${inv.id}')">✏️ এডিট</button>
-        <button class="btn btn-danger" onclick="deleteInvoice('${inv.id}')">মুছুন</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-async function viewSaved(id){
-  const list = await loadInvoices();
-  const inv = list.find(x=>x.id===id);
-  if(!inv) return;
-  renderInvoicePreview(inv);
-  setActiveView('invoice');
-}
-
-async function deleteInvoice(id){
-  if(!confirm('এই ইনভয়েসটি স্থায়ীভাবে মুছে ফেলবেন?')) return;
-  let list = await loadInvoices();
-  const inv = list.find(x=>x.id===id);
-  list = list.filter(x=>x.id!==id);
-  await persistInvoices(list);
-  showToast('🗑 মুছে ফেলা হয়েছে');
-  refreshHistory();
-  if(inv && isSyncEligible(inv.date)){
-    removeInvoiceFromDealer(id).catch(e=>{ console.error('dealer un-sync failed', e); showToast('⚠️ ডিলার ড্যাশবোর্ড থেকে মোছা যায়নি: ' + (e && e.message ? e.message : e)); });
-    pushInvoiceToTonCount({id}, true).catch(e=>{ console.error('toncount un-sync failed', e); showToast('⚠️ Ton Count থেকে মোছা যায়নি: ' + (e && e.message ? e.message : e)); });
-  }
-}
-
-function showToast(msg){
+function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  const duration = msg.length > 40 ? 5000 : 2200;
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(()=>t.classList.remove('show'), duration);
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=> t.classList.remove('show'), 1800);
 }
 
-// ---------- rate & party settings (persisted) ----------
-async function loadSettings(){
-  if(db){
-    try{
-      const sSnap = await db.collection('nasirglass').doc('syncSettings').get();
-      syncStartDate = sSnap.exists ? (sSnap.data().startDate || '') : '';
-      try{ localStorage.setItem('nasirglass_syncStartDate', syncStartDate); }catch(_){}
-    }catch(e){
-      try{ syncStartDate = localStorage.getItem('nasirglass_syncStartDate') || ''; }catch(_){ syncStartDate = ''; }
-    }
-    try{
-      const rSnap = await db.collection('nasirglass').doc('rateTable').get();
-      rateTable = rSnap.exists ? (rSnap.data().list || defaultRateTable.slice()) : defaultRateTable.slice();
-      try{ localStorage.setItem('nasirglass_rateTable', JSON.stringify(rateTable)); }catch(_){}
-    }catch(e){
-      try{ const v = localStorage.getItem('nasirglass_rateTable'); rateTable = v ? JSON.parse(v) : defaultRateTable.slice(); }
-      catch(_){ rateTable = defaultRateTable.slice(); }
-    }
-    try{
-      const pSnap = await db.collection('nasirglass').doc('partyList').get();
-      partyList = pSnap.exists ? (pSnap.data().list || defaultPartyList.slice()) : defaultPartyList.slice();
-      try{ localStorage.setItem('nasirglass_partyList', JSON.stringify(partyList)); }catch(_){}
-    }catch(e){
-      try{ const v = localStorage.getItem('nasirglass_partyList'); partyList = v ? JSON.parse(v) : defaultPartyList.slice(); }
-      catch(_){ partyList = defaultPartyList.slice(); }
-    }
+function waShare(text){
+  const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+}
+
+function shareTextForEntry(dateStr, e){
+  const d = new Date(dateStr+'T00:00:00');
+  const label = `${d.getDate()} ${BN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `*NASIR GLASS — TON COUNT*\n${label}\n\n`+
+    `Tempered : ${fmt(e.tempered)}\n`+
+    `Clear : ${fmt(e.clear)}\n`+
+    `Colour : ${fmt(e.colour)}\n`+
+    `Reflective : ${fmt(e.reflective)}\n`+
+    `Mirror : ${fmt(e.mirror)}\n`+
+    `Total Ton : ${fmt(entryTotal(e))}`;
+}
+function shareTextForMonth(ym){
+  const s = monthSums(ym);
+  const total = CATS.reduce((a,c)=>a+s[c],0);
+  const [y,m] = ym.split('-');
+  const label = `${BN_MONTHS[parseInt(m,10)-1]} ${y}`;
+  const days = monthEntries(ym).length;
+  return `*NASIR GLASS — MONTHLY TON COUNT*\n${label}  (${days} দিনের এন্ট্রি)\n\n`+
+    `Tempered : ${fmt(s.tempered)}\n`+
+    `Clear : ${fmt(s.clear)}\n`+
+    `Colour : ${fmt(s.colour)}\n`+
+    `Reflective : ${fmt(s.reflective)}\n`+
+    `Mirror : ${fmt(s.mirror)}\n`+
+    `Total Ton : ${fmt(total)}`;
+}
+function shareTextForYear(year){
+  let lines = [`*NASIR GLASS — YEARLY TON COUNT ${year}*`, ''];
+  let grand = {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
+  let grandTotal = 0;
+  for(let m=0;m<12;m++){
+    const ym = `${year}-${pad2(m+1)}`;
+    const s = monthSums(ym);
+    const t = CATS.reduce((a,c)=>a+s[c],0);
+    if(t<=0) continue;
+    grandTotal += t;
+    CATS.forEach(c=> grand[c]+=s[c]);
+    lines.push(`${BN_MONTHS[m]}: ${fmt(t)} টন`);
+  }
+  lines.push('');
+  lines.push(`Tempered : ${fmt(grand.tempered)}`);
+  lines.push(`Clear : ${fmt(grand.clear)}`);
+  lines.push(`Colour : ${fmt(grand.colour)}`);
+  lines.push(`Reflective : ${fmt(grand.reflective)}`);
+  lines.push(`Mirror : ${fmt(grand.mirror)}`);
+  lines.push(`Total Ton : ${fmt(grandTotal)}`);
+  return lines.join('\n');
+}
+
+/* ============================================================
+   TAB NAVIGATION
+   ============================================================ */
+const tabs = ['entry','month','overview'];
+function showTab(name){
+  tabs.forEach(t=>{
+    document.getElementById('screen-'+t).classList.toggle('active', t===name);
+  });
+  document.querySelectorAll('nav.tabbar button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab===name);
+  });
+  if(name==='month') renderMonth();
+  if(name==='overview') renderOverview();
+}
+document.querySelectorAll('nav.tabbar button').forEach(b=>{
+  b.addEventListener('click', ()=> showTab(b.dataset.tab));
+});
+
+/* ============================================================
+   ENTRY SCREEN
+   ============================================================ */
+const entryDateInput = document.getElementById('entryDate');
+const entryTotalEl = document.getElementById('entryTotal');
+const deleteRow = document.getElementById('deleteEntryRow');
+
+function loadEntryForm(dateStr){
+  const e = entries[dateStr] || {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
+  CATS.forEach(c=>{
+    const inp = document.getElementById('in-'+c);
+    inp.value = e[c] ? e[c] : '';
+  });
+  updateEntryTotal();
+  deleteRow.style.display = entries[dateStr] ? 'flex' : 'none';
+}
+function currentFormEntry(){
+  const e = {};
+  CATS.forEach(c=>{
+    e[c] = parseFloat(document.getElementById('in-'+c).value) || 0;
+  });
+  return e;
+}
+function updateEntryTotal(){
+  entryTotalEl.textContent = fmt(entryTotal(currentFormEntry()));
+}
+CATS.forEach(c=>{
+  document.getElementById('in-'+c).addEventListener('input', updateEntryTotal);
+});
+entryDateInput.addEventListener('change', ()=> loadEntryForm(entryDateInput.value));
+
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  const dateStr = entryDateInput.value || todayStr();
+  const e = currentFormEntry();
+  entries[dateStr] = e;
+  saveEntries();
+  toast('সেভ হয়েছে ✓');
+  deleteRow.style.display = 'flex';
+  renderRecentList();
+});
+document.getElementById('shareEntryBtn').addEventListener('click', ()=>{
+  const dateStr = entryDateInput.value || todayStr();
+  const e = entries[dateStr] || currentFormEntry();
+  waShare(shareTextForEntry(dateStr, e));
+});
+document.getElementById('deleteEntryBtn').addEventListener('click', ()=>{
+  const dateStr = entryDateInput.value;
+  if(!entries[dateStr]) return;
+  if(!confirm('এই তারিখের এন্ট্রি মুছে ফেলবেন?')) return;
+  delete entries[dateStr];
+  saveEntries();
+  loadEntryForm(dateStr);
+  renderRecentList();
+  toast('মুছে ফেলা হয়েছে');
+});
+
+function renderRecentList(){
+  const list = document.getElementById('recentList');
+  const dates = Object.keys(entries).sort().reverse().slice(0,6);
+  if(dates.length===0){
+    list.innerHTML = '<div class="empty-note">এখনও কোনো এন্ট্রি নেই — উপরে প্রথম এন্ট্রি যোগ করুন</div>';
     return;
   }
-  try{
-    const v = localStorage.getItem('nasirglass_rateTable');
-    rateTable = v ? JSON.parse(v) : defaultRateTable.slice();
-  }catch(e){ rateTable = defaultRateTable.slice(); }
-  try{
-    const v = localStorage.getItem('nasirglass_partyList');
-    partyList = v ? JSON.parse(v) : defaultPartyList.slice();
-  }catch(e){ partyList = defaultPartyList.slice(); }
-  try{ syncStartDate = localStorage.getItem('nasirglass_syncStartDate') || ''; }catch(_){ syncStartDate = ''; }
+  list.innerHTML = dates.map(d=>logItemHTML(d)).join('');
+  list.querySelectorAll('.log-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      entryDateInput.value = el.dataset.date;
+      loadEntryForm(el.dataset.date);
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
 }
-
-let syncStartDate = ''; // '' = auto-transfer to Dealer Dashboard / TON COUNT is off
-async function saveSyncStartDate(){
-  const val = document.getElementById('in-sync-start-date').value;
-  if(!val){ showToast('আগে একটা তারিখ বাছাই করো'); return; }
-  syncStartDate = val;
-  try{ localStorage.setItem('nasirglass_syncStartDate', syncStartDate); }catch(_){}
-  if(db){
-    try{ await db.collection('nasirglass').doc('syncSettings').set({ startDate: syncStartDate }, {merge:true}); }
-    catch(e){ showToast('⚠️ সেভ ব্যর্থ: ' + (e && e.message ? e.message : e)); return; }
-  }
-  renderSyncStartHint();
-  showToast('🔒 সিল করা হয়েছে — ' + syncStartDate + ' থেকে সব ইনভয়েস অটো-ট্রান্সফার হবে');
-}
-async function clearSyncStartDate(){
-  syncStartDate = '';
-  try{ localStorage.setItem('nasirglass_syncStartDate', ''); }catch(_){}
-  if(db){
-    try{ await db.collection('nasirglass').doc('syncSettings').set({ startDate: '' }, {merge:true}); }
-    catch(e){ showToast('⚠️ সেভ ব্যর্থ: ' + (e && e.message ? e.message : e)); return; }
-  }
-  renderSyncStartHint();
-  showToast('অটো-ট্রান্সফার বন্ধ করা হয়েছে');
-}
-function renderSyncStartHint(){
-  const input = document.getElementById('in-sync-start-date');
-  const hint = document.getElementById('sync-start-hint');
-  if(input) input.value = syncStartDate || '';
-  if(!hint) return;
-  hint.textContent = syncStartDate
-    ? `🔒 সিল করা আছে: ${syncStartDate} বা তার পরের ইনভয়েস সেভ/ডিলিট করলে Dealer Dashboard আর TON COUNT-এও যোগ/মুছে যাবে। এর আগের তারিখের ইনভয়েসে হাত দেওয়া হবে না।`
-    : 'এখনো কোনো তারিখ সিল করা নেই — অটো-ট্রান্সফার বন্ধ আছে।';
-}
-
-function renderRateSettings(){
-  const body = document.getElementById('rate-settings-body');
-  body.innerHTML = rateTable.map((r,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td><input value="${r.code}" oninput="updateRateField(${i},'code',this.value)"></td>
-      <td><input type="number" step="any" value="${r.rate}" oninput="updateRateField(${i},'rate',this.value)"></td>
-      <td><input type="number" step="any" value="${r.div}" oninput="updateRateField(${i},'div',this.value)"></td>
-      <td class="no-print"><button class="rm-row" onclick="removeRateRow(${i})">✕</button></td>
-    </tr>`).join('');
-}
-function updateRateField(i,field,val){
-  rateTable[i][field] = (field==='rate'||field==='div') ? (parseFloat(val)||0) : val;
-}
-function addRateRow(){ rateTable.push({code:'',rate:0,div:0}); renderRateSettings(); }
-function removeRateRow(i){ rateTable.splice(i,1); renderRateSettings(); }
-async function saveRates(){
-  try{ localStorage.setItem('nasirglass_rateTable', JSON.stringify(rateTable)); }catch(_){}
-  if(db){
-    try{ await db.collection('nasirglass').doc('rateTable').set({list: rateTable}); showToast('✅ দাম সেভ হয়েছে (সব ডিভাইসে)'); }
-    catch(e){
-      console.error('Firestore save failed (rateTable):', e);
-      showToast('⚠️ ক্লাউডে সেভ হয়নি: ' + (e.code || e.message || 'unknown error') + ' — এই ডিভাইসে সেভ আছে');
-    }
-  } else {
-    showToast('✅ দাম সেভ হয়েছে');
-  }
-  renderRows(); // refresh home table so new rates apply immediately
-}
-
-function renderPartySettings(){
-  const body = document.getElementById('party-settings-body');
-  body.innerHTML = partyList.map((p,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td><input value="${p.code}" oninput="updatePartyField(${i},'code',this.value)"></td>
-      <td><input value="${p.name}" oninput="updatePartyField(${i},'name',this.value)"></td>
-      <td><input value="${p.address}" oninput="updatePartyField(${i},'address',this.value)"></td>
-      <td><input value="${p.mobile}" oninput="updatePartyField(${i},'mobile',this.value)"></td>
-      <td class="no-print"><button class="rm-row" onclick="removePartyRow(${i})">✕</button></td>
-    </tr>`).join('');
-}
-function updatePartyField(i,field,val){ partyList[i][field] = val; }
-function addPartyRow(){ partyList.push({code:'',name:'',address:'',mobile:''}); renderPartySettings(); }
-function removePartyRow(i){ partyList.splice(i,1); renderPartySettings(); }
-async function saveParties(){
-  try{ localStorage.setItem('nasirglass_partyList', JSON.stringify(partyList)); }catch(_){}
-  if(db){
-    try{ await db.collection('nasirglass').doc('partyList').set({list: partyList}); showToast('✅ পার্টি তালিকা সেভ হয়েছে (সব ডিভাইসে)'); }
-    catch(e){
-      console.error('Firestore save failed (partyList):', e);
-      showToast('⚠️ ক্লাউডে সেভ হয়নি: ' + (e.code || e.message || 'unknown error') + ' — এই ডিভাইসে সেভ আছে');
-    }
-  } else {
-    showToast('✅ পার্টি তালিকা সেভ হয়েছে');
-  }
-  refreshPartyDatalist();
-}
-
-function renderSettingsView(){
-  renderRateSettings();
-  renderPartySettings();
-  renderSyncStartHint();
-}
-
-// ---------- navigation ----------
-function setActiveView(v){
-  document.getElementById('view-home').style.display = v==='home' ? '' : 'none';
-  document.getElementById('view-tempered').style.display = v==='tempered' ? '' : 'none';
-  document.getElementById('view-invoice').style.display = v==='invoice' ? '' : 'none';
-  document.getElementById('view-history').style.display = v==='history' ? '' : 'none';
-  document.getElementById('view-settings').style.display = v==='settings' ? '' : 'none';
-  document.getElementById('view-dashboard').style.display = v==='dashboard' ? '' : 'none';
-  document.getElementById('nav-home').classList.toggle('active', v==='home');
-  document.getElementById('nav-tempered').classList.toggle('active', v==='tempered');
-  document.getElementById('nav-invoice').classList.toggle('active', v==='invoice');
-  document.getElementById('nav-history').classList.toggle('active', v==='history');
-  document.getElementById('nav-settings').classList.toggle('active', v==='settings');
-  document.getElementById('nav-dashboard').classList.toggle('active', v==='dashboard');
-}
-
-let currentView = 'home';
-function goto(v){
-  currentView = v;
-  if(v==='invoice'){ renderInvoicePreview(gatherInvoice()); }
-  if(v==='history'){ refreshHistory(); }
-  if(v==='settings'){ renderSettingsView(); }
-  if(v==='dashboard'){ renderDashboard(); }
-  setActiveView(v);
-}
-
-// ---------- dashboard: overall summary + per-party ledger ----------
-async function renderDashboard(){
-  const list = await loadInvoices();
-  const totalCount = list.length;
-  const totalAmt = list.reduce((s,i)=>s + (i.totals ? i.totals.amt : 0), 0);
-  const totalSft = list.reduce((s,i)=>s + (i.totals ? i.totals.sft : 0), 0);
-  const uniqueParties = new Set(list.map(i=>i.code).filter(Boolean)).size;
-
-  const cardStyle = "background:#f6f8f9;border:1px solid var(--line);border-radius:9px;padding:14px;text-align:center;";
-  const numStyle = "font-family:'Roboto Mono',monospace;font-weight:700;font-size:20px;color:var(--navy);";
-  const lblStyle = "font-size:11.5px;color:var(--slate);margin-top:4px;";
-  document.getElementById('dash-summary').innerHTML = `
-    <div style="${cardStyle}"><div style="${numStyle}">${totalCount}</div><div style="${lblStyle}">মোট ইনভয়েস</div></div>
-    <div style="${cardStyle}"><div style="${numStyle}">৳ ${Math.round(totalAmt).toLocaleString('en-IN')}</div><div style="${lblStyle}">মোট বিক্রয় (টাকা)</div></div>
-    <div style="${cardStyle}"><div style="${numStyle}">${uniqueParties}</div><div style="${lblStyle}">মোট পার্টি</div></div>
-  `;
-
-  refreshPartyDatalist();
-  renderPartyLedger();
-}
-
-async function renderPartyLedger(){
-  const box = document.getElementById('ledger-result');
-  const raw = document.getElementById('ledger-code').value.trim();
-  if(!raw){ box.innerHTML = `<div class="hint">উপরে একটা পার্টি কোড লিখুন — তার সমস্ত ইনভয়েসের লেজার এখানে চলে আসবে।</div>`; return; }
-  const fromDate = document.getElementById('ledger-from').value;
-  const toDate = document.getElementById('ledger-to').value;
-  const p = findParty(raw);
-  const list = await loadInvoices();
-  const norm = s => (s||'').toString().trim().replace(/^0+(?=\d)/,'').toLowerCase();
-  let matches = list.filter(inv => p ? norm(inv.code)===norm(p.code) : norm(inv.code)===norm(raw));
-  if(fromDate) matches = matches.filter(inv => (inv.date||'') >= fromDate);
-  if(toDate) matches = matches.filter(inv => (inv.date||'') <= toDate);
-
-  if(matches.length===0){
-    box.innerHTML = `<div class="empty"><div class="big">📭</div>${fromDate||toDate ? 'এই তারিখের মধ্যে এই কোডে কোনো ইনভয়েস পাওয়া যায়নি।' : 'এই কোডে কোনো সংরক্ষিত ইনভয়েস পাওয়া যায়নি।'}</div>`;
-    return;
-  }
-  const partyName = matches[0].name || (p ? p.name : raw);
-  const total = matches.reduce((s,i)=>s + (i.totals ? i.totals.amt : 0), 0);
-  const rowsHtml = matches
-    .slice()
-    .sort((a,b)=> (b.date||'').localeCompare(a.date||''))
-    .map(inv=>`
-      <div class="list-item">
-        <div>
-          <div class="who">${inv.date || '-'} <span style="color:#9aa7b0;font-weight:400;">(DO: ${inv.doNo||'-'})</span></div>
-          <div class="meta">${(inv.rows||[]).length} আইটেম</div>
-        </div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
-          <span class="amt">৳ ${Math.round(inv.totals ? inv.totals.amt : 0).toLocaleString('en-IN')}</span>
-          <button class="btn btn-outline" onclick="viewSaved('${inv.id}')">দেখুন / প্রিন্ট</button>
-          <button class="btn btn-ghost" onclick="editFromHistory('${inv.id}')">✏️ এডিট</button>
-        </div>
-      </div>
-    `).join('');
-
-  box.innerHTML = `
-    <div style="margin-bottom:10px;"><span class="who" style="font-size:16px;">${partyName}</span> <span style="color:var(--slate);font-size:13px;">— ${matches.length} টি ইনভয়েস</span></div>
-    ${rowsHtml}
-    <div class="totals" style="margin-top:10px;">
-      <table><tr class="grand"><td>সর্বমোট লেনদেন</td><td>৳ ${Math.round(total).toLocaleString('en-IN')}</td></tr></table>
+function logItemHTML(d){
+  const e = entries[d];
+  const total = entryTotal(e);
+  const dt = new Date(d+'T00:00:00');
+  const catStr = CATS.filter(c=>e[c]>0).map(c=>`${CAT_LABEL[c][0]}:${fmt(e[c])}`).join('  ');
+  let segs = '';
+  CATS.forEach(c=>{
+    if(e[c]>0){ segs += `<div class="seg" style="background:var(--c-${c});flex:${(e[c]/total).toFixed(4)}"></div>`; }
+  });
+  return `<div class="log-item" data-date="${d}">
+    <div class="date"><div class="d">${dt.getDate()}</div><div class="m">${EN_MONTHS[dt.getMonth()]}</div></div>
+    <div class="mid">
+      <div class="mini-stack">${segs}</div>
+      <div class="cats">${catStr || 'কোনো ডেটা নেই'}</div>
     </div>
-  `;
+    <div class="total">${fmt(total)}</div>
+  </div>`;
 }
 
-async function boot(){
-  await loadSettings();
-  initForm();
-  setActiveView('home');
-  refreshHistory();
-}
-</script>
+/* ============================================================
+   MONTH SCREEN
+   ============================================================ */
+let currentYM = todayStr().slice(0,7);
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+function renderMonth(){
+  const [y,m] = currentYM.split('-').map(Number);
+  document.getElementById('monthLabel').textContent = BN_MONTHS[m-1];
+  document.getElementById('monthSub').textContent = y;
+
+  const sums = monthSums(currentYM);
+  buildPaneStack(document.getElementById('monthPaneStack'), sums);
+
+  const legend = document.getElementById('monthLegend');
+  legend.innerHTML = CATS.map(c=>`<span><span class="dot" style="background:var(--c-${c})"></span>${CAT_LABEL[c]}</span>`).join('');
+
+  const total = CATS.reduce((a,c)=>a+sums[c],0);
+  document.getElementById('monthSummary').innerHTML = CATS.map(c=>`
+    <div class="summary-row">
+      <span class="k"><span class="dot" style="background:var(--c-${c})"></span>${CAT_LABEL[c]}</span>
+      <span class="v">${fmt(sums[c])}</span>
+    </div>`).join('') + `
+    <div class="summary-row total">
+      <span class="k">Total Ton</span>
+      <span class="v">${fmt(total)}</span>
+    </div>`;
+
+  const dates = monthEntries(currentYM).slice().reverse();
+  document.getElementById('monthLogCount').textContent = dates.length;
+  const logEl = document.getElementById('monthLog');
+  if(dates.length===0){
+    logEl.innerHTML = '<div class="empty-note">এই মাসে কোনো এন্ট্রি নেই</div>';
+  }else{
+    logEl.innerHTML = dates.map(d=>logItemHTML(d)).join('');
+    logEl.querySelectorAll('.log-item').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        showTab('entry');
+        entryDateInput.value = el.dataset.date;
+        loadEntryForm(el.dataset.date);
+      });
+    });
+  }
+}
+document.getElementById('monthPrev').addEventListener('click', ()=>{ shiftMonth(-1); });
+document.getElementById('monthNext').addEventListener('click', ()=>{ shiftMonth(1); });
+function shiftMonth(delta){
+  let [y,m] = currentYM.split('-').map(Number);
+  m += delta;
+  if(m<1){ m=12; y--; } if(m>12){ m=1; y++; }
+  currentYM = `${y}-${pad2(m)}`;
+  renderMonth();
+}
+document.getElementById('shareMonthBtn').addEventListener('click', ()=>{
+  waShare(shareTextForMonth(currentYM));
+});
+
+/* ============================================================
+   OVERVIEW SCREEN
+   ============================================================ */
+let currentYear = parseInt(todayStr().slice(0,4),10);
+
+function renderOverview(){
+  document.getElementById('yearLabel').textContent = currentYear;
+  let grandTotal = 0;
+  let html = '';
+  for(let m=0;m<12;m++){
+    const ym = `${currentYear}-${pad2(m+1)}`;
+    const sums = monthSums(ym);
+    const total = CATS.reduce((a,c)=>a+sums[c],0);
+    grandTotal += total;
+    const isZero = total<=0;
+    html += `<div class="month-card ${isZero?'zero':''}">
+      <div class="row-between">
+        <span class="mname">${BN_MONTHS[m]}</span>
+        <span class="mtotal">${isZero? '—' : fmt(total)+' টন'}</span>
+      </div>
+      <div class="pill-row">
+        ${CATS.map(c=>`<span class="pill ${sums[c]>0?'has':''}">${CAT_LABEL[c]} ${sums[c]>0?fmt(sums[c]):'–'}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+  document.getElementById('monthsOverview').innerHTML = html;
+  document.getElementById('yearTotal').textContent = fmt(grandTotal);
+}
+document.getElementById('yearPrev').addEventListener('click', ()=>{ currentYear--; renderOverview(); });
+document.getElementById('yearNext').addEventListener('click', ()=>{ currentYear++; renderOverview(); });
+document.getElementById('shareYearBtn').addEventListener('click', ()=>{
+  waShare(shareTextForYear(currentYear));
+});
+
+/* ============================================================
+   MENU SHEET
+   ============================================================ */
+const sheet = document.getElementById('menuSheet');
+const backdrop = document.getElementById('sheetBackdrop');
+function openSheet(){ sheet.classList.add('show'); backdrop.classList.add('show'); }
+function closeSheet(){ sheet.classList.remove('show'); backdrop.classList.remove('show'); }
+document.getElementById('menuBtn').addEventListener('click', openSheet);
+backdrop.addEventListener('click', closeSheet);
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(entries, null, 1)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `ton-count-backup-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  closeSheet();
+  toast('ব্যাকআপ ডাউনলোড হয়েছে');
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  closeSheet();
+  if(!confirm('সব ডেটা স্থায়ীভাবে মুছে ফেলা হবে। আপনি কি নিশ্চিত?')) return;
+  entries = {};
+  localStorage.removeItem(STORE_KEY);
+  localStorage.removeItem(SEED_FLAG);
+  saveEntries();
+  loadEntryForm(entryDateInput.value);
+  renderRecentList();
+  toast('সব ডেটা মুছে ফেলা হয়েছে');
+});
+
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstall = e;
+});
+document.getElementById('installBtn').addEventListener('click', async ()=>{
+  closeSheet();
+  if(deferredInstall){
+    deferredInstall.prompt();
+    await deferredInstall.userChoice;
+    deferredInstall = null;
+  }else{
+    toast('ব্রাউজার মেনু থেকে "Add to Home Screen" ব্যবহার করুন');
+  }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function boot(){
+  entryDateInput.value = todayStr();
+  loadEntryForm(todayStr());
+  renderRecentList();
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
   });
 }
 </script>
