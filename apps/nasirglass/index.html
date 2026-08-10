@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>NGIL</title>
+<meta name="theme-color" content="#0f1720">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+  :root{
+    --bg:#0f1720; --panel:#182432; --panel2:#1e2c3d;
+    --text:#eef3f8; --muted:#8fa2b8; --line:#26364a;
+    --c1:#e8a33d; --c2:#bfe9e2; --c3:#4aa98c; --c4:#4a86d8; --c5:#c3c9cf;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  #app{position:fixed;inset:0;display:flex;flex-direction:column;}
+
+  /* BOOT / LOGIN */
+  #boot-check{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;color:var(--muted);font-size:14px;}
+  #login-screen{position:fixed;inset:0;background:var(--bg);z-index:9998;display:flex;align-items:center;justify-content:center;padding:24px;}
+  #login-screen.hidden, #boot-check.hidden{display:none !important;}
+  .login-box{width:100%;max-width:360px;}
+  .login-logo{text-align:center;margin-bottom:30px;}
+  .login-logo img{width:76px;height:76px;border-radius:20px;margin-bottom:10px;}
+  .login-logo .t1{font-size:19px;font-weight:700;}
+  .login-logo .t2{font-size:13px;color:var(--muted);margin-top:4px;}
+  .login-box input{
+    width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;
+    border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;
+  }
+  .login-box .err{color:#e0776b;font-size:13px;min-height:18px;margin-bottom:6px;}
+  .login-box button.primary{
+    width:100%;padding:13px;border:none;border-radius:12px;
+    background:var(--c4);color:#fff;font-size:15px;font-weight:700;
+  }
+  .login-box .switch{text-align:center;margin-top:16px;font-size:13px;color:var(--muted);}
+  .login-box .switch a{color:var(--c4);text-decoration:none;}
+
+  /* HOME SCREEN */
+  #home{flex:1;overflow-y:auto;padding:max(20px,env(safe-area-inset-top)) 18px 100px;}
+  #home .headrow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  #home h1{font-size:20px;margin:6px 4px 4px;font-weight:700;}
+  #home p.sub{margin:0 4px 20px;color:var(--muted);font-size:13px;}
+  #logout-link{background:none;border:none;color:var(--muted);font-size:12.5px;padding:8px 4px;text-decoration:underline;}
+  .cards{display:flex;flex-direction:column;gap:14px;}
+  .card{
+    background:linear-gradient(145deg,var(--panel2),var(--panel));
+    border:1px solid var(--line); border-radius:18px; padding:18px;
+    display:flex; align-items:center; gap:14px; cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .card:active{transform:scale(0.97);}
+  .card .icon{
+    width:52px;height:52px;border-radius:14px;flex:0 0 52px;
+    overflow:hidden; background:#111a24;
+  }
+  .card .icon img{display:block;width:100%;height:100%;object-fit:cover;}
+  .card .meta{flex:1;min-width:0;}
+  .card .meta .name{font-weight:700;font-size:16px;margin-bottom:3px;}
+  .card .meta .desc{font-size:12.5px;color:var(--muted);}
+  .card .chev{color:var(--muted);font-size:20px;}
+
+  /* APP VIEW */
+  .appview{position:fixed;left:0;right:0;top:0;bottom:64px;background:#fff;display:none;flex-direction:column;z-index:20;}
+  .appview.active{display:flex;}
+  .appview iframe{flex:1;width:100%;border:none;background:#fff;}
+
+  /* BOTTOM NAV (always visible once logged in — lets you jump between apps directly) */
+  #bottomnav{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    display:flex;background:var(--panel);border-top:1px solid var(--line);
+    padding:8px 6px max(8px,env(safe-area-inset-bottom));
+  }
+  #bottomnav button{
+    flex:1;background:none;border:none;color:var(--muted);
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:11px;padding:6px 2px;border-radius:12px;
+  }
+  #bottomnav button img{width:22px;height:22px;border-radius:6px;opacity:.75;}
+  #bottomnav button.active{color:var(--c4);background:rgba(74,134,216,.12);}
+  #bottomnav button.active img{opacity:1;}
+
+  /* FINGERPRINT LOCK SCREEN */
+  #fp-lock-screen{position:fixed;inset:0;background:var(--bg);z-index:9997;display:flex;align-items:center;justify-content:center;padding:24px;}
+  #fp-lock-screen.hidden{display:none !important;}
+  .fp-box{width:100%;max-width:340px;text-align:center;}
+  .fp-box img{width:64px;height:64px;border-radius:16px;margin-bottom:14px;}
+  .fp-box .fp-title{font-size:17px;font-weight:700;margin-bottom:4px;}
+  .fp-box .fp-sub{font-size:13px;color:var(--muted);margin-bottom:26px;}
+  .fp-btn{
+    width:92px;height:92px;border-radius:50%;border:2px solid var(--c4);background:rgba(74,134,216,.12);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 20px;cursor:pointer;
+  }
+  .fp-btn svg{width:42px;height:42px;}
+  .fp-box .fp-err{color:#e0776b;font-size:13px;min-height:18px;margin-bottom:10px;}
+  .fp-box .fp-alt{background:none;border:none;color:var(--c4);font-size:13px;text-decoration:underline;padding:8px;}
+
+  /* Small toggle link shown on the home screen to turn fingerprint unlock on/off */
+  #fp-toggle-link{background:none;border:none;color:var(--muted);font-size:12.5px;padding:8px 4px;text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div id="boot-check">লোড হচ্ছে…</div>
+
+<div id="fp-lock-screen" class="hidden">
+  <div class="fp-box">
+    <img src="icon-192.png" alt="">
+    <div class="fp-title">NGIL লক করা আছে</div>
+    <div class="fp-sub">ঢোকার জন্য ফিঙ্গারপ্রিন্ট দিন</div>
+    <div class="fp-btn" id="fp-unlock-btn" onclick="unlockWithFingerprint(false)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4a86d8" stroke-width="1.6"><path d="M12 2a7 7 0 0 0-7 7c0 2.5.5 4.5 1.2 6M12 2a7 7 0 0 1 7 7c0 1.2-.1 2.2-.3 3.1M8 9a4 4 0 0 1 8 0c0 3.5 1 6.5 2.3 9M12 9a3 3 0 0 0-3 3c0 3-1 6-2.7 8M12 9a3 3 0 0 1 3 3c0 1-.1 2-.3 3M9 20a9 9 0 0 0 1.5-3"/></svg>
+    </div>
+    <div class="fp-err" id="fp-lock-err"></div>
+    <button class="fp-alt" id="fp-use-password-btn" onclick="fallbackToPasswordLogin()">পাসওয়ার্ড দিয়ে ঢুকুন</button>
+  </div>
+</div>
+
+<div id="login-screen" class="hidden">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="icon-192.png" alt="">
+      <div class="t1">NGIL</div>
+      <div class="t2">একটাই লগইন — Nasir Glass, ডিস্ট্রিবিউটর ড্যাশবোর্ড ও TON COUNT</div>
+    </div>
+
+    <div id="login-form">
+      <input type="email" id="login-email" placeholder="ইমেইল">
+      <input type="password" id="login-pass" placeholder="পাসওয়ার্ড">
+      <div class="err" id="login-err"></div>
+      <button class="primary" id="login-btn" onclick="doLogin()">লগইন করুন</button>
+      <div class="switch">অ্যাকাউন্ট নেই? <a href="#" onclick="showSignup();return false;">তৈরি করুন</a></div>
+    </div>
+
+    <div id="signup-form" style="display:none;">
+      <input type="email" id="signup-email" placeholder="ইমেইল">
+      <input type="password" id="signup-pass" placeholder="পাসওয়ার্ড (অন্তত ৬ অক্ষর)">
+      <input type="password" id="signup-pass2" placeholder="পাসওয়ার্ড আবার লিখুন">
+      <div class="err" id="signup-err"></div>
+      <button class="primary" id="signup-btn" onclick="doSignup()">অ্যাকাউন্ট তৈরি করুন</button>
+      <div class="switch">আগে থেকে অ্যাকাউন্ট আছে? <a href="#" onclick="showLogin();return false;">লগইন করুন</a></div>
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+
+  <!-- HOME -->
+  <div id="home">
+    <div class="headrow">
+      <div>
+        <h1>NGIL</h1>
+        <p class="sub">সব অ্যাপ এক জায়গায় — যেটা লাগবে সেটাতে ট্যাপ করুন</p>
+      </div>
+      <button id="logout-link" onclick="doLogout()">লগআউট</button>
+    </div>
+    <button id="fp-toggle-link" onclick="toggleFingerprintSetting()">ফিঙ্গারপ্রিন্ট লক চালু করুন</button>
+
+    <div class="cards">
+      <div class="card" onclick="openApp('nasirglass')">
+        <div class="icon"><img src="apps/nasirglass/icon-192.png" alt=""></div>
+        <div class="meta">
+          <div class="name">Nasir Glass</div>
+          <div class="desc">অর্ডার, ইনভয়েস, কমিশন হিসাব</div>
+        </div>
+        <div class="chev">›</div>
+      </div>
+
+      <div class="card" onclick="openApp('dealer')">
+        <div class="icon"><img src="apps/dealer/icon-192.png" alt=""></div>
+        <div class="meta">
+          <div class="name">Dealer</div>
+          <div class="desc">পার্টি হিসাব, স্টেটমেন্ট, লেনদেন</div>
+        </div>
+        <div class="chev">›</div>
+      </div>
+
+      <div class="card" onclick="openApp('toncount')">
+        <div class="icon"><img src="apps/toncount/icon-192.png" alt=""></div>
+        <div class="meta">
+          <div class="name">TON COUNT</div>
+          <div class="desc">টন হিসাব / এন্ট্রি</div>
+        </div>
+        <div class="chev">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP VIEWS (iframes kept alive so data isn't lost when switching) -->
+  <div class="appview" id="view-nasirglass">
+    <iframe id="frame-nasirglass" src="apps/nasirglass/index.html"></iframe>
+  </div>
+
+  <div class="appview" id="view-dealer">
+    <iframe id="frame-dealer" src="apps/dealer/index.html"></iframe>
+  </div>
+
+  <div class="appview" id="view-toncount">
+    <iframe id="frame-toncount" src="apps/toncount/index.html"></iframe>
+  </div>
+
+  <!-- PERSISTENT BOTTOM NAV -->
+  <div id="bottomnav">
+    <button id="nav-home" onclick="openApp('home')">
+      <img src="icon-192.png" alt="">
+      হোম
+    </button>
+    <button id="nav-nasirglass" onclick="openApp('nasirglass')">
+      <img src="apps/nasirglass/icon-192.png" alt="">
+      Nasir Glass
+    </button>
+    <button id="nav-dealer" onclick="openApp('dealer')">
+      <img src="apps/dealer/icon-192.png" alt="">
+      Dealer
+    </button>
+    <button id="nav-toncount" onclick="openApp('toncount')">
+      <img src="apps/toncount/icon-192.png" alt="">
+      TON COUNT
+    </button>
+  </div>
+
+</div>
+
+<script>
+  /* ---------------- Firebase (shared login for all three apps) ---------------- */
+  const firebaseConfig = {
+    apiKey: "AIzaSyAW72RV5Bt9zOZlwBkfneh3ulIZWSuhgtU",
+    authDomain: "nasir-glass-3edec.firebaseapp.com",
+    projectId: "nasir-glass-3edec",
+    storageBucket: "nasir-glass-3edec.firebasestorage.app",
+    messagingSenderId: "234065972210",
+    appId: "1:234065972210:web:0fea8c849e98901377396b",
+    measurementId: "G-78F0FG0D51"
+  };
+  let auth = null;
+  let db = null;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+  }catch(e){ console.error('Firebase init failed', e); }
+
+  function showApp(){
+    document.getElementById('boot-check').classList.add('hidden');
+    document.getElementById('login-screen').classList.add('hidden');
+    if(sessionStorage.getItem('ng_hub_skip_fp_once')){
+      sessionStorage.removeItem('ng_hub_skip_fp_once');
+      revealAppNow();
+      return;
+    }
+    if(isFingerprintEnabled()){
+      showFpLockScreen();
+    } else {
+      revealAppNow();
+    }
+  }
+  function revealAppNow(){
+    document.getElementById('fp-lock-screen').classList.add('hidden');
+    document.getElementById('app').style.display = 'flex';
+    openApp('home');
+    updateFpToggleLabel();
+    loadOverview();
+  }
+  function showFpLockScreen(){
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('fp-lock-err').textContent = '';
+    document.getElementById('fp-lock-screen').classList.remove('hidden');
+    // try once automatically — on many phones this pops the fingerprint/Face ID
+    // prompt right away; if the browser blocks it without a fresh tap, fail
+    // silently here (no red error) — the person just taps the button below.
+    unlockWithFingerprint(true);
+  }
+  function showLoginScreen(){
+    document.getElementById('boot-check').classList.add('hidden');
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('fp-lock-screen').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+  function showLogin(){
+    document.getElementById('signup-form').style.display = 'none';
+    document.getElementById('login-form').style.display = '';
+    document.getElementById('signup-err').textContent = '';
+  }
+  function showSignup(){
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('signup-form').style.display = '';
+    document.getElementById('login-err').textContent = '';
+  }
+  async function doLogin(){
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value;
+    const errBox = document.getElementById('login-err');
+    const btn = document.getElementById('login-btn');
+    errBox.textContent = '';
+    if(!email || !pass){ errBox.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
+    btn.disabled = true; btn.textContent = 'লগইন হচ্ছে...';
+    try{ await auth.signInWithEmailAndPassword(email, pass); }
+    catch(e){ errBox.textContent = loginErrorMessage(e); }
+    finally{ btn.disabled = false; btn.textContent = 'লগইন করুন'; }
+  }
+  async function doSignup(){
+    const email = document.getElementById('signup-email').value.trim();
+    const pass = document.getElementById('signup-pass').value;
+    const pass2 = document.getElementById('signup-pass2').value;
+    const errBox = document.getElementById('signup-err');
+    const btn = document.getElementById('signup-btn');
+    errBox.textContent = '';
+    if(!email || !pass){ errBox.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
+    if(pass.length < 6){ errBox.textContent = 'পাসওয়ার্ড অন্তত ৬ অক্ষর হতে হবে'; return; }
+    if(pass !== pass2){ errBox.textContent = 'দুই পাসওয়ার্ড মিলছে না'; return; }
+    btn.disabled = true; btn.textContent = 'তৈরি হচ্ছে...';
+    try{ await auth.createUserWithEmailAndPassword(email, pass); }
+    catch(e){ errBox.textContent = loginErrorMessage(e); }
+    finally{ btn.disabled = false; btn.textContent = 'অ্যাকাউন্ট তৈরি করুন'; }
+  }
+  function loginErrorMessage(e){
+    const code = e && e.code || '';
+    if(code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'ইমেইল বা পাসওয়ার্ড ভুল';
+    if(code.includes('invalid-email')) return 'সঠিক ইমেইল দিন';
+    if(code.includes('email-already-in-use')) return 'এই ইমেইলে আগে থেকে অ্যাকাউন্ট আছে — লগইন করুন';
+    if(code.includes('weak-password')) return 'পাসওয়ার্ড খুব দুর্বল';
+    if(code.includes('network-request-failed')) return 'ইন্টারনেট সংযোগ পাওয়া যাচ্ছে না';
+    if(code.includes('too-many-requests')) return 'অনেকবার চেষ্টা হয়েছে, একটু পর আবার চেষ্টা করুন';
+    return 'কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন';
+  }
+  async function doLogout(){
+    if(!confirm('আপনি কি লগআউট করতে চান?')) return;
+    try{ await auth.signOut(); }catch(e){}
+  }
+
+  /* ---------------- Fingerprint / Face unlock (WebAuthn, device-based) ----------------
+     This does NOT replace Firebase login — it's an extra lock screen shown every
+     time the Hub is opened, so the phone's fingerprint/Face sensor is required
+     before the already-logged-in dashboard is revealed. The credential is tied
+     to this device+browser, so each phone needs its own one-time setup. */
+  const FP_CRED_KEY = 'ng_hub_fp_cred_id';
+
+  function isFingerprintEnabled(){
+    return !!localStorage.getItem(FP_CRED_KEY);
+  }
+  function b64urlToBuf(b64url){
+    const pad = '='.repeat((4 - b64url.length % 4) % 4);
+    const b64 = (b64url + pad).replace(/-/g,'+').replace(/_/g,'/');
+    const str = atob(b64);
+    const buf = new Uint8Array(str.length);
+    for(let i=0;i<str.length;i++) buf[i] = str.charCodeAt(i);
+    return buf.buffer;
+  }
+  function bufToB64url(buf){
+    const bytes = new Uint8Array(buf);
+    let str = '';
+    for(let i=0;i<bytes.length;i++) str += String.fromCharCode(bytes[i]);
+    return btoa(str).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  async function isPlatformAuthenticatorAvailable(){
+    if(!window.PublicKeyCredential || !navigator.credentials) return false;
+    try{ return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); }
+    catch(e){ return false; }
+  }
+  async function registerFingerprint(){
+    const available = await isPlatformAuthenticatorAvailable();
+    if(!available){
+      alert('এই ডিভাইস বা ব্রাউজারে ফিঙ্গারপ্রিন্ট/ফেস আনলক সাপোর্ট পাওয়া যায়নি।');
+      return;
+    }
+    try{
+      const challenge = crypto.getRandomValues(new Uint8Array(32));
+      const userId = crypto.getRandomValues(new Uint8Array(16));
+      const label = (auth.currentUser && auth.currentUser.email) || 'user';
+      const cred = await navigator.credentials.create({
+        publicKey:{
+          challenge,
+          rp:{ name:'NGIL' },
+          user:{ id:userId, name:label, displayName:label },
+          pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+          authenticatorSelection:{ authenticatorAttachment:'platform', userVerification:'required' },
+          timeout:60000
+        }
+      });
+      localStorage.setItem(FP_CRED_KEY, bufToB64url(cred.rawId));
+      updateFpToggleLabel();
+      alert('ফিঙ্গারপ্রিন্ট লক চালু হয়েছে — এখন থেকে অ্যাপ খুললে ফিঙ্গারপ্রিন্ট চাইবে।');
+    }catch(e){
+      console.error(e);
+      alert('ফিঙ্গারপ্রিন্ট সেটআপ করা যায়নি। আবার চেষ্টা করুন।');
+    }
+  }
+  function disableFingerprint(){
+    localStorage.removeItem(FP_CRED_KEY);
+    updateFpToggleLabel();
+    alert('ফিঙ্গারপ্রিন্ট লক বন্ধ করা হয়েছে।');
+  }
+  async function toggleFingerprintSetting(){
+    if(isFingerprintEnabled()){
+      if(confirm('ফিঙ্গারপ্রিন্ট লক বন্ধ করতে চান?')) disableFingerprint();
+    } else {
+      await registerFingerprint();
+    }
+  }
+  function updateFpToggleLabel(){
+    const btn = document.getElementById('fp-toggle-link');
+    if(!btn) return;
+    btn.textContent = isFingerprintEnabled() ? 'ফিঙ্গারপ্রিন্ট লক বন্ধ করুন' : 'ফিঙ্গারপ্রিন্ট লক চালু করুন';
+  }
+  async function unlockWithFingerprint(silent){
+    const errBox = document.getElementById('fp-lock-err');
+    const credIdB64 = localStorage.getItem(FP_CRED_KEY);
+    if(!credIdB64){ revealAppNow(); return; }
+    try{
+      const challenge = crypto.getRandomValues(new Uint8Array(32));
+      await navigator.credentials.get({
+        publicKey:{
+          challenge,
+          allowCredentials:[{ id:b64urlToBuf(credIdB64), type:'public-key' }],
+          userVerification:'required',
+          timeout:60000
+        }
+      });
+      revealAppNow();
+    }catch(e){
+      console.error(e);
+      if(!silent && errBox) errBox.textContent = 'ফিঙ্গারপ্রিন্ট মেলেনি বা বাতিল হয়েছে — আবার চেষ্টা করুন';
+    }
+  }
+  async function fallbackToPasswordLogin(){
+    sessionStorage.setItem('ng_hub_skip_fp_once','1');
+    document.getElementById('fp-lock-screen').classList.add('hidden');
+    try{ await auth.signOut(); }catch(e){}
+  }
+
+  if(auth){
+    auth.onAuthStateChanged(user => {
+      if(user){ showApp(); }
+      else{ showLoginScreen(); }
+    });
+  } else {
+    // Firebase failed to load (e.g. offline) — fall back to using the app without cloud login
+    showApp();
+  }
+
+  /* ---------------- Home screen overview: total money + party + ton, in one place ---------------- */
+  const TONCAT_LABELS = {tempered:'Tempered', clear:'Clear', colour:'Colour', reflective:'Reflective', mirror:'Mirror'};
+  window._overviewData = null;
+
+  async function loadOverview(){
+    const body = document.getElementById('overview-body');
+    if(!body) return;
+    if(!db || !auth || !auth.currentUser){ body.textContent = 'লোড করা যায়নি — একটু পর আবার চেষ্টা করুন'; return; }
+    body.textContent = 'লোড হচ্ছে…';
+    try{
+      const uid = auth.currentUser.uid;
+      const [dealerSnap, tonSnap] = await Promise.all([
+        db.collection('dealerDashboard').doc(uid).get(),
+        db.collection('toncount').doc('entries').get()
+      ]);
+      const entries = dealerSnap.exists ? (dealerSnap.data().entries || []) : [];
+      const tonData = tonSnap.exists ? (tonSnap.data().data || {}) : {};
+
+      const ym = new Date().toISOString().slice(0,7); // "YYYY-MM"
+      const monthEntries = entries.filter(e => (e.date||'').slice(0,7) === ym);
+      const grossMonth = monthEntries.reduce((s,e)=>s+(e.gross||0),0);
+      const netMonth = monthEntries.reduce((s,e)=>s+(e.net||0),0);
+      const grossAll = entries.reduce((s,e)=>s+(e.gross||0),0);
+
+      const byParty = {};
+      monthEntries.forEach(e=>{
+        const key = e.code || e.party || '-';
+        if(!byParty[key]) byParty[key] = {name: e.party||key, code:e.code||'', gross:0, net:0};
+        byParty[key].gross += (e.gross||0);
+        byParty[key].net += (e.net||0);
+      });
+      const topParties = Object.values(byParty).sort((a,b)=>b.gross-a.gross).slice(0,5);
+
+      const tonCats = {tempered:0, clear:0, colour:0, reflective:0, mirror:0};
+      Object.keys(tonData).forEach(dateStr=>{
+        if(dateStr.slice(0,7) !== ym) return;
+        const day = tonData[dateStr] || {};
+        Object.keys(tonCats).forEach(c=> tonCats[c] += (day[c]||0));
+      });
+      const tonTotal = Object.values(tonCats).reduce((a,b)=>a+b,0);
+
+      // CR (Taka given as CR), grouped by month then by party — across ALL
+      // history, not just this month, so "কোন মাসে কে কত CR পেল" is answered.
+      const crByMonth = {};
+      entries.forEach(e=>{
+        const cr = e.cr || 0;
+        if(cr <= 0) return;
+        const m = (e.date||'').slice(0,7) || 'অজানা মাস';
+        if(!crByMonth[m]) crByMonth[m] = {};
+        const key = e.party || e.code || '-';
+        crByMonth[m][key] = (crByMonth[m][key] || 0) + cr;
+      });
+      const crMonthsSorted = Object.keys(crByMonth).sort((a,b)=> b.localeCompare(a)).slice(0,6); // most recent 6 months
+      const crMonthTotal = (crByMonth[ym] ? Object.values(crByMonth[ym]).reduce((a,b)=>a+b,0) : 0);
+
+      window._overviewData = {grossMonth, netMonth, grossAll, topParties, tonCats, tonTotal, ym, crByMonth, crMonthsSorted, crMonthTotal};
+
+      body.innerHTML = `
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin:8px 0 10px;">
+          <div><div style="font-size:11px;color:#8291a0;">এই মাসের গ্রস</div><div style="font-weight:700;font-size:15px;">৳ ${Math.round(grossMonth).toLocaleString('en-IN')}</div></div>
+          <div><div style="font-size:11px;color:#8291a0;">এই মাসের নেট</div><div style="font-weight:700;font-size:15px;">৳ ${Math.round(netMonth).toLocaleString('en-IN')}</div></div>
+          <div><div style="font-size:11px;color:#8291a0;">মোট টন</div><div style="font-weight:700;font-size:15px;">${tonTotal.toFixed(2)} টন</div></div>
+          <div><div style="font-size:11px;color:#8291a0;">এই মাসের CR</div><div style="font-weight:700;font-size:15px;color:#c0392b;">৳ ${Math.round(crMonthTotal).toLocaleString('en-IN')}</div></div>
+        </div>
+        ${topParties.length ? `
+        <div style="font-size:11px;color:#8291a0;margin-top:2px;">শীর্ষ পার্টি (এই মাস)</div>
+        <div style="font-size:13px;">
+          ${topParties.map(p=>`<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>${p.name}</span><span style="font-weight:600;">৳ ${Math.round(p.gross).toLocaleString('en-IN')}</span></div>`).join('')}
+        </div>` : `<div style="font-size:12.5px;color:#8291a0;">এই মাসে এখনো কোনো এন্ট্রি নেই</div>`}
+        ${crMonthsSorted.length ? `
+        <div style="font-size:11px;color:#8291a0;margin-top:10px;">CR হিসাব — কে কোন মাসে কত পেয়েছে</div>
+        <div style="font-size:13px;">
+          ${crMonthsSorted.map(m=>`
+            <div style="margin-top:4px;">
+              <div style="font-weight:600;color:#4a86d8;">${m}</div>
+              ${Object.entries(crByMonth[m]).sort((a,b)=>b[1]-a[1]).map(([name,amt])=>`
+                <div style="display:flex;justify-content:space-between;padding:1px 0 1px 8px;"><span>${name}</span><span style="font-weight:600;color:#c0392b;">৳ ${Math.round(amt).toLocaleString('en-IN')}</span></div>
+              `).join('')}
+            </div>
+          `).join('')}
+        </div>` : ''}
+      `;
+    }catch(e){
+      console.error('overview load failed', e);
+      body.textContent = 'লোড করা যায়নি';
+    }
+  }
+
+  function shareOverview(){
+    const d = window._overviewData;
+    if(!d){ alert('একটু অপেক্ষা করুন, ডাটা লোড হচ্ছে'); return; }
+    let text = `📊 NGIL — সারসংক্ষেপ (${d.ym})\n\n`;
+    text += `মোট গ্রস: ৳${Math.round(d.grossMonth).toLocaleString('en-IN')}\n`;
+    text += `মোট নেট: ৳${Math.round(d.netMonth).toLocaleString('en-IN')}\n`;
+    text += `মোট টন: ${d.tonTotal.toFixed(2)} টন\n`;
+    text += `  (Tempered ${d.tonCats.tempered.toFixed(2)} · Clear ${d.tonCats.clear.toFixed(2)} · Colour ${d.tonCats.colour.toFixed(2)} · Reflective ${d.tonCats.reflective.toFixed(2)} · Mirror ${d.tonCats.mirror.toFixed(2)})\n`;
+    if(d.topParties.length){
+      text += `\nশীর্ষ পার্টি:\n`;
+      d.topParties.forEach(p=>{ text += `- ${p.name}: ৳${Math.round(p.gross).toLocaleString('en-IN')}\n`; });
+    }
+    if(d.crMonthsSorted && d.crMonthsSorted.length){
+      text += `\nCR হিসাব (কে কোন মাসে কত পেয়েছে):\n`;
+      d.crMonthsSorted.forEach(m=>{
+        text += `${m}:\n`;
+        Object.entries(d.crByMonth[m]).sort((a,b)=>b[1]-a[1]).forEach(([name,amt])=>{
+          text += `  - ${name}: ৳${Math.round(amt).toLocaleString('en-IN')}\n`;
+        });
+      });
+    }
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  /* ---------------- Navigation between the three apps + home ---------------- */
+  function openApp(key){
+    document.querySelectorAll('.appview').forEach(v=>v.classList.remove('active'));
+    document.getElementById('home').style.display = (key === 'home') ? '' : 'none';
+    if(key !== 'home'){
+      document.getElementById('view-'+key).classList.add('active');
+    } else {
+      loadOverview();
+    }
+    document.querySelectorAll('#bottomnav button').forEach(b=>b.classList.remove('active'));
+    document.getElementById('nav-'+key).classList.add('active');
+    if(history.state !== key) history.pushState(key,'','#'+key);
+  }
+  window.addEventListener('popstate', ()=>{
+    const h = location.hash.replace('#','') || 'home';
+    if(document.getElementById('nav-'+h)) openApp(h);
+  });
+
+  // Register service worker for offline use
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+</script>
+</body>
+</html>
