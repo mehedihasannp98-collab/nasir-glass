@@ -2,996 +2,1422 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<meta name="theme-color" content="#14171A">
-<title>TON COUNT — Nasir Glass</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ডিস্ট্রিবিউটর ড্যাশবোর্ড</title>
+<meta name="theme-color" content="#0f3d3e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ton Count">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script>
+  /* =====================================================================
+     ক্লাউড সিঙ্ক (ঐচ্ছিক) — ফোন ও ল্যাপটপে একই ডাটা রিয়েল-টাইমে দেখতে চাইলে
+     এখানে আপনার নিজের Firebase প্রজেক্টের কনফিগ বসান।
+     খালি রাখলে অ্যাপ আগের মতোই এই ডিভাইসেই (localStorage) কাজ করবে।
+     কনফিগ কোথায় পাবেন তার ধাপ নিচে চ্যাটে দেওয়া আছে।
+  ===================================================================== */
+  window.FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBMSPRutn3EparvkTj1gh_-iLLlJNlwM6k",
+    authDomain: "dealer-dashboard-b2271.firebaseapp.com",
+    projectId: "dealer-dashboard-b2271",
+    storageBucket: "dealer-dashboard-b2271.firebasestorage.app",
+    messagingSenderId: "581371844256",
+    appId: "1:581371844256:web:10d565de1df521d320dbc5"
+  };
+</script>
 <style>
   :root{
-    --bg:#14171A;
-    --surface:#1D2226;
-    --surface-2:#262C31;
-    --surface-3:#2F363C;
-    --border:#363E44;
-    --text:#EDEFF1;
-    --muted:#8F9BA3;
-    --muted-2:#657078;
-    --accent:#4A90D9;
-    --accent-dim:#2E5F8C;
-    --good:#5CC98A;
-    --danger:#DE6B5F;
-
-    --c-tempered:#E3A034;
-    --c-clear:#9FDDE0;
-    --c-colour:#9385C4;
-    --c-reflective:#4A90D9;
-    --c-mirror:#C7CBCF;
-
-    --radius:14px;
-    --radius-sm:9px;
-    --font-head:Georgia,'Noto Serif Bengali','Times New Roman',serif;
-    --font-body:'Segoe UI','Noto Sans Bengali',system-ui,-apple-system,sans-serif;
-    --font-mono:ui-monospace,'SFMono-Regular','Cascadia Mono','Roboto Mono',monospace;
+    --bg:#0b2b2c; --panel:#123f40; --panel-light:#16504f;
+    --accent:#e8b35a; --accent2:#5ac8a8; --text:#eef7f5; --muted:#9fc4bd; --danger:#e17b6a;
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;height:100%;}
   body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--font-body);
-    -webkit-font-smoothing:antialiased;
-    padding-bottom:calc(72px + env(safe-area-inset-bottom));
-    min-height:100vh;
+    font-family:"Noto Sans Bengali","Hind Siliguri",-apple-system,"Segoe UI",sans-serif;
+    background: radial-gradient(1200px 800px at 10% -10%, #17514f 0%, var(--bg) 55%, #071a1b 100%);
+    color:var(--text); min-height:100vh; padding-bottom:70px;
   }
-  ::selection{background:var(--accent-dim);}
+  .app{max-width:560px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column;}
+  header{
+    padding:20px 20px 12px; position:sticky; top:0; z-index:20;
+    background:linear-gradient(180deg, rgba(11,43,44,0.98) 75%, rgba(11,43,44,0.0));
+    backdrop-filter: blur(6px);
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-size:12px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent2); margin-bottom:6px; font-weight:700;}
+  .brand .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+  h1{font-size:21px; margin:0 0 5px; font-weight:800;}
+  .sub{color:var(--muted); font-size:13px; margin:0; line-height:1.6;}
 
-  /* ---------- top bar ---------- */
-  .topbar{
-    position:sticky; top:0; z-index:20;
-    background:linear-gradient(180deg,var(--bg) 70%, transparent);
-    padding:18px 18px 8px;
+  main{flex:1; padding:6px 20px 30px;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  .panel{background:var(--panel); border:1px solid rgba(255,255,255,.07); border-radius:18px; padding:18px; margin-top:14px;}
+  .panel.editing{border-color:var(--accent); box-shadow:0 0 0 2px rgba(232,179,90,.15);}
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block; font-size:12.5px; color:var(--accent2); font-weight:700; margin-bottom:7px;}
+  .field .note-sm{color:var(--muted); font-size:11px; font-weight:400; margin-top:4px;}
+  .combo-wrap{position:relative;}
+  select, input[type=text], input[type=number], input[type=date]{
+    width:100%; padding:13px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.1);
+    background:var(--panel-light); color:var(--text); font-size:15.5px; outline:none; appearance:none;
   }
-  .brand{
-    display:flex; align-items:baseline; justify-content:space-between;
+  select{padding-right:40px;}
+  .combo-wrap::after{content:"▾"; position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--accent2); pointer-events:none; font-size:13px;}
+  input:focus, select:focus{border-color:var(--accent2);}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+  .party-name-display{padding:14px 16px; border-radius:12px; background:rgba(232,179,90,.09); border:1px solid rgba(232,179,90,.25); font-size:16px; font-weight:800; color:var(--accent); min-height:20px;}
+  .party-name-display.empty{color:var(--muted); font-weight:500; font-size:14px;}
+
+  .suggest-drop{margin-top:8px; max-height:220px; overflow-y:auto; border-radius:12px; background:var(--panel-light); border:1px solid rgba(255,255,255,.08); display:none;}
+  .suggest-drop.show{display:block;}
+  .suggest-item{padding:12px 16px; font-size:14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.05); display:flex; justify-content:space-between; gap:10px;}
+  .suggest-item:last-child{border-bottom:none;}
+  .suggest-item:active{background:rgba(90,200,168,.12);}
+  .suggest-item .c{color:var(--accent2); font-weight:700; font-size:12px;}
+
+  .empty-hint{margin-top:36px; text-align:center; color:var(--muted); font-size:13px; padding:0 10px; line-height:1.8;}
+  .empty-hint .big{font-size:34px; display:block; margin-bottom:10px;}
+
+  .results{display:none;}
+  .results.show{display:block;}
+  .section-label{color:var(--accent2); font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin:22px 2px 10px;}
+
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;}
+  .stat-card{background:var(--panel); border-radius:14px; padding:14px; border:1px solid rgba(255,255,255,.06);}
+  .stat-card .label{color:var(--muted); font-size:11px; margin-bottom:5px;}
+  .stat-card .value{font-size:16.5px; font-weight:800;}
+  .stat-card .value.accent{color:var(--accent2);}
+  .stat-card .value.gold{color:var(--accent);}
+
+  table{width:100%; border-collapse:collapse; font-size:12.4px;}
+  thead th{text-align:right; color:var(--muted); font-weight:600; font-size:10.8px; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,.08); text-transform:uppercase;}
+  thead th:first-child, tbody td:first-child{text-align:right;}
+  tbody td{padding:10px 6px; border-bottom:1px solid rgba(255,255,255,.05); text-align:right; white-space:nowrap;}
+  tbody tr.zero td{color:var(--muted); opacity:.5;}
+  .table-scroll{overflow-x:auto; border-radius:14px; background:var(--panel); border:1px solid rgba(255,255,255,.06); padding:4px 10px;}
+
+  .tx-card{background:var(--panel); border-radius:14px; padding:14px 14px 14px 46px; margin-bottom:10px; border:1px solid rgba(255,255,255,.06); position:relative;}
+  .tx-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .tx-date{font-weight:700; font-size:14px;}
+  .tx-do{color:var(--muted); font-size:12px;}
+  .tx-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; font-size:12.3px;}
+  .tx-grid div span{display:block; color:var(--muted); font-size:10.3px; margin-bottom:2px;}
+  .tx-note{margin-top:8px; font-size:12px; color:var(--accent); background:rgba(232,179,90,.09); padding:6px 10px; border-radius:8px; display:inline-block;}
+  .tx-actions{position:absolute; top:12px; left:10px; display:flex; flex-direction:column; gap:8px;}
+  .tx-actions button{background:none; border:none; font-size:15px; cursor:pointer; opacity:.75; padding:2px;}
+  .tx-actions .edit-btn{color:var(--accent2);}
+  .tx-actions .del-btn{color:var(--danger);}
+  .new-badge{display:inline-block; background:var(--accent2); color:#04211f; font-size:9.5px; font-weight:800; padding:2px 7px; border-radius:6px; margin-left:6px; vertical-align:middle;}
+  .edited-badge{display:inline-block; background:var(--accent); color:#3a2400; font-size:9.5px; font-weight:800; padding:2px 7px; border-radius:6px; margin-left:6px; vertical-align:middle;}
+
+  .calc-box{display:flex; gap:10px;}
+  .calc-item{flex:1; background:var(--panel-light); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:12px 14px;}
+  .calc-item .l{color:var(--muted); font-size:11px; margin-bottom:4px;}
+  .calc-item .v{font-size:15px; font-weight:800; color:var(--accent2);}
+
+  .btn{width:100%; padding:15px; border-radius:14px; border:none; font-size:15.5px; font-weight:800; cursor:pointer; margin-top:6px;}
+  .btn-primary{background:linear-gradient(135deg, var(--accent2), #2f8f7d); color:#04211f;}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-secondary{background:var(--panel-light); color:var(--text); border:1px solid rgba(255,255,255,.12);}
+  .form-msg{text-align:center; font-size:13px; color:var(--accent2); margin-top:10px; display:none;}
+  .form-msg.show{display:block;}
+  .editing-banner{
+    background:rgba(232,179,90,.12); border:1px solid rgba(232,179,90,.3); border-radius:12px; padding:10px 14px;
+    font-size:12.8px; color:var(--accent); margin-top:12px; display:none; align-items:center; justify-content:space-between; gap:10px;
   }
-  .brand h1{
-    font-family:var(--font-head);
-    font-size:22px; font-weight:700; margin:0; letter-spacing:.3px;
-  }
-  .brand .sub{
-    font-size:11px; color:var(--muted-2); letter-spacing:1.5px; text-transform:uppercase;
-    font-family:var(--font-mono);
-  }
-  .menu-btn{
-    background:none;border:none;color:var(--muted);font-size:20px;padding:6px 4px;cursor:pointer;
+  .editing-banner.show{display:flex;}
+  .editing-banner button{background:none; border:none; color:var(--muted); font-size:12px; text-decoration:underline; cursor:pointer;}
+
+  /* Statement / print / share */
+  .stmt-panel{background:var(--panel); border:1px solid rgba(255,255,255,.07); border-radius:16px; padding:16px; margin-top:14px;}
+  .stmt-preview{margin-top:12px; background:#fff; color:#000; border-radius:10px; padding:12px; overflow-x:auto;}
+  .stmt-row{display:flex; gap:8px; margin-bottom:10px;}
+  .stmt-row select{flex:1;}
+  .stmt-btns{display:flex; gap:10px; margin-top:4px;}
+  .stmt-btns .btn{margin-top:0; font-size:13.5px; padding:12px;}
+  .btn-print{background:var(--accent); color:#3a2400;}
+  .btn-share{background:#25D366; color:#04220f;}
+  #printArea{display:none;}
+  .pa-head{text-align:center; margin-bottom:14px;}
+  .pa-head h2{margin:0 0 4px; font-size:18px;}
+  .pa-head p{margin:2px 0; font-size:12px; color:#333;}
+  .pa-table{width:100%; border-collapse:collapse; font-size:11px; margin-top:10px;}
+  .pa-table th, .pa-table td{border:1px solid #999; padding:5px 6px; text-align:center;}
+  .pa-table th{background:#eee;}
+  .pa-total-row td{font-weight:800; background:#f3f3f3;}
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block !important; position:absolute; top:0; left:0; width:100%; color:#000; background:#fff; padding:10px;}
   }
 
-  main{ padding:4px 16px 24px; max-width:520px; margin:0 auto; }
-  .screen{ display:none; animation:fade .18s ease; }
-  .screen.active{ display:block; }
-  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+  .install-banner{display:none; margin-top:20px; padding:14px 16px; border-radius:14px;
+    background:linear-gradient(135deg, rgba(90,200,168,.14), rgba(232,179,90,.10)); border:1px solid rgba(90,200,168,.25); font-size:12.4px; line-height:1.7;}
+  .install-banner.show{display:block;}
+  .install-banner b{color:var(--accent2);}
+  .install-banner button{margin-top:8px; background:var(--accent2); border:none; color:#04211f; font-weight:800; padding:9px 16px; border-radius:10px; font-size:13px; cursor:pointer;}
 
-  /* ---------- glass pane stack (signature element) ---------- */
-  .pane-stack{
-    display:flex; height:14px; border-radius:7px; overflow:hidden;
-    background:var(--surface-2); border:1px solid var(--border);
-  }
-  .pane-stack .seg{ height:100%; min-width:0; transition:flex-basis .3s ease; }
-  .pane-stack.empty{ background:var(--surface-2); }
-  .pane-legend{
-    display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:11.5px; color:var(--muted);
-  }
-  .pane-legend span{ display:inline-flex; align-items:center; gap:5px; }
-  .dot{ width:9px; height:9px; border-radius:3px; display:inline-block; flex:none; }
+  .chip-list{display:flex; flex-direction:column; gap:8px; margin-top:4px;}
+  .chip-row{display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--panel-light); border:1px solid rgba(255,255,255,.07); border-radius:12px; padding:11px 14px;}
+  .chip-row .info{min-width:0;}
+  .chip-row .name{font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .chip-row .meta{color:var(--muted); font-size:11.5px; margin-top:2px;}
+  .chip-row .rm{background:none; border:none; color:var(--danger); font-size:16px; cursor:pointer; flex-shrink:0; padding:4px;}
+  .chip-row .tag{font-size:9.5px; font-weight:800; padding:2px 7px; border-radius:6px; margin-left:6px;}
+  .chip-row .tag.custom{background:var(--accent2); color:#04211f;}
+  .chip-row .tag.base{background:rgba(255,255,255,.1); color:var(--muted);}
+  .subhead{font-size:12px; color:var(--muted); margin:2px 0 12px; line-height:1.6;}
 
-  /* ---------- cards ---------- */
-  .card{
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--radius); padding:16px; margin-bottom:14px;
+  .tabbar{
+    position:fixed; bottom:0; left:0; right:0; z-index:30;
+    background:rgba(9,34,35,.96); backdrop-filter:blur(10px); border-top:1px solid rgba(255,255,255,.08);
+    display:flex; max-width:560px; margin:0 auto;
   }
-  .card h2{ font-family:var(--font-head); font-size:15px; margin:0 0 12px; color:var(--text); font-weight:600;}
-  .row-between{ display:flex; align-items:center; justify-content:space-between; }
+  .tab-btn{
+    flex:1; background:none; border:none; padding:11px 6px 9px; color:var(--muted);
+    display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.8px; font-weight:700; cursor:pointer;
+  }
+  .tab-btn .ic{font-size:18px;}
+  .tab-btn.active{color:var(--accent2);}
 
-  /* ---------- big total ---------- */
-  .big-total{
-    text-align:center; padding:6px 0 14px;
-  }
-  .big-total .num{
-    font-family:var(--font-mono); font-size:44px; font-weight:600; color:var(--accent);
-    letter-spacing:-1px; line-height:1;
-  }
-  .big-total .label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-top:6px;}
+  footer{padding:14px 20px 26px; text-align:center; color:var(--muted); font-size:11px;}
 
-  /* ---------- form ---------- */
-  .field{ margin-bottom:12px; }
-  .field label{
-    display:flex; align-items:center; gap:7px; font-size:13px; color:var(--muted); margin-bottom:6px;
+  /* ===== CLOUD SYNC AUTH GATE ===== */
+  #authGate{
+    position:fixed; inset:0; z-index:100; background:radial-gradient(1200px 800px at 10% -10%, #17514f 0%, var(--bg) 55%, #071a1b 100%);
+    display:none; align-items:center; justify-content:center; padding:24px;
   }
-  .field input[type=date]{
-    width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text);
-    padding:11px 12px; border-radius:var(--radius-sm); font-size:15px; font-family:var(--font-body);
+  #authGate.show{display:flex;}
+  .auth-card{width:100%; max-width:400px; background:var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:26px 22px;}
+  .auth-card h2{margin:0 0 6px; font-size:20px;}
+  .auth-card p{color:var(--muted); font-size:13px; line-height:1.7; margin:0 0 18px;}
+  .auth-card input{margin-bottom:12px;}
+  .auth-err{color:var(--danger); font-size:12.5px; margin-top:10px; display:none;}
+  .auth-err.show{display:block;}
+  .auth-toggle{text-align:center; margin-top:14px; font-size:12.8px; color:var(--muted);}
+  .auth-toggle a{color:var(--accent2); cursor:pointer; font-weight:700; text-decoration:none;}
+  .sync-badge{
+    position:fixed; top:10px; right:10px; z-index:40; font-size:10.5px; font-weight:700; padding:5px 10px; border-radius:20px;
+    background:rgba(9,34,35,.9); border:1px solid rgba(255,255,255,.1); color:var(--muted); display:none; align-items:center; gap:5px;
   }
-  .num-row{ display:grid; grid-template-columns:1fr; gap:10px; }
-  .num-field{
-    display:flex; align-items:center; gap:10px;
-    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
-    padding:8px 12px;
-  }
-  .num-field .dot{ width:11px; height:11px; }
-  .num-field .name{ flex:1; font-size:14.5px; }
-  .num-field input{
-    width:88px; text-align:right; background:transparent; border:none; color:var(--text);
-    font-family:var(--font-mono); font-size:17px; font-weight:600; padding:6px 2px; outline:none;
-  }
-  .num-field input:focus-visible{ outline:2px solid var(--accent); border-radius:6px; }
-  .num-field.tempered{ border-left:3px solid var(--c-tempered); }
-  .num-field.clear{ border-left:3px solid var(--c-clear); }
-  .num-field.colour{ border-left:3px solid var(--c-colour); }
-  .num-field.reflective{ border-left:3px solid var(--c-reflective); }
-  .num-field.mirror{ border-left:3px solid var(--c-mirror); }
+  .sync-badge.show{display:flex;}
+  .sync-badge .sdot{width:6px;height:6px;border-radius:50%; background:var(--muted);}
+  .sync-badge.online .sdot{background:var(--accent2); box-shadow:0 0 6px var(--accent2);}
+  .sync-badge.online{color:var(--accent2);}
 
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    width:100%; padding:13px; border-radius:var(--radius-sm); border:none;
-    font-size:15px; font-weight:600; cursor:pointer; font-family:var(--font-body);
-  }
-  .btn-primary{ background:var(--accent); color:#0C1A26; }
-  .btn-primary:active{ background:#3f7fc2; }
-  .btn-whatsapp{ background:#1E8E5A; color:#EAF8EF; }
-  .btn-whatsapp:active{ background:#187348; }
-  .btn-ghost{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
-  .btn-danger{ background:transparent; color:var(--danger); border:1px solid #5A3833; }
-  .btn-row{ display:flex; gap:10px; margin-top:14px; }
-  .btn-row .btn{ flex:1; }
-  .btn-sm{ width:auto; padding:9px 14px; font-size:13px; }
+  /* ===== LIVE GREETING STRIP ===== */
+  .greet-strip{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin:0 0 10px; font-weight:600;}
+  .greet-strip .gicon{font-size:15px;}
+  .greet-strip .gdate{margin-left:auto; font-size:11px; color:var(--muted); opacity:.8;}
 
-  /* ---------- month selector ---------- */
-  .month-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .month-nav button{
-    background:var(--surface-2); border:1px solid var(--border); color:var(--text);
-    width:38px; height:38px; border-radius:10px; font-size:17px; cursor:pointer;
+  /* ===== ENTRANCE / TRANSITION MOTION ===== */
+  @keyframes fadeUp{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+  .page.active{animation:fadeIn .28s ease;}
+  .stat-grid .stat-card{animation:fadeUp .45s ease backwards;}
+  .stat-grid .stat-card:nth-child(1){animation-delay:.02s;}
+  .stat-grid .stat-card:nth-child(2){animation-delay:.07s;}
+  .stat-grid .stat-card:nth-child(3){animation-delay:.12s;}
+  .stat-grid .stat-card:nth-child(4){animation-delay:.17s;}
+  .stat-grid .stat-card:nth-child(5){animation-delay:.22s;}
+  .stat-card{transition:transform .15s ease;}
+  .stat-card:active{transform:scale(.97);}
+  @media (prefers-reduced-motion: reduce){
+    .page.active, .stat-grid .stat-card{animation:none;}
   }
-  .month-nav .month-label{ font-family:var(--font-head); font-size:18px; font-weight:700; text-align:center; }
-  .month-nav .month-label small{ display:block; font-family:var(--font-mono); font-size:11px; color:var(--muted); font-weight:400; margin-top:2px;}
 
-  /* ---------- summary grid (share format) ---------- */
-  .summary-grid{ display:flex; flex-direction:column; gap:9px; }
-  .summary-row{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:9px 4px; border-bottom:1px dashed var(--border); font-size:14.5px;
-  }
-  .summary-row:last-child{ border-bottom:none; }
-  .summary-row .k{ display:flex; align-items:center; gap:8px; color:var(--muted); }
-  .summary-row .v{ font-family:var(--font-mono); font-weight:600; font-size:15.5px; }
-  .summary-row.total{ margin-top:4px; padding-top:12px; border-top:1px solid var(--border); border-bottom:none;}
-  .summary-row.total .k{ color:var(--text); font-weight:700; }
-  .summary-row.total .v{ color:var(--accent); font-size:18px; }
+  /* ===== TREND CHIP (vs last month) ===== */
+  .trend-chip{display:inline-flex; align-items:center; gap:3px; font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:8px; margin-top:5px;}
+  .trend-chip.up{color:var(--accent2); background:rgba(90,200,168,.14);}
+  .trend-chip.down{color:var(--danger); background:rgba(225,123,106,.14);}
+  .trend-chip.flat{color:var(--muted); background:rgba(255,255,255,.06);}
 
-  /* ---------- entry log list ---------- */
-  .log-item{
-    display:flex; align-items:center; gap:12px;
-    padding:11px 4px; border-bottom:1px solid var(--border); cursor:pointer;
-  }
-  .log-item:last-child{ border-bottom:none; }
-  .log-item .date{
-    width:44px; flex:none; text-align:center;
-  }
-  .log-item .date .d{ font-family:var(--font-mono); font-size:18px; font-weight:700; line-height:1; }
-  .log-item .date .m{ font-size:10px; color:var(--muted-2); text-transform:uppercase; letter-spacing:.5px; }
-  .log-item .mid{ flex:1; min-width:0; }
-  .log-item .mini-stack{ display:flex; height:7px; border-radius:4px; overflow:hidden; background:var(--surface-2); margin-bottom:5px;}
-  .log-item .mini-stack .seg{ height:100%; }
-  .log-item .cats{ font-size:11px; color:var(--muted-2); font-family:var(--font-mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .log-item .total{ font-family:var(--font-mono); font-weight:700; font-size:15px; flex:none; }
-  .empty-note{ text-align:center; color:var(--muted-2); font-size:13px; padding:26px 10px; }
+  /* ===== MINI TREND BAR CHART ===== */
+  .trend-chart{display:flex; align-items:flex-end; gap:5px; height:104px; margin-top:14px; padding:12px 8px 8px; background:var(--panel); border-radius:14px; border:1px solid rgba(255,255,255,.06);}
+  .trend-bar{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:5px;}
+  .trend-bar .bar{width:100%; max-width:20px; border-radius:5px 5px 2px 2px; background:linear-gradient(180deg, var(--accent2), rgba(90,200,168,.18)); min-height:3px; transition:height .7s cubic-bezier(.22,.9,.3,1); animation:fadeIn .5s ease;}
+  .trend-bar.peak .bar{background:linear-gradient(180deg, var(--accent), rgba(232,179,90,.2));}
+  .trend-bar .lbl{font-size:8.6px; color:var(--muted); font-weight:700;}
 
-  /* ---------- overview / year table ---------- */
-  .year-nav{ display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:16px; }
-  .year-nav button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:34px; height:34px; border-radius:9px; font-size:15px; cursor:pointer;}
-  .year-nav .yr{ font-family:var(--font-head); font-size:19px; font-weight:700; min-width:64px; text-align:center;}
-
-  .month-card{
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    padding:13px 15px; margin-bottom:10px;
-  }
-  .month-card.zero{ opacity:.45; }
-  .month-card .row-between{ margin-bottom:9px; }
-  .month-card .mname{ font-weight:700; font-size:14.5px; }
-  .month-card .mtotal{ font-family:var(--font-mono); font-weight:700; color:var(--accent); font-size:15px; }
-  .pill-row{ display:flex; flex-wrap:wrap; gap:6px; }
-  .pill{
-    font-size:11px; font-family:var(--font-mono); padding:3px 8px; border-radius:20px;
-    background:var(--surface-2); border:1px solid var(--border); color:var(--muted);
-  }
-  .pill.has{ color:var(--text); border-color:transparent; }
-
-  .year-total-card{
-    background:linear-gradient(135deg,var(--surface-2),var(--surface)); border:1px solid var(--border);
-    border-radius:var(--radius); padding:18px; text-align:center; margin-top:6px; margin-bottom:16px;
-  }
-  .year-total-card .num{ font-family:var(--font-mono); font-size:32px; font-weight:700; color:var(--accent); }
-  .year-total-card .label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-top:4px;}
-
-  /* ---------- bottom nav ---------- */
-  nav.tabbar{
-    position:fixed; left:0; right:0; bottom:0; z-index:30;
-    background:var(--surface); border-top:1px solid var(--border);
-    display:flex; padding:6px 10px calc(6px + env(safe-area-inset-bottom));
-  }
-  nav.tabbar button{
-    flex:1; background:none; border:none; color:var(--muted-2); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 4px; font-family:var(--font-body);
-    font-size:11px;
-  }
-  nav.tabbar button svg{ width:21px; height:21px; }
-  nav.tabbar button.active{ color:var(--accent); }
-
-  /* ---------- toast ---------- */
-  #toast{
-    position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px);
-    background:var(--surface-3); color:var(--text); padding:10px 18px; border-radius:30px;
-    font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease; z-index:50;
-    border:1px solid var(--border); white-space:nowrap;
-  }
-  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-
-  /* ---------- menu sheet ---------- */
-  .sheet-backdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:40; opacity:0; pointer-events:none; transition:opacity .2s;
-  }
-  .sheet-backdrop.show{ opacity:1; pointer-events:auto; }
-  .sheet{
-    position:fixed; left:0; right:0; bottom:0; z-index:41;
-    background:var(--surface); border-radius:18px 18px 0 0; border:1px solid var(--border); border-bottom:none;
-    padding:10px 16px calc(20px + env(safe-area-inset-bottom));
-    transform:translateY(100%); transition:transform .25s ease;
-  }
-  .sheet.show{ transform:translateY(0); }
-  .sheet .handle{ width:36px; height:4px; background:var(--border); border-radius:3px; margin:6px auto 14px; }
-  .sheet button.item{
-    width:100%; text-align:left; background:none; border:none; color:var(--text); font-size:15px;
-    padding:13px 4px; border-bottom:1px solid var(--border); font-family:var(--font-body);
-  }
-  .sheet button.item:last-of-type{ border-bottom:none; }
-  .sheet button.item.danger{ color:var(--danger); }
-
-  small.hint{ display:block; color:var(--muted-2); font-size:11.5px; margin-top:8px; }
+  /* ===== LEADERBOARD ===== */
+  .leader-row{display:flex; align-items:center; gap:11px; background:var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:12px 14px; margin-bottom:8px; animation:fadeUp .4s ease backwards;}
+  .leader-rank{width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12.5px; background:var(--panel-light); color:var(--muted); flex-shrink:0;}
+  .leader-rank.r1{background:linear-gradient(135deg,#f3cf7d,#c9922f); color:#3a2400;}
+  .leader-rank.r2{background:linear-gradient(135deg,#e4eaea,#a6b7b7); color:#123f40;}
+  .leader-rank.r3{background:linear-gradient(135deg,#dba274,#9c6538); color:#2a1608;}
+  .leader-info{flex:1; min-width:0;}
+  .leader-top{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .leader-name{font-weight:700; font-size:13.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .leader-value{font-weight:800; font-size:12.5px; color:var(--accent2); flex-shrink:0;}
+  .leader-bar-track{height:5px; border-radius:4px; background:rgba(255,255,255,.07); margin-top:7px; overflow:hidden;}
+  .leader-bar-fill{height:100%; border-radius:4px; background:linear-gradient(90deg,var(--accent2),var(--accent)); transition:width .8s cubic-bezier(.22,.9,.3,1); width:0;}
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
 
-<!-- BOOT CHECK: shown briefly while we ask Firebase "is anyone already logged in?" -->
-<div id="boot-check" style="position:fixed;inset:0;background:#14171A;display:flex;align-items:center;justify-content:center;z-index:9999;color:#8F9BA3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;">লোড হচ্ছে…</div>
-
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="hidden" style="position:fixed;inset:0;background:#14171A;z-index:9998;display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="width:100%;max-width:360px;">
-    <div style="text-align:center;margin-bottom:28px;">
-      <div style="font-size:20px;font-weight:700;color:#EDEFF1;">TON COUNT</div>
-      <div style="font-size:13px;color:#8F9BA3;margin-top:4px;">Nasir Glass · টন হিসাব — লগইন করুন</div>
-    </div>
-
-    <div id="login-form">
-      <input type="email" id="login-email" placeholder="ইমেইল" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <input type="password" id="login-pass" placeholder="পাসওয়ার্ড" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <div id="login-err" style="color:#DE6B5F;font-size:13px;min-height:18px;margin-bottom:6px;"></div>
-      <button id="login-btn" onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:12px;background:#4A90D9;color:#fff;font-size:15px;font-weight:700;">লগইন করুন</button>
-      <div style="text-align:center;margin-top:16px;font-size:13px;color:#8F9BA3;">অ্যাকাউন্ট নেই? <a href="#" onclick="showSignup();return false;" style="color:#4A90D9;">তৈরি করুন</a></div>
-    </div>
-
-    <div id="signup-form" style="display:none;">
-      <input type="email" id="signup-email" placeholder="ইমেইল" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <input type="password" id="signup-pass" placeholder="পাসওয়ার্ড (অন্তত ৬ অক্ষর)" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <input type="password" id="signup-pass2" placeholder="পাসওয়ার্ড আবার লিখুন" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <div id="signup-err" style="color:#DE6B5F;font-size:13px;min-height:18px;margin-bottom:6px;"></div>
-      <button id="signup-btn" onclick="doSignup()" style="width:100%;padding:13px;border:none;border-radius:12px;background:#4A90D9;color:#fff;font-size:15px;font-weight:700;">অ্যাকাউন্ট তৈরি করুন</button>
-      <div style="text-align:center;margin-top:16px;font-size:13px;color:#8F9BA3;">আগে থেকে অ্যাকাউন্ট আছে? <a href="#" onclick="showLogin();return false;" style="color:#4A90D9;">লগইন করুন</a></div>
-    </div>
-  </div>
-</div>
-<style>#boot-check.hidden, #login-screen.hidden{display:none !important;}</style>
-
-<div id="app-root" style="display:none;">
-
-<div class="topbar">
-  <div class="brand">
-    <div>
-      <h1>TON COUNT</h1>
-      <div class="sub">Nasir Glass · টন হিসাব</div>
-    </div>
-    <button class="menu-btn" id="menuBtn" aria-label="মেনু">⋮</button>
+<div id="authGate">
+  <div class="auth-card">
+    <h2 id="authTitle">লগইন করুন</h2>
+    <p id="authSub">ফোন আর ল্যাপটপে একই ইমেইল-পাসওয়ার্ড দিয়ে লগইন করলে ডাটা রিয়েল-টাইমে সিঙ্ক থাকবে।</p>
+    <div class="field"><input id="authEmail" type="text" placeholder="ইমেইল" autocomplete="username"></div>
+    <div class="field"><input id="authPassword" type="text" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ ডিজিট/অক্ষর)" autocomplete="current-password"></div>
+    <button class="btn btn-primary" id="authSubmitBtn">লগইন করুন</button>
+    <div class="auth-err" id="authErr"></div>
+    <div class="auth-toggle" id="authToggleWrap">নতুন এখানে? <a id="authToggleLink">অ্যাকাউন্ট তৈরি করুন</a></div>
   </div>
 </div>
 
-<main>
+<div class="sync-badge" id="syncBadge"><span class="sdot"></span><span id="syncBadgeText">অফলাইন মোড</span></div>
 
-  <!-- ================= ENTRY SCREEN ================= -->
-  <section class="screen active" id="screen-entry">
+<div class="app">
+  <header>
+    <div class="brand"><span class="dot"></span>ডিলার ডেটাবেজ ২০২৬</div>
+    <p class="greet-strip" id="greetStrip"><span class="gicon">👋</span><span id="greetText">স্বাগতম</span><span class="gdate" id="greetDate"></span></p>
+    <h1 id="pageTitle">ডিস্ট্রিবিউটর ড্যাশবোর্ড</h1>
+    <p class="sub" id="pageSub">নিচের বক্সে পার্টি কোড লিখুন বা লিস্ট থেকে সিলেক্ট করুন — সকল তথ্য, সারাংশ ও টেবিল স্বয়ংক্রিয়ভাবে আপডেট হবে।</p>
+  </header>
 
-    <div class="card">
-      <div class="field">
-        <label for="entryDate">তারিখ</label>
-        <input type="date" id="entryDate">
-      </div>
-
-      <div class="num-row" id="numInputs">
-        <div class="num-field tempered">
-          <span class="dot" style="background:var(--c-tempered)"></span>
-          <span class="name">Tempered</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-tempered" placeholder="0">
+  <main>
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div class="page active" id="dashboardPage">
+      <div class="panel">
+        <div class="field">
+          <label>পার্টি কোড সিলেক্ট করুন / লিখুন:</label>
+          <div class="combo-wrap"><input id="codeInput" type="text" inputmode="search" placeholder="যেমন: 510 বা Sharif Metal" autocomplete="off"></div>
+          <div class="suggest-drop" id="suggestDrop"></div>
         </div>
-        <div class="num-field clear">
-          <span class="dot" style="background:var(--c-clear)"></span>
-          <span class="name">Clear</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-clear" placeholder="0">
+        <div class="field">
+          <label>অথবা লিস্ট থেকে বেছে নিন:</label>
+          <div class="combo-wrap"><select id="codeSelect"><option value="">— পার্টি কোড সিলেক্ট করুন —</option></select></div>
         </div>
-        <div class="num-field colour">
-          <span class="dot" style="background:var(--c-colour)"></span>
-          <span class="name">Colour</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-colour" placeholder="0">
-        </div>
-        <div class="num-field reflective">
-          <span class="dot" style="background:var(--c-reflective)"></span>
-          <span class="name">Reflective</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-reflective" placeholder="0">
-        </div>
-        <div class="num-field mirror">
-          <span class="dot" style="background:var(--c-mirror)"></span>
-          <span class="name">Mirror</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-mirror" placeholder="0">
+        <div class="field">
+          <label>পার্টি নাম:</label>
+          <div class="party-name-display empty" id="partyNameDisplay">এখনো কোনো পার্টি সিলেক্ট করা হয়নি</div>
         </div>
       </div>
 
-      <div class="big-total">
-        <div class="num" id="entryTotal">0.00</div>
-        <div class="label">Total Ton</div>
+      <div class="empty-hint" id="emptyHint">
+        <span class="big">👆</span>
+        উপরে পার্টি কোড লিখুন বা লিস্ট থেকে সিলেক্ট করুন — নিচে সেই পার্টির সব হিসাব সাথে সাথে চলে আসবে।
       </div>
 
-      <div class="btn-row">
-        <button class="btn btn-primary" id="saveBtn">সেভ করুন</button>
+      <div class="results" id="results">
+        <div class="section-label">সারাংশ</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="label">মোট এন্ট্রি</div><div class="value" id="statCount">0</div></div>
+          <div class="stat-card"><div class="label">মোট ওজন (টন)</div><div class="value accent" id="statWeight">0</div></div>
+          <div class="stat-card"><div class="label">মোট গ্রস অ্যামাউন্ট (৳)</div><div class="value gold" id="statGross">0</div><div id="statGrossTrend"></div></div>
+          <div class="stat-card"><div class="label">মোট নেট অ্যামাউন্ট (৳)</div><div class="value gold" id="statNet">0</div></div>
+          <div class="stat-card" style="grid-column:1/-1;"><div class="label">মোট ব্যাংক পেমেন্ট (৳)</div><div class="value accent" id="statBank">0</div></div>
+        </div>
+
+        <div class="section-label">মাসভিত্তিক বিশ্লেষণ (নির্বাচিত পার্টি)</div>
+        <div class="trend-chart" id="partyTrendChart"></div>
+        <div class="table-scroll" style="margin-top:10px;">
+          <table>
+            <thead><tr><th>মাস</th><th>গ্রস</th><th>১% লেস</th><th>নেট</th><th>ব্যাংক পেমেন্ট</th><th>ওজন</th></tr></thead>
+            <tbody id="monthTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="section-label">📄 স্টেটমেন্ট তৈরি, প্রিন্ট ও শেয়ার</div>
+        <div class="stmt-panel">
+          <div class="stmt-row">
+            <select id="stmtType">
+              <option value="all">সব সময়ের স্টেটমেন্ট</option>
+              <option value="month">নির্দিষ্ট মাসের স্টেটমেন্ট</option>
+              <option value="year">নির্দিষ্ট বছরের স্টেটমেন্ট</option>
+            </select>
+          </div>
+          <div class="stmt-row" id="stmtMonthRow" style="display:none;">
+            <select id="stmtMonth"></select>
+          </div>
+          <div class="stmt-row" id="stmtYearRow" style="display:none;">
+            <select id="stmtYear"></select>
+          </div>
+          <div class="stmt-btns">
+            <button class="btn btn-print" id="printStmtBtn">🖨️ প্রিন্ট / PDF</button>
+            <button class="btn btn-share" id="shareStmtBtn">📤 হোয়াটসঅ্যাপে শেয়ার</button>
+          </div>
+          <div class="note-sm" style="margin-top:8px;">প্রিন্ট চাপলে ফোনের প্রিন্ট মেনুতে "Save as PDF" অপশন থাকবে — সরাসরি PDF হিসেবে সেভও করতে পারবেন।</div>
+          <div id="stmtPreview" class="stmt-preview" style="display:none;"></div>
+        </div>
+
+        <div class="section-label">নির্বাচিত পার্টির সকল লেনদেন (ডিটেইল) — ✏️ চেপে সংশোধন করুন</div>
+        <div id="txList"></div>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-whatsapp" id="shareEntryBtn">WhatsApp-এ শেয়ার</button>
+
+      <div class="install-banner" id="installBanner">
+        <b>📲 ফোনে অ্যাপের মতো ইনস্টল করুন —</b><br>
+        Chrome মেনু (⋮) খুলে <b>"Add to Home screen"</b> বা <b>"Install app"</b>-এ ট্যাপ করুন।
+        <br><button id="installNowBtn" style="display:none;">এখনই ইনস্টল করুন</button>
       </div>
-      <div class="btn-row" id="deleteEntryRow" style="display:none;">
-        <button class="btn btn-danger" id="deleteEntryBtn">এই তারিখের এন্ট্রি মুছুন</button>
+    </div>
+
+    <!-- ===== MONTHLY SUMMARY (ALL PARTIES) PAGE ===== -->
+    <div class="page" id="summaryPage">
+      <div class="section-label" style="margin-top:0;">সব পার্টি মিলিয়ে সর্বমোট</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="label">মোট এন্ট্রি (সব পার্টি)</div><div class="value" id="sumStatCount">0</div></div>
+        <div class="stat-card"><div class="label">মোট ওজন (টন)</div><div class="value accent" id="sumStatWeight">0</div></div>
+        <div class="stat-card"><div class="label">মোট গ্রস অ্যামাউন্ট (৳)</div><div class="value gold" id="sumStatGross">0</div></div>
+        <div class="stat-card"><div class="label">মোট নেট অ্যামাউন্ট (৳)</div><div class="value gold" id="sumStatNet">0</div></div>
+        <div class="stat-card" style="grid-column:1/-1;"><div class="label">মোট ব্যাংক পেমেন্ট (৳)</div><div class="value accent" id="sumStatBank">0</div><div id="sumStatGrossTrend"></div></div>
+      </div>
+
+      <div class="section-label">কোন মাসে কত সেলস (সব পার্টি একসাথে)</div>
+      <div class="trend-chart" id="summaryTrendChart"></div>
+      <div class="table-scroll" style="margin-top:10px;">
+        <table>
+          <thead><tr><th>মাস</th><th>এন্ট্রি</th><th>গ্রস</th><th>১% লেস</th><th>নেট</th><th>ব্যাংক পেমেন্ট</th><th>ওজন</th></tr></thead>
+          <tbody id="summaryMonthBody"></tbody>
+        </table>
+      </div>
+
+      <div class="section-label">🏆 কোন পার্টি কত সেলস করেছে — মাস বেছে নিন</div>
+      <select id="partyMonthFilter" style="width:100%; padding:12px 14px; margin-bottom:12px; border-radius:12px; border:1px solid var(--border,#333); background:var(--card-bg,#1a1a1a); color:inherit; font-size:15px;">
+        <option value="all">সব মাস (সর্বমোট)</option>
+      </select>
+      <div id="leaderboard"></div>
+
+      <div class="section-label" id="partyTableLabel">পার্টি-ভিত্তিক মোট (বড় থেকে ছোট)</div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>পার্টি</th><th>এন্ট্রি</th><th>গ্রস</th><th>নেট</th><th>ব্যাংক পেমেন্ট</th></tr></thead>
+          <tbody id="summaryPartyBody"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-share" id="sharePartyReportBtn" style="margin-top:10px; width:100%;">📤 এই রিপোর্ট হোয়াটসঅ্যাপে শেয়ার করুন</button>
+
+      <div class="stmt-btns" style="margin-top:20px;">
+        <button class="btn btn-print" id="printSummaryBtn">🖨️ প্রিন্ট / PDF</button>
+        <button class="btn btn-share" id="shareSummaryBtn">📤 হোয়াটসঅ্যাপে শেয়ার</button>
       </div>
     </div>
 
-    <div class="card">
-      <div class="row-between">
-        <h2>সাম্প্রতিক এন্ট্রি</h2>
+    <!-- ===== DATA ENTRY PAGE ===== -->
+    <div class="page" id="entryPage">
+      <div class="editing-banner" id="editingBanner">
+        <span>✏️ আপনি একটা পুরোনো এন্ট্রি সংশোধন করছেন (SL #<b id="editingSlLabel"></b>)</span>
+        <button id="cancelEditBtn">বাতিল</button>
       </div>
-      <div id="recentList"></div>
-    </div>
+      <div class="panel" id="entryPanel">
+        <div class="field">
+          <label>মাস</label>
+          <div class="combo-wrap"><select id="inMonth"></select></div>
+        </div>
+        <div class="field">
+          <label>তারিখ</label>
+          <input id="inDate" type="date">
+        </div>
+        <div class="field">
+          <label>পার্টি/ডিস্ট্রিবিউটর নাম</label>
+          <div class="combo-wrap"><select id="inPartySelect"><option value="">— পার্টি সিলেক্ট করুন —</option></select></div>
+          <div class="note-sm">তালিকায় না থাকলে "পার্টি ও ব্যাংক" ট্যাব থেকে নতুন পার্টি যোগ করুন।</div>
+        </div>
+        <div class="field">
+          <label>পার্টি কোড</label>
+          <input id="inCode" type="text" placeholder="পার্টি সিলেক্ট করলে অটো বসবে" readonly>
+        </div>
+        <div class="field">
+          <label>ডি.ও নম্বর</label>
+          <input id="inDO" type="text" placeholder="যেমন: 135">
+        </div>
+        <div class="field">
+          <label>গ্রস অ্যামাউন্ট (৳)</label>
+          <input id="inGross" type="number" inputmode="decimal" placeholder="যেমন: 1712142">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>১% লেস অ্যামাউন্ট (৳)</label>
+            <input id="inLess" type="number" inputmode="decimal" placeholder="যেমন: 17121">
+          </div>
+          <div class="field">
+            <label>নেট অ্যামাউন্ট (৳)</label>
+            <input id="inNet" type="number" inputmode="decimal" placeholder="যেমন: 1695021">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>ব্যাংক পেমেন্ট (৳)</label>
+            <input id="inBankPay" type="number" inputmode="decimal" placeholder="0">
+          </div>
+          <div class="field">
+            <label>ব্যাংকের নাম</label>
+            <div class="combo-wrap"><select id="inBankName"></select></div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>কমিশন/টাইপ</label>
+            <input id="inComm" type="text" placeholder="যেমন: 1+54">
+          </div>
+          <div class="field">
+            <label>ওজন (টন)</label>
+            <input id="inWeight" type="number" inputmode="decimal" placeholder="0">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>CR (৳, ঐচ্ছিক)</label>
+            <input id="inCR" type="number" inputmode="decimal" placeholder="0">
+          </div>
+        </div>
+        <div class="field">
+          <label>নোট (ঐচ্ছিক)</label>
+          <input id="inNote" type="text" placeholder="যেমন: বিশেষ ছাড়">
+        </div>
 
-  </section>
-
-  <!-- ================= MONTH SCREEN ================= -->
-  <section class="screen" id="screen-month">
-
-    <div class="month-nav">
-      <button id="monthPrev">‹</button>
-      <div class="month-label"><span id="monthLabel">—</span><small id="monthSub">&nbsp;</small></div>
-      <button id="monthNext">›</button>
-    </div>
-
-    <div class="card">
-      <div class="pane-stack empty" id="monthPaneStack"></div>
-      <div class="pane-legend" id="monthLegend"></div>
-    </div>
-
-    <div class="card">
-      <div class="row-between">
-        <h2>মাসিক সামারি</h2>
-        <button class="btn btn-whatsapp btn-sm" id="shareMonthBtn">Share</button>
+        <button class="btn btn-primary" id="saveEntryBtn">✔ এন্ট্রি সেভ করুন</button>
+        <div class="form-msg" id="formMsg">✅ এন্ট্রি সেভ হয়েছে এবং ড্যাশবোর্ডে যোগ হয়ে গেছে!</div>
       </div>
-      <div class="summary-grid" id="monthSummary"></div>
+
+      <div class="section-label">সব এন্ট্রি (এই ডিভাইসে) — ✏️ চেপে সংশোধন করুন</div>
+      <div class="field" style="margin-top:-4px;">
+        <input id="entrySearchAll" type="text" placeholder="পার্টি নাম বা কোড দিয়ে খুঁজুন...">
+      </div>
+      <div id="allEntriesList" style="padding-bottom:10px;"></div>
     </div>
 
-    <div class="card">
-      <h2>দৈনিক লগ (<span id="monthLogCount">0</span> এন্ট্রি)</h2>
-      <div id="monthLog"></div>
+    <!-- ===== MANAGE PARTIES & BANKS PAGE ===== -->
+    <div class="page" id="managePage">
+      <div class="panel">
+        <div class="section-label" style="margin-top:0;">নতুন পার্টি যোগ করুন</div>
+        <div class="row2">
+          <div class="field">
+            <label>পার্টি কোড</label>
+            <input id="newPartyCode" type="text" placeholder="যেমন: 520">
+          </div>
+          <div class="field">
+            <label>পার্টি নাম</label>
+            <input id="newPartyName" type="text" placeholder="যেমন: Nabil Glass House">
+          </div>
+        </div>
+        <button class="btn btn-primary" id="addPartyBtn">+ পার্টি যোগ করুন</button>
+        <div class="form-msg" id="partyMsg">✅ পার্টি যোগ হয়ে গেছে!</div>
+      </div>
+
+      <div class="section-label">সব পার্টি (মোট <span id="partyCountLabel">0</span>টি)</div>
+      <p class="subhead">পার্টির নাম ভুল হলে — সেই পার্টির যেকোনো এন্ট্রি "ডাটা এন্ট্রি" ট্যাবে ✏️ চেপে খুলুন, সঠিক পার্টি বেছে নিয়ে "আপডেট করুন" চাপুন।</p>
+      <div class="chip-list" id="partyChipList"></div>
+
+      <div class="panel" style="margin-top:26px;">
+        <div class="section-label" style="margin-top:0;">নতুন ব্যাংক যোগ করুন</div>
+        <div class="field">
+          <label>ব্যাংকের নাম</label>
+          <input id="newBankName" type="text" placeholder="যেমন: DUTCH BANGLA">
+        </div>
+        <button class="btn btn-primary" id="addBankBtn">+ ব্যাংক যোগ করুন</button>
+        <div class="form-msg" id="bankMsg">✅ ব্যাংক যোগ হয়ে গেছে!</div>
+      </div>
+
+      <div class="section-label">সব ব্যাংক (মোট <span id="bankCountLabel">0</span>টি)</div>
+      <div class="chip-list" id="bankChipList"></div>
     </div>
+  </main>
 
-  </section>
+  <div class="tabbar">
+    <button class="tab-btn active" data-page="dashboardPage" id="tabDashboard"><span class="ic">📊</span>ড্যাশবোর্ড</button>
+    <button class="tab-btn" data-page="summaryPage" id="tabSummary"><span class="ic">📈</span>মাসিক সামারি</button>
+    <button class="tab-btn" data-page="entryPage" id="tabEntry"><span class="ic">✍️</span>ডাটা এন্ট্রি</button>
+    <button class="tab-btn" data-page="managePage" id="tabManage"><span class="ic">🏷️</span>পার্টি ও ব্যাংক</button>
+  </div>
 
-  <!-- ================= OVERVIEW SCREEN ================= -->
-  <section class="screen" id="screen-overview">
-
-    <div class="year-nav">
-      <button id="yearPrev">‹</button>
-      <div class="yr" id="yearLabel">2026</div>
-      <button id="yearNext">›</button>
-    </div>
-
-    <div class="year-total-card">
-      <div class="num" id="yearTotal">0.00</div>
-      <div class="label">বছরের মোট টন</div>
-    </div>
-
-    <div id="monthsOverview"></div>
-
-    <div class="btn-row">
-      <button class="btn btn-whatsapp" id="shareYearBtn">বছরের সামারি শেয়ার করুন</button>
-    </div>
-
-  </section>
-
-</main>
-
-<nav class="tabbar">
-  <button data-tab="entry" class="active">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-    এন্ট্রি
-  </button>
-  <button data-tab="month">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
-    মাসের হিসাব
-  </button>
-  <button data-tab="overview">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
-    ওভারভিউ
-  </button>
-</nav>
-
-<div id="toast"></div>
-<div class="sheet-backdrop" id="sheetBackdrop"></div>
-<div class="sheet" id="menuSheet">
-  <div class="handle"></div>
-  <button class="item" id="exportBtn">ডেটা ব্যাকআপ (JSON) ডাউনলোড</button>
-  <button class="item" id="installBtn">অ্যাপ ইনস্টল করুন</button>
-  <button class="item danger" id="resetBtn">সব ডেটা মুছে ফেলুন</button>
-  <button class="item" id="logoutBtn" onclick="doLogout()">লগআউট</button>
+  <div id="printArea"></div>
 </div>
 
-</div><!-- /#app-root -->
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
-/* ============================================================
-   DATA LAYER
-   ============================================================ */
-const STORE_KEY = 'tonCountEntries_v1';
-const SEED_FLAG = 'tonCountSeeded_v1';
-const CATS = ['tempered','clear','colour','reflective','mirror'];
-const CAT_LABEL = {tempered:'Tempered', clear:'Clear', colour:'Colour', reflective:'Reflective', mirror:'Mirror'};
+const SEED_ENTRIES = [{"sl": 1, "month": "June", "date": "02-06-2026", "party": "Parves Thai", "code": "503", "do": "DO-101", "gross": 1389582.0, "less": 13895.82, "net": 1375686.18, "bankPay": 1116877.0, "bankName": "Pubali", "comm": "1+20", "weight": 12.66, "note": "Tempered Order"}, {"sl": 2, "month": "January", "date": "2026-01-03", "party": "Vhai Vhai Glass", "code": "1462", "do": "22", "gross": 1246533.0, "less": 1234068.0, "net": 691078.0, "bankPay": 817227.0, "bankName": "IFIC", "comm": "1+44", "weight": 12.16, "note": ""}, {"sl": 3, "month": "January", "date": "2026-01-03", "party": "Vhai Vhai Glass", "code": "1462", "do": "23", "gross": 49864.0, "less": 49365.0, "net": 24932.0, "bankPay": 0.0, "bankName": "", "comm": "50", "weight": 0, "note": ""}, {"sl": 4, "month": "January", "date": "2026-01-03", "party": "Vhai Vhai Glass", "code": "1462", "do": "24", "gross": 384597.0, "less": 380745.0, "net": 213217.0, "bankPay": 0.0, "bankName": "", "comm": "1+44", "weight": 0, "note": ""}, {"sl": 5, "month": "January", "date": "2026-01-04", "party": "Kaba Thai Aluminium", "code": "1265", "do": "36", "gross": 1850778.0, "less": 1832270.0, "net": 842844.0, "bankPay": 674300.0, "bankName": "IFIC", "comm": "1+54", "weight": 12.53, "note": "ex-2"}, {"sl": 6, "month": "January", "date": "2026-01-05", "party": "Sharif Glass Desing", "code": "509", "do": "61", "gross": 1745835.0, "less": 1728376.0, "net": 795053.0, "bankPay": 455000.0, "bankName": "PUBALI", "comm": "1+54", "weight": 12.48, "note": ""}, {"sl": 7, "month": "January", "date": "2026-01-05", "party": "M/S Rupali Thai", "code": "499", "do": "76", "gross": 1241524.0, "less": 1229108.0, "net": 565390.0, "bankPay": 479400.0, "bankName": "PUBALI", "comm": "1+54", "weight": 9.19, "note": ""}, {"sl": 8, "month": "January", "date": "2026-01-05", "party": "New Al Amin Glass House", "code": "502", "do": "110", "gross": 391510.0, "less": 387594.0, "net": 178293.0, "bankPay": 168000.0, "bankName": "PUBALI", "comm": "1+54", "weight": 2.57, "note": ""}, {"sl": 9, "month": "January", "date": "2026-01-06", "party": "Sharif Metal", "code": "510", "do": "135", "gross": 1712142.0, "less": 1695020.0, "net": 779709.0, "bankPay": 717000.0, "bankName": "PUBALI", "comm": "1+54", "weight": 11.76, "note": ""}, {"sl": 10, "month": "January", "date": "2026-01-07", "party": "Pervej Thai & Glass", "code": "503", "do": "192", "gross": 678212.0, "less": 671430.0, "net": 308857.0, "bankPay": 100000.0, "bankName": "IFIC", "comm": "1+54", "weight": 4.81, "note": ""}, {"sl": 11, "month": "January", "date": "2026-01-08", "party": "Vhai Vhai Glass", "code": "1462", "do": "236", "gross": 417130.0, "less": 412958.0, "net": 189961.0, "bankPay": 189961.0, "bankName": "IFIC", "comm": "1+54", "weight": 2.45, "note": ""}, {"sl": 12, "month": "January", "date": "2026-01-08", "party": "Vhai Vhai Glass", "code": "1462", "do": "237", "gross": 881395.0, "less": 872581.0, "net": 401387.0, "bankPay": 401400.0, "bankName": "IFIC", "comm": "1+54", "weight": 6.2, "note": ""}, {"sl": 13, "month": "January", "date": "2026-01-08", "party": "Pervej Thai & Glass", "code": "503", "do": "241", "gross": 539822.0, "less": 534424.0, "net": 245835.0, "bankPay": 245800.0, "bankName": "IFIC", "comm": "1+54", "weight": 3.51, "note": ""}, {"sl": 14, "month": "January", "date": "2026-01-11", "party": "Kaba Thai Aluminium", "code": "1265", "do": "255", "gross": 1854568.0, "less": 1836022.0, "net": 844570.0, "bankPay": 664500.0, "bankName": "ISLAMI", "comm": "1+54", "weight": 12.35, "note": "ex-2"}, {"sl": 15, "month": "January", "date": "2026-01-13", "party": "Sharif Metal", "code": "510", "do": "308", "gross": 1821533.0, "less": 1803317.0, "net": 829526.0, "bankPay": 829500.0, "bankName": "IFIC", "comm": "1+54", "weight": 12.03, "note": ""}, {"sl": 16, "month": "January", "date": "2026-01-14", "party": "Pervej Thai & Glass", "code": "503", "do": "336", "gross": 1075532.0, "less": 1064776.0, "net": 489797.0, "bankPay": 489800.0, "bankName": "IFIC", "comm": "1+54", "weight": 7.33, "note": ""}, {"sl": 17, "month": "January", "date": "2026-01-14", "party": "Vhai Vhai Glass", "code": "1462", "do": "343", "gross": 603627.0, "less": 597591.0, "net": 274892.0, "bankPay": 274900.0, "bankName": "IFIC", "comm": "1+54", "weight": 4.15, "note": ""}, {"sl": 18, "month": "January", "date": "2026-01-14", "party": "New Al Amin Glass House", "code": "502", "do": "341", "gross": 167492.0, "less": 165817.0, "net": 76276.0, "bankPay": 75000.0, "bankName": "PUBALI", "comm": "1+54", "weight": 1.1, "note": ""}, {"sl": 19, "month": "January", "date": "2026-01-18", "party": "Vhai Vhai Glass", "code": "1462", "do": "401", "gross": 1495579.0, "less": 1480623.0, "net": 681086.0, "bankPay": 681100.0, "bankName": "IFIC", "comm": "1+54", "weight": 10.2, "note": ""}, {"sl": 20, "month": "January", "date": "2026-01-18", "party": "Kaba Thai Aluminium", "code": "1265", "do": "384", "gross": 1834093.0, "less": 1815752.0, "net": 835246.0, "bankPay": 798900.0, "bankName": "ISLAMI", "comm": "1+54", "weight": 12.39, "note": "ex-2"}, {"sl": 21, "month": "January", "date": "2026-01-27", "party": "Monowar Traders", "code": "498", "do": "549", "gross": 558016.0, "less": 552436.0, "net": 254120.0, "bankPay": 172000.0, "bankName": "MERCANTILE", "comm": "1+54", "weight": 3.69, "note": ""}, {"sl": 22, "month": "January", "date": "2026-01-27", "party": "Sharif Glass Desing", "code": "509", "do": "550", "gross": 464625.0, "less": 459978.0, "net": 211590.0, "bankPay": 211600.0, "bankName": "ISLAMI", "comm": "1+54", "weight": 3.6, "note": ""}, {"sl": 23, "month": "January", "date": "2026-01-27", "party": "Pervej Thai & Glass", "code": "503", "do": "552", "gross": 790335.0, "less": 782431.0, "net": 359918.0, "bankPay": 359900.0, "bankName": "IFIC", "comm": "1+54", "weight": 5.5, "note": ""}, {"sl": 24, "month": "January", "date": "2026-01-28", "party": "Sumon Thai & Glass", "code": "511", "do": "572", "gross": 1708175.0, "less": 1691093.0, "net": 734515.0, "bankPay": 734500.0, "bankName": "BRACK", "comm": "57", "weight": 11.29, "note": "Side D"}, {"sl": 25, "month": "February", "date": "2026-02-01", "party": "Pervej Thai & Glass", "code": "503", "do": "22", "gross": 1888205.0, "less": 1869322.0, "net": 859888.0, "bankPay": 859900.0, "bankName": "IFIC", "comm": "1+54", "weight": 12.51, "note": ""}, {"sl": 26, "month": "February", "date": "2026-02-01", "party": "Vhai Vhai Glass", "code": "1462", "do": "100", "gross": 1912808.0, "less": 1893680.0, "net": 871092.0, "bankPay": 700000.0, "bankName": "IFIC", "comm": "1+54", "weight": 12.83, "note": "CR 171092"}, {"sl": 27, "month": "February", "date": "2026-02-01", "party": "Sharif Glass Desing", "code": "509", "do": "62", "gross": 516532.0, "less": 511365.0, "net": 235228.0, "bankPay": 808400.0, "bankName": "", "comm": "1+54", "weight": 0.0, "note": ""}, {"sl": 28, "month": "February", "date": "2026-02-01", "party": "Sharif Glass Desing", "code": "509", "do": "63", "gross": 1244906.0, "less": 1232456.0, "net": 566929.0, "bankPay": 552200.0, "bankName": "PUBALI", "comm": "1+54", "weight": 12.41, "note": "CR 250000"}, {"sl": 29, "month": "February", "date": "2026-02-02", "party": "Pervej Thai & Glass", "code": "503", "do": "173", "gross": 1843029.0, "less": 1824598.0, "net": 839315.0, "bankPay": 603500.0, "bankName": "IFIC", "comm": "1+54", "weight": 12.45, "note": "CR 235754"}, {"sl": 30, "month": "February", "date": "2026-02-02", "party": "Vhai Vhai Glass", "code": "1462", "do": "169", "gross": 1424728.0, "less": 1410480.0, "net": 648820.0, "bankPay": 600000.0, "bankName": "IFIC", "comm": "1+54", "weight": 9.63, "note": "CR 48820"}, {"sl": 31, "month": "February", "date": "2026-02-02", "party": "Kaba Thai Aluminium", "code": "1265", "do": "164", "gross": 1875195.0, "less": 1856443.0, "net": 853963.0, "bankPay": 573600.0, "bankName": "ISLAMI", "comm": "1+54", "weight": 12.36, "note": "CR 243200"}, {"sl": 32, "month": "February", "date": "2026-02-02", "party": "Sharif Metal", "code": "510", "do": "163", "gross": 1775051.0, "less": 1757300.0, "net": 808358.0, "bankPay": 808400.0, "bankName": "IFIC", "comm": "1+54", "weight": 12.18, "note": ""}, {"sl": 33, "month": "February", "date": "2026-02-02", "party": "Alif Glass House", "code": "491", "do": "192", "gross": 1179367.0, "less": 1167573.0, "net": 537083.0, "bankPay": 259528.0, "bankName": "PUBALI", "comm": "1+54", "weight": 8.02, "note": "CR 278000"}, {"sl": 34, "month": "February", "date": "2026-02-03", "party": "Vhai Vhai Glass", "code": "1462", "do": "215", "gross": 439250.0, "less": 434857.0, "net": 200034.0, "bankPay": 200000.0, "bankName": "IFIC", "comm": "1+54", "weight": 3.04, "note": ""}, {"sl": 35, "month": "February", "date": "2026-02-03", "party": "Kaba Thai Aluminium", "code": "1265", "do": "230", "gross": 1887568.0, "less": 1868691.0, "net": 859598.0, "bankPay": 822200.0, "bankName": "ISLAMI", "comm": "1+54", "weight": 12.56, "note": ""}, {"sl": 36, "month": "February", "date": "2026-02-03", "party": "Gazi Glass & Thai", "code": "493", "do": "231", "gross": 605115.0, "less": 599063.0, "net": 275569.0, "bankPay": 185600.0, "bankName": "PUBALI", "comm": "1+54", "weight": 3.9, "note": "CR 90000"}, {"sl": 37, "month": "February", "date": "2026-02-05", "party": "Kaba Thai Aluminium", "code": "1265", "do": "273", "gross": 1807978.0, "less": 1789898.0, "net": 823352.0, "bankPay": 787500.0, "bankName": "PUBALI", "comm": "1+54", "weight": 12.38, "note": ""}, {"sl": 38, "month": "February", "date": "2026-02-08", "party": "Kaba Thai Aluminium", "code": "1265", "do": "311", "gross": 1759949.0, "less": 1742349.0, "net": 801480.0, "bankPay": 766600.0, "bankName": "ISLAMI", "comm": "1+54", "weight": 11.77, "note": ""}, {"sl": 39, "month": "February", "date": "2026-02-08", "party": "Pervej Thai & Glass", "code": "503", "do": "321", "gross": 445876.0, "less": 441417.0, "net": 203052.0, "bankPay": 203000.0, "bankName": "IFIC", "comm": "1+54", "weight": 3.15, "note": ""}, {"sl": 40, "month": "February", "date": "2026-02-16", "party": "Pervej Thai & Glass", "code": "503", "do": "411", "gross": 1201594.0, "less": 1189577.0, "net": 547205.0, "bankPay": 547200.0, "bankName": "IFIC", "comm": "1+54", "weight": 8.018, "note": ""}, {"sl": 41, "month": "February", "date": "2026-02-25", "party": "Kaba Thai Aluminium", "code": "1265", "do": "492", "gross": 1866377.0, "less": 1847713.0, "net": 849947.0, "bankPay": 813000.0, "bankName": "Isalmi", "comm": "1+54", "weight": 12.55, "note": ""}, {"sl": 42, "month": "March", "date": "2026-03-01", "party": "Sharif Glass Desing", "code": "509", "do": "4", "gross": 1794019.0, "less": 1777078.0, "net": 816996.0, "bankPay": 537000.0, "bankName": "PUBALI", "comm": "1+54", "weight": 12.55, "note": "CR 280000"}, {"sl": 43, "month": "March", "date": "2026-03-01", "party": "Pervej Thai & Glass", "code": "503", "do": "238", "gross": 1762583.0, "less": 1744956.0, "net": 802680.0, "bankPay": 798000.0, "bankName": "IFIC", "comm": "1+54", "weight": 11.78, "note": ""}, {"sl": 44, "month": "March", "date": "2026-03-01", "party": "Sumon Thai & Glass", "code": "511", "do": "53", "gross": 1855350.0, "less": 1836796.0, "net": 844926.0, "bankPay": 0.0, "bankName": "", "comm": "1+54", "weight": 12.48, "note": ""}, {"sl": 45, "month": "March", "date": "2026-03-01", "party": "Sumon Thai & Glass", "code": "511", "do": "54", "gross": 1921745.0, "less": 1902527.0, "net": 875162.0, "bankPay": 0.0, "bankName": "", "comm": "1+54", "weight": 13.51, "note": ""}, {"sl": 46, "month": "March", "date": "2026-03-01", "party": "Sumon Thai & Glass", "code": "511", "do": "55", "gross": 1935503.0, "less": 1916197.0, "net": 881450.0, "bankPay": 2600000.0, "bankName": "PUBALI", "comm": "1+54", "weight": 12.79, "note": ""}, {"sl": 47, "month": "March", "date": "2026-03-01", "party": "Sharif Metal", "code": "510", "do": "180", "gross": 1625033.0, "less": 1608782.0, "net": 740039.0, "bankPay": 741500.0, "bankName": "PUBALI", "comm": "1+54", "weight": 11.44, "note": ""}, {"sl": 48, "month": "March", "date": "2026-03-01", "party": "Kaba Thai Aluminium", "code": "1265", "do": "3", "gross": 1821295.0, "less": 1803082.0, "net": 829417.0, "bankPay": 0, "bankName": "", "comm": "1+54", "weight": 12.19, "note": ""}, {"sl": 49, "month": "March", "date": "2026-03-01", "party": "Kaba Thai Aluminium", "code": "1265", "do": "1", "gross": 1883473.0, "less": 1864637.0, "net": 857733.0, "bankPay": 0.0, "bankName": "", "comm": "1+54", "weight": 12.6, "note": ""}, {"sl": 50, "month": "March", "date": "2026-03-01", "party": "Kaba Thai Aluminium", "code": "1265", "do": "24", "gross": 1813539.0, "less": 1795403.0, "net": 825885.0, "bankPay": 0.0, "bankName": "", "comm": "1+54", "weight": 12.29, "note": ""}, {"sl": 51, "month": "March", "date": "2026-03-01", "party": "Kaba Thai Aluminium", "code": "1265", "do": "23", "gross": 1825208.0, "less": 1806955.0, "net": 831199.0, "bankPay": 0.0, "bankName": "", "comm": "1+54", "weight": 12.55, "note": ""}, {"sl": 52, "month": "March", "date": "2026-03-01", "party": "Kaba Thai Aluminium", "code": "1265", "do": "178", "gross": 1865990.0, "less": 1847330.0, "net": 849771.0, "bankPay": 4151400.0, "bankName": "PUBALI", "comm": "1+54", "weight": 12.59, "note": ""}, {"sl": 53, "month": "March", "date": "2026-03-01", "party": "Vhai Vhai Glass", "code": "1462", "do": "179", "gross": 1850643.0, "less": 1832136.0, "net": 842782.0, "bankPay": 842500.0, "bankName": "IFIC", "comm": "1+54", "weight": 12.45, "note": ""}, {"sl": 54, "month": "March", "date": "2026-03-05", "party": "Sharif Glass Desing", "code": "509", "do": "310", "gross": 231000.0, "less": 228690.0, "net": 105197.0, "bankPay": 105200.0, "bankName": "PUBALI", "comm": "1+54", "weight": 1.62, "note": ""}, {"sl": 55, "month": "April", "date": "2026-04-13", "party": "Kaba Thai Aluminium", "code": "1265", "do": "78", "gross": 1111688.0, "less": 1100570.0, "net": 506262.0, "bankPay": 476200.0, "bankName": "PUBALI", "comm": "1+54", "weight": 8.62, "note": "CR 30062"}, {"sl": 56, "month": "April", "date": "2026-04-12", "party": "Sharif Glass Desing", "code": "509", "do": "69", "gross": 1013040.0, "less": 1002909.0, "net": 461338.0, "bankPay": 461400.0, "bankName": "PUBALI", "comm": "1+54", "weight": 7.89, "note": ""}, {"sl": 57, "month": "April", "date": "2026-04-23", "party": "Sumon Thai & Glass", "code": "511", "do": "158", "gross": 343875.0, "less": 340436.0, "net": 156600.0, "bankPay": 132000.0, "bankName": "PUBALI", "comm": "1+54", "weight": 2.66, "note": "CR 24600"}, {"sl": 58, "month": "April", "date": "2026-04-30", "party": "Pervej Thai & Glass", "code": "503", "do": "210", "gross": 1013250.0, "less": 1003117.0, "net": 461434.0, "bankPay": 461000.0, "bankName": "Islami ", "comm": "1+54", "weight": 7.85, "note": ""}, {"sl": 59, "month": "May", "date": "2026-05-14", "party": "Sharif Glass Desing", "code": "509", "do": "89", "gross": 1090283.0, "less": 1079380.17, "net": 863503.0, "bankPay": 863500.0, "bankName": "Pubali", "comm": "1+20", "weight": 9.37, "note": ""}, {"sl": 60, "month": "May", "date": "2026-05-17", "party": "Pervej Thai & Glass", "code": "503", "do": "110", "gross": 1038713.0, "less": 1028325.87, "net": 822660.0, "bankPay": 822000.0, "bankName": "IFIC", "comm": "1+20", "weight": 8.41, "note": ""}, {"sl": 61, "month": "June", "date": "2026-06-02", "party": "Pervej Thai & Glass", "code": "503", "do": "2", "gross": 1389582.0, "less": 1375686.18, "net": 1100548.0, "bankPay": 1116877.0, "bankName": "Pubali ", "comm": "1+20", "weight": 12.66, "note": ""}, {"sl": 62, "month": "June", "date": "2026-06-03", "party": "Sharif Glass Desing", "code": "509", "do": "11", "gross": 1303093.0, "less": 1290062.07, "net": 1032049.0, "bankPay": 1056500.0, "bankName": "Pubali ", "comm": "1+20", "weight": 12.54, "note": ""}, {"sl": 63, "month": "June", "date": "2026-06-03", "party": "Ripon Glass", "code": "504", "do": "20", "gross": 513393.0, "less": 508259.07, "net": 406607.0, "bankPay": 306600.0, "bankName": "Pubali ", "comm": "1+20", "weight": 4.49, "note": "CR 100000"}, {"sl": 64, "month": "June", "date": "2026-06-04", "party": "Vhai Vhai Glass", "code": "1462", "do": "65", "gross": 412992.0, "less": 408862.08, "net": 327090.0, "bankPay": 327000.0, "bankName": "IFIC", "comm": "1+20", "weight": 3.65, "note": ""}, {"sl": 65, "month": "June", "date": "2026-06-04", "party": "Sumon Thai & Glass", "code": "511", "do": "89", "gross": 1263066.0, "less": 1250435.34, "net": 1000348.0, "bankPay": 1000000.0, "bankName": "Pubali ", "comm": "1+20", "weight": 8.02, "note": ""}, {"sl": 66, "month": "June", "date": "2026-06-08", "party": "Pervej Thai & Glass", "code": "503", "do": "213", "gross": 1353610.0, "less": 1340073.9, "net": 1072059.0, "bankPay": 1091000.0, "bankName": "Islami-IFIC", "comm": "1+20", "weight": 12.59, "note": ""}, {"sl": 67, "month": "June", "date": "2026-06-09", "party": "Sharif Glass Desing", "code": "509", "do": "223", "gross": 1270270.0, "less": 1257567.3, "net": 1006054.0, "bankPay": 1019600.0, "bankName": "Pubali ", "comm": "1+20", "weight": 12.47, "note": ""}, {"sl": 68, "month": "June", "date": "2026-06-10", "party": "Pervej Thai & Glass", "code": "503", "do": "", "gross": 688359.0, "less": 681475.41, "net": 550680.0, "bankPay": 550700.0, "bankName": "Islami/IFIC", "comm": "20", "weight": 6.6, "note": ""}, {"sl": 69, "month": "June", "date": "2026-06-21", "party": "Sharif Glass Desing", "code": "509", "do": "431", "gross": 1277062.0, "less": 1264291.38, "net": 1011433.0, "bankPay": 900000.0, "bankName": "Pubali", "comm": "1+20", "weight": 12.63, "note": "CR 150215"}, {"sl": 70, "month": "June", "date": "2026-06-28", "party": "Pervej Thai & Glass", "code": "503", "do": "578", "gross": 1235919.0, "less": 1223559.81, "net": 978848.0, "bankPay": 672000.0, "bankName": "IFIC ", "comm": "1+20", "weight": 12.58, "note": "CR 300000"}, {"sl": 71, "month": "June", "date": "2026-06-29", "party": "Kaba Thai Aluminium", "code": "1265", "do": "620", "gross": 1225402.0, "less": 1213147.98, "net": 970518.0, "bankPay": 520518.0, "bankName": "IFIC ", "comm": "1+20", "weight": 11.95, "note": "CR 450000"}, {"sl": 72, "month": "June", "date": "2026-06-29", "party": "Sharif Glass Desing", "code": "509", "do": "633", "gross": 636363.0, "less": 629999.37, "net": 503999.0, "bankPay": 504000.0, "bankName": "Pubali ", "comm": "1+20", "weight": 6.59, "note": ""}, {"sl": 73, "month": "June", "date": "2026-06-30", "party": "Vhai Vhai Glass", "code": "1462", "do": "646", "gross": 1017450.0, "less": 1007275.5, "net": 805820.0, "bankPay": 500000.0, "bankName": "IFIC", "comm": "1+20", "weight": 6.84, "note": "CR 305820"}, {"sl": 74, "month": "June", "date": "2026-06-30", "party": "Pervej Thai & Glass", "code": "503", "do": "679", "gross": 1093208.0, "less": 1082275.92, "net": 865820.0, "bankPay": 740000.0, "bankName": "IFIC", "comm": "1+20", "weight": 8.68, "note": "CR 125820"}, {"sl": 75, "month": "July", "date": "2026-07-08", "party": "Sharif Glass Desing", "code": "509", "do": "", "gross": 61740.0, "less": 61122.6, "net": 0, "bankPay": 49400.0, "bankName": "Pubali", "comm": "20", "weight": 0.58, "note": ""}, {"sl": 76, "month": "July", "date": "2026-07-09", "party": "Pervej Thai & Glass", "code": "503", "do": "200", "gross": 437398.0, "less": 433024.02, "net": 346419.0, "bankPay": 346400.0, "bankName": "IFIC ", "comm": "1+20", "weight": 3.79, "note": ""}, {"sl": 77, "month": "July", "date": "2026-07-09", "party": "Sharif Glass Desing", "code": "509", "do": "217", "gross": 552366.0, "less": 546842.34, "net": 437474.0, "bankPay": 437500.0, "bankName": "Pubali", "comm": "1+20", "weight": 5.46, "note": ""}, {"sl": 78, "month": "July", "date": "2026-07-13", "party": "Sharif Metal", "code": "510", "do": "277", "gross": 1453821.0, "less": 1439282.79, "net": 1151426.0, "bankPay": 1107300.0, "bankName": "IFIC", "comm": "1+20", "weight": 10.51, "note": "CR 45000"}, {"sl": 79, "month": "July", "date": "2026-07-16", "party": "Vhai Vhai Glass", "code": "1462", "do": "394", "gross": 718007.0, "less": 710827.0, "net": 568661.0, "bankPay": 338600.0, "bankName": "IFIC", "comm": "1+20", "weight": 4.96, "note": "CR 230000"}];
+const MONTHS_ORDER = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTHS_BN = {"January": "জানুয়ারি", "February": "ফেব্রুয়ারি", "March": "মার্চ", "April": "এপ্রিল", "May": "মে", "June": "জুন", "July": "জুলাই", "August": "আগস্ট", "September": "সেপ্টেম্বর", "October": "অক্টোবর", "November": "নভেম্বর", "December": "ডিসেম্বর"};
+const MONTHS_SHORT_BN = {"January": "জান", "February": "ফেব", "March": "মার্চ", "April": "এপ্রি", "May": "মে", "June": "জুন", "July": "জুলা", "August": "আগ", "September": "সেপ্ট", "October": "অক্টো", "November": "নভে", "December": "ডিসে"};
 
-const SEED_DATA = {"2026-07-08": {"tempered": 0.58, "clear": 0.0, "colour": 0.0, "reflective": 0.0, "mirror": 0.0}, "2026-07-09": {"tempered": 0.0, "clear": 7.67, "colour": 0.0, "reflective": 0.55, "mirror": 1.03}, "2026-07-13": {"tempered": 0.0, "clear": 1.7, "colour": 1.25, "reflective": 7.54, "mirror": 0.0}, "2026-07-16": {"tempered": 0.0, "clear": 0.61, "colour": 0.0, "reflective": 4.35, "mirror": 0.0}, "2026-07-20": {"tempered": 0.0, "clear": 11.1, "colour": 0.0, "reflective": 0.0, "mirror": 0.0}, "2026-07-21": {"tempered": 0.0, "clear": 4.5, "colour": 0.0, "reflective": 2.07, "mirror": 0.0}, "2026-07-23": {"tempered": 0.0, "clear": 5.42, "colour": 0.0, "reflective": 6.61, "mirror": 1.03}, "2026-07-27": {"tempered": 0.0, "clear": 6.24, "colour": 0.0, "reflective": 5.54, "mirror": 0.68}, "2026-06-02": {"tempered": 0.19, "clear": 10.49, "colour": 0.0, "reflective": 0.0, "mirror": 1.98}, "2026-06-03": {"tempered": 0.29, "clear": 14.63, "colour": 0.0, "reflective": 0.0, "mirror": 2.1}, "2026-06-04": {"tempered": 0, "clear": 2.5, "colour": 0.0, "reflective": 8.02, "mirror": 1.15}, "2026-06-08": {"tempered": 0.22, "clear": 10.83, "colour": 0.0, "reflective": 0.0, "mirror": 1.54}, "2026-06-09": {"tempered": 0.19, "clear": 10.91, "colour": 0.0, "reflective": 0.0, "mirror": 1.37}, "2026-06-10": {"tempered": 6.6, "clear": 0.0, "colour": 0.0, "reflective": 0.0, "mirror": 0}, "2026-06-21": {"tempered": 0.46, "clear": 11.68, "colour": 0.0, "reflective": 0.0, "mirror": 0.49}, "2026-06-28": {"tempered": 0.0, "clear": 4.37, "colour": 8.21, "reflective": 0.0, "mirror": 0.0}, "2026-06-29": {"tempered": 0.0, "clear": 6.42, "colour": 12.12, "reflective": 0.0, "mirror": 0.0}, "2026-06-30": {"tempered": 0.0, "clear": 0.0, "colour": 5.64, "reflective": 9.88, "mirror": 0.0}, "2026-05-14": {"tempered": 0, "clear": 9.37, "colour": 0, "reflective": 0, "mirror": 0}, "2026-05-17": {"tempered": 0, "clear": 5.92, "colour": 0, "reflective": 0, "mirror": 2.49}, "2026-04-12": {"tempered": 0, "clear": 0, "colour": 7.89, "reflective": 0, "mirror": 0}, "2026-04-13": {"tempered": 0, "clear": 0, "colour": 8.62, "reflective": 0, "mirror": 0}, "2026-04-23": {"tempered": 0, "clear": 0, "colour": 2.66, "reflective": 0, "mirror": 0}, "2026-04-30": {"tempered": 0, "clear": 0, "colour": 7.85, "reflective": 0, "mirror": 0}, "2026-03-01": {"tempered": 0, "clear": 0.0, "colour": 7.02, "reflective": 140.67, "mirror": 1.46}, "2026-03-05": {"tempered": 0, "clear": 0, "colour": 1.65, "reflective": 0, "mirror": 0}, "2026-02-01": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 35.64, "mirror": 2.08}, "2026-02-02": {"tempered": 0, "clear": 1.38, "colour": 0.0, "reflective": 52.5, "mirror": 0.74}, "2026-02-03": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 19.5, "mirror": 0.0}, "2026-02-05": {"tempered": 0, "clear": 0.0, "colour": 1.35, "reflective": 11.03, "mirror": 0.0}, "2026-02-08": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 14.92, "mirror": 0.0}, "2026-02-16": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 8.018, "mirror": 0.0}, "2026-02-25": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 12.53, "mirror": 0.0}, "2026-01-03": {"tempered": 0, "clear": 3.14, "colour": 0.39, "reflective": 8.63, "mirror": 0.0}, "2026-01-04": {"tempered": 0, "clear": 0.0, "colour": 1.16, "reflective": 11.37, "mirror": 0.0}, "2026-01-05": {"tempered": 0, "clear": 5.27, "colour": 0.0, "reflective": 17.6, "mirror": 1.39}, "2026-01-06": {"tempered": 0, "clear": 1.79, "colour": 0.0, "reflective": 9.97, "mirror": 0.0}, "2026-01-07": {"tempered": 0, "clear": 1.17, "colour": 0.0, "reflective": 3.64, "mirror": 0.0}, "2026-01-08": {"tempered": 0, "clear": 0.74, "colour": 0.34, "reflective": 11.38, "mirror": 0.0}, "2026-01-11": {"tempered": 0, "clear": 0.0, "colour": 0.49, "reflective": 11.9, "mirror": 0.0}, "2026-01-13": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 12.03, "mirror": 0.0}, "2026-01-14": {"tempered": 0, "clear": 1.04, "colour": 0.0, "reflective": 11.03, "mirror": 0.52}, "2026-01-18": {"tempered": 0, "clear": 1.1, "colour": 0.0, "reflective": 21.53, "mirror": 0.0}, "2026-01-27": {"tempered": 0, "clear": 1.04, "colour": 3.6, "reflective": 8.15, "mirror": 0.0}, "2026-01-28": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 11.29, "mirror": 0.0}};
-
-function loadEntries(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    let data = raw ? JSON.parse(raw) : {};
-    if(!localStorage.getItem(SEED_FLAG)){
-      data = Object.assign({}, SEED_DATA, data); // existing user data wins over seed
-      localStorage.setItem(SEED_FLAG, '1');
-      localStorage.setItem(STORE_KEY, JSON.stringify(data));
-    }
-    return data;
-  }catch(e){ console.error('load error', e); return {}; }
+/* ============ LIVE GREETING STRIP ============ */
+function renderGreeting(){
+  const now = new Date();
+  const h = now.getHours();
+  const greetText = h < 5 ? 'শুভ রাত্রি' : h < 12 ? 'সুপ্রভাত' : h < 16 ? 'শুভ দুপুর' : h < 19 ? 'শুভ বিকাল' : 'শুভ সন্ধ্যা';
+  const icon = h < 5 ? '🌙' : h < 12 ? '🌤️' : h < 16 ? '☀️' : h < 19 ? '🌇' : '🌙';
+  const el = document.getElementById('greetText'); if(el) el.textContent = greetText + ' — আজকের কার্যক্রম দেখুন';
+  const gi = document.querySelector('#greetStrip .gicon'); if(gi) gi.textContent = icon;
+  const gd = document.getElementById('greetDate');
+  if(gd) gd.textContent = now.toLocaleDateString('bn-BD', {weekday:'short', day:'numeric', month:'short'});
 }
-function saveEntries(){
-  try{ localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }
-  catch(e){ toast('সেভ করতে সমস্যা হয়েছে'); }
-  pushToCloud();
+renderGreeting();
+setInterval(renderGreeting, 60000);
+
+/* ============ MINI BAR CHART (used on dashboard + summary) ============ */
+function renderBarChart(containerId, values, labels){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const max = Math.max(1, ...values);
+  const peakIdx = values.indexOf(Math.max(...values));
+  el.innerHTML = values.map((v,i)=>{
+    const h = Math.max(3, Math.round((v/max)*72));
+    return `<div class="trend-bar${v>0 && i===peakIdx ? ' peak':''}"><div class="bar" style="height:${h}px" title="${labels[i]}: ${fmt(v)}"></div><div class="lbl">${labels[i]}</div></div>`;
+  }).join('');
 }
 
-let entries = loadEntries();
-
-// ---------- Firebase (Firestore) — syncs data across every device (same account as Nasir Glass) ----------
-const firebaseConfig = {
-  apiKey: "AIzaSyAW72RV5Bt9zOZlwBkfneh3ulIZWSuhgtU",
-  authDomain: "nasir-glass-3edec.firebaseapp.com",
-  projectId: "nasir-glass-3edec",
-  storageBucket: "nasir-glass-3edec.firebasestorage.app",
-  messagingSenderId: "234065972210",
-  appId: "1:234065972210:web:0fea8c849e98901377396b",
-  measurementId: "G-78F0FG0D51"
-};
-let db = null;
-let auth = null;
-try{
-  firebase.initializeApp(firebaseConfig);
-  db = firebase.firestore();
-  auth = firebase.auth();
-}catch(e){ console.error('Firebase init failed', e); }
-
-async function pushToCloud(){
-  if(!db) return;
-  try{ await db.collection('toncount').doc('entries').set({data: entries}); }
-  catch(e){
-    console.error('Firestore save failed (toncount):', e);
-    toast('⚠️ ক্লাউডে সেভ হয়নি — এই ডিভাইসে সেভ আছে');
-  }
+/* ============ TREND CHIP: this month vs last month ============ */
+function trendChipHTML(entriesForScope){
+  const now = new Date();
+  const curMonth = MONTHS_ORDER[now.getMonth()];
+  const prevMonth = MONTHS_ORDER[(now.getMonth() + 11) % 12];
+  const curGross = entriesForScope.filter(e=>e.month===curMonth).reduce((s,e)=>s+e.gross,0);
+  const prevGross = entriesForScope.filter(e=>e.month===prevMonth).reduce((s,e)=>s+e.gross,0);
+  if(curGross === 0 && prevGross === 0) return '';
+  if(prevGross === 0) return `<span class="trend-chip up">▲ ${MONTHS_BN[curMonth]}-এ নতুন সেলস</span>`;
+  const pct = Math.round(((curGross - prevGross) / prevGross) * 100);
+  if(pct > 0) return `<span class="trend-chip up">▲ ${pct}% গত মাসের তুলনায়</span>`;
+  if(pct < 0) return `<span class="trend-chip down">▼ ${Math.abs(pct)}% গত মাসের তুলনায়</span>`;
+  return `<span class="trend-chip flat">— গত মাসের সমান</span>`;
 }
-async function pullFromCloud(){
-  if(!db) return;
-  try{
-    const snap = await db.collection('toncount').doc('entries').get();
+const BASE_BANKS = ["PUBALI", "IFIC", "ISLAMI", "MERCANTILE", "BRACK"];
+const ENTRIES_KEY = 'dealer_dashboard_all_entries_v2';
+const PARTY_KEY = 'dealer_dashboard_custom_parties_v1';
+const BANK_KEY = 'dealer_dashboard_custom_banks_v1';
+
+function fmt(n){ n = Math.round((n + Number.EPSILON) * 100) / 100; return n.toLocaleString('en-US', {maximumFractionDigits:2}); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function loadLS(key, fallback){ try{ const v = localStorage.getItem(key); return v===null ? fallback : JSON.parse(v); }catch(e){ return fallback; } }
+function saveLS(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  cloudPush(); // if signed in to Firebase, also push the latest state to the cloud (debounced)
+}
+
+// All entries now live in one editable store, seeded once from the original spreadsheet data.
+let allEntries = loadLS(ENTRIES_KEY, null);
+if(allEntries === null){ allEntries = JSON.parse(JSON.stringify(SEED_ENTRIES)); saveLS(ENTRIES_KEY, allEntries); }
+
+let customParties = loadLS(PARTY_KEY, []);
+let customBanks = loadLS(BANK_KEY, []);
+
+/* ============ OPTIONAL FIREBASE CLOUD SYNC ============ */
+const CLOUD_ENABLED = !!(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey);
+let cloudDb = null, cloudUser = null, cloudDocRef = null, cloudPushTimer = null, cloudApplyingRemote = false;
+
+function refreshEverythingOnScreen(){
+  rebuildIndex(); populateCodeSelect(); populateEntryPartySelect(); populateBankSelect();
+  renderPartyChips(); renderBankChips(); renderAllEntriesList(document.getElementById('entrySearchAll') ? document.getElementById('entrySearchAll').value : '');
+  if(typeof refreshStmtYears === 'function') refreshStmtYears();
+  if(document.getElementById('summaryPage') && document.getElementById('summaryPage').classList.contains('active') && typeof renderSummaryPage === 'function') renderSummaryPage();
+  if(currentSelectedCode) selectParty(currentSelectedCode);
+}
+
+function cloudPush(){
+  if(!CLOUD_ENABLED || !cloudDocRef || cloudApplyingRemote) return;
+  clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(()=>{
+    cloudDocRef.set({ entries: allEntries, customParties: customParties, customBanks: customBanks, updatedAt: Date.now() })
+      .catch(err=>console.error('cloud push failed', err));
+  }, 350);
+}
+
+function setSyncBadge(mode){
+  const badge = document.getElementById('syncBadge');
+  const text = document.getElementById('syncBadgeText');
+  if(mode === 'online'){ badge.classList.add('show','online'); text.textContent = 'রিয়েল-টাইম সিঙ্ক চালু'; }
+  else if(mode === 'connecting'){ badge.classList.add('show'); badge.classList.remove('online'); text.textContent = 'সিঙ্ক হচ্ছে...'; }
+  else if(mode === 'offline-cloud'){ badge.classList.add('show'); badge.classList.remove('online'); text.textContent = 'অফলাইন — এই ডিভাইসেই সেভ হচ্ছে'; }
+  else { badge.classList.remove('show'); }
+}
+
+// Fixed document ID — always read/write this exact document, no matter which
+// Firebase Auth UID is currently logged in. This protects the existing data
+// from ever being "orphaned" again if the login account is ever deleted and
+// recreated (which changes its UID even if the email/password stay the same).
+const FIXED_DEALER_DOC_ID = '1Fy3UlLIC5TKDDP12ygwWviu7j62';
+
+function startCloudListener(){
+  cloudDocRef = cloudDb.collection('dealerDashboard').doc(FIXED_DEALER_DOC_ID);
+  setSyncBadge('connecting');
+  cloudDocRef.onSnapshot((snap)=>{
     if(snap.exists){
-      // Cloud is the single source of truth (every save uploads the FULL data set),
-      // so we replace local data with it — this makes deletions sync correctly too.
-      entries = snap.data().data || {};
-      localStorage.setItem(STORE_KEY, JSON.stringify(entries));
+      const d = snap.data();
+      cloudApplyingRemote = true;
+      allEntries = d.entries || allEntries;
+      customParties = d.customParties || customParties;
+      customBanks = d.customBanks || customBanks;
+      saveLS(ENTRIES_KEY, allEntries); saveLS(PARTY_KEY, customParties); saveLS(BANK_KEY, customBanks);
+      cloudApplyingRemote = false;
+      refreshEverythingOnScreen();
+      setSyncBadge('online');
     } else {
-      // nothing in the cloud yet — push whatever we have locally so it becomes the baseline
-      await pushToCloud();
+      // first time this account is used — seed the cloud with current local data
+      cloudDocRef.set({ entries: allEntries, customParties: customParties, customBanks: customBanks, updatedAt: Date.now() });
+      setSyncBadge('online');
     }
-  }catch(e){ console.error('Firestore load failed (toncount):', e); }
+  }, (err)=>{ console.error('cloud listen error', err); setSyncBadge('offline-cloud'); });
 }
 
-// ---------- login gate ----------
-function showApp(){
-  document.getElementById('boot-check').classList.add('hidden');
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('app-root').style.display = '';
-  boot();
-}
-function showLoginScreen(){
-  document.getElementById('boot-check').classList.add('hidden');
-  document.getElementById('app-root').style.display = 'none';
-  document.getElementById('login-screen').classList.remove('hidden');
-}
-function showLogin(){
-  document.getElementById('signup-form').style.display = 'none';
-  document.getElementById('login-form').style.display = '';
-  document.getElementById('signup-err').textContent = '';
-}
-function showSignup(){
-  document.getElementById('login-form').style.display = 'none';
-  document.getElementById('signup-form').style.display = '';
-  document.getElementById('login-err').textContent = '';
-}
-async function doLogin(){
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const errBox = document.getElementById('login-err');
-  const btn = document.getElementById('login-btn');
-  errBox.textContent = '';
-  if(!email || !pass){ errBox.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
-  btn.disabled = true; btn.textContent = 'লগইন হচ্ছে...';
-  try{ await auth.signInWithEmailAndPassword(email, pass); }
-  catch(e){ errBox.textContent = loginErrorMessage(e); }
-  finally{ btn.disabled = false; btn.textContent = 'লগইন করুন'; }
-}
-async function doSignup(){
-  const email = document.getElementById('signup-email').value.trim();
-  const pass = document.getElementById('signup-pass').value;
-  const pass2 = document.getElementById('signup-pass2').value;
-  const errBox = document.getElementById('signup-err');
-  const btn = document.getElementById('signup-btn');
-  errBox.textContent = '';
-  if(!email || !pass){ errBox.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
-  if(pass.length < 6){ errBox.textContent = 'পাসওয়ার্ড অন্তত ৬ ডিজিট/অক্ষর হতে হবে'; return; }
-  if(pass !== pass2){ errBox.textContent = 'দুই পাসওয়ার্ড মিলছে না'; return; }
-  btn.disabled = true; btn.textContent = 'তৈরি হচ্ছে...';
-  try{ await auth.createUserWithEmailAndPassword(email, pass); }
-  catch(e){ errBox.textContent = loginErrorMessage(e); }
-  finally{ btn.disabled = false; btn.textContent = 'অ্যাকাউন্ট তৈরি করুন'; }
-}
-function loginErrorMessage(e){
-  const code = e && e.code || '';
-  if(code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'ইমেইল বা পাসওয়ার্ড ভুল';
-  if(code.includes('invalid-email')) return 'সঠিক ইমেইল দিন';
-  if(code.includes('email-already-in-use')) return 'এই ইমেইলে আগে থেকে অ্যাকাউন্ট আছে — লগইন করুন';
-  if(code.includes('weak-password')) return 'পাসওয়ার্ড খুব দুর্বল, আরেকটু শক্ত পাসওয়ার্ড দিন';
-  if(code.includes('network-request-failed')) return 'ইন্টারনেট সংযোগ পাওয়া যাচ্ছে না';
-  if(code.includes('too-many-requests')) return 'অনেকবার চেষ্টা হয়েছে, একটু পর আবার চেষ্টা করুন';
-  return 'কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন';
-}
-async function doLogout(){
-  if(!confirm('আপনি কি লগআউট করতে চান?')) return;
-  try{ await auth.signOut(); }catch(e){}
-}
-
-if(auth){
-  auth.onAuthStateChanged(async user => {
+if(CLOUD_ENABLED){
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  cloudDb = firebase.firestore();
+  try{ cloudDb.enablePersistence({synchronizeTabs:true}).catch(()=>{}); }catch(e){}
+  firebase.auth().onAuthStateChanged((user)=>{
     if(user){
-      await pullFromCloud();
-      showApp();
-      startEntriesLiveSync();
+      cloudUser = user;
+      document.getElementById('authGate').classList.remove('show');
+      startCloudListener();
     } else {
-      showLoginScreen();
+      cloudUser = null;
+      document.getElementById('authGate').classList.add('show');
+      setSyncBadge('none');
     }
+  });
+
+  let authMode = 'login';
+  const authTitle = document.getElementById('authTitle');
+  const authToggleLink = document.getElementById('authToggleLink');
+  const authErr = document.getElementById('authErr');
+  authToggleLink.addEventListener('click', ()=>{
+    authMode = authMode === 'login' ? 'signup' : 'login';
+    authTitle.textContent = authMode === 'login' ? 'লগইন করুন' : 'নতুন অ্যাকাউন্ট তৈরি করুন';
+    document.getElementById('authSubmitBtn').textContent = authMode === 'login' ? 'লগইন করুন' : 'অ্যাকাউন্ট তৈরি করুন';
+    authToggleLink.textContent = authMode === 'login' ? 'অ্যাকাউন্ট তৈরি করুন' : 'লগইন করুন';
+    authErr.classList.remove('show');
+  });
+  document.getElementById('authSubmitBtn').addEventListener('click', ()=>{
+    const email = document.getElementById('authEmail').value.trim();
+    const pass = document.getElementById('authPassword').value;
+    authErr.classList.remove('show');
+    if(!email || pass.length < 6){ authErr.textContent = 'সঠিক ইমেইল দিন এবং পাসওয়ার্ড কমপক্ষে ৬ ডিজিট/অক্ষর দিন।'; authErr.classList.add('show'); return; }
+    const action = authMode === 'login'
+      ? firebase.auth().signInWithEmailAndPassword(email, pass)
+      : firebase.auth().createUserWithEmailAndPassword(email, pass);
+    action.catch(err=>{ authErr.textContent = err.message; authErr.classList.add('show'); });
   });
 } else {
-  document.getElementById('logoutBtn').style.display = 'none';
-  showApp();
+  document.getElementById('authGate').classList.remove('show');
 }
 
-// ---------- live auto-sync: keep this device's screen updated the instant
-// entries are saved/deleted from ANY device or app (e.g. Nasir Glass auto-sync), no reload needed ----------
-let entriesLiveUnsub = null;
-function startEntriesLiveSync(){
-  if(!db || entriesLiveUnsub) return;
-  entriesLiveUnsub = db.collection('toncount').doc('entries').onSnapshot(snap=>{
-    if(!snap.exists) return;
-    entries = snap.data().data || {};
-    try{ localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }catch(_){}
-    renderRecentList();
-    if(typeof renderMonth==='function') renderMonth();
-    if(typeof renderOverview==='function') renderOverview();
-  }, err=>console.error('toncount live sync error', err));
-}
+let partyMap = {};
+let partyList = [];
+let bankList = [];
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
-const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
-const EN_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-
-function pad2(n){ return n.toString().padStart(2,'0'); }
-function todayStr(){
-  const d = new Date();
-  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-}
-function fmt(n){
-  n = Number(n)||0;
-  return n.toFixed(2);
-}
-function entryTotal(e){
-  return CATS.reduce((s,c)=> s + (Number(e[c])||0), 0);
-}
-function monthKey(dateStr){ return dateStr.slice(0,7); }
-function monthEntries(ym){
-  return Object.keys(entries).filter(d => d.startsWith(ym)).sort();
-}
-function monthSums(ym){
-  const sums = {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
-  monthEntries(ym).forEach(d=>{
-    CATS.forEach(c => sums[c] += Number(entries[d][c])||0);
+function rebuildIndex(){
+  partyMap = {};
+  allEntries.forEach(e=>{
+    if(!partyMap[e.code]) partyMap[e.code] = {code:e.code, name:e.party, entries:[], custom:false};
+    partyMap[e.code].entries.push(e);
   });
-  return sums;
-}
-function catColor(c){ return getComputedStyle(document.documentElement).getPropertyValue('--c-'+c).trim(); }
-
-function buildPaneStack(el, sums){
-  const total = CATS.reduce((s,c)=>s+sums[c],0);
-  el.innerHTML = '';
-  el.classList.toggle('empty', total<=0);
-  if(total<=0) return;
-  CATS.forEach(c=>{
-    if(sums[c]<=0) return;
-    const seg = document.createElement('div');
-    seg.className = 'seg';
-    seg.style.background = `var(--c-${c})`;
-    seg.style.flex = (sums[c]/total).toFixed(4);
-    el.appendChild(seg);
+  customParties.forEach(p=>{
+    if(!partyMap[p.code]) partyMap[p.code] = {code:p.code, name:p.name, entries:[], custom:true};
+    else partyMap[p.code].custom = true;
   });
-}
+  partyList = Object.values(partyMap).sort((a,b)=>a.name.localeCompare(b.name));
 
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(()=> t.classList.remove('show'), 1800);
+  const bankSet = new Set(BASE_BANKS);
+  customBanks.forEach(b=>bankSet.add(b));
+  bankList = Array.from(bankSet);
 }
+rebuildIndex();
 
-function waShare(text){
-  const url = 'https://wa.me/?text=' + encodeURIComponent(text);
-  window.open(url, '_blank');
+/* ============ TAB SWITCHING ============ */
+const pages = { dashboardPage: document.getElementById('dashboardPage'), summaryPage: document.getElementById('summaryPage'), entryPage: document.getElementById('entryPage'), managePage: document.getElementById('managePage') };
+const titles = {
+  dashboardPage: ['ডিস্ট্রিবিউটর ড্যাশবোর্ড', 'নিচের বক্সে পার্টি কোড লিখুন বা লিস্ট থেকে সিলেক্ট করুন — সকল তথ্য, সারাংশ ও টেবিল স্বয়ংক্রিয়ভাবে আপডেট হবে।'],
+  summaryPage: ['মাসিক সেলস সামারি', 'সব পার্টি মিলিয়ে কোন মাসে মোট কত সেলস হয়েছে — এখানে একনজরে দেখুন।'],
+  entryPage: ['ডাটা এন্ট্রি', 'নতুন এন্ট্রি যোগ করুন অথবা পুরোনো এন্ট্রি ✏️ চেপে সংশোধন করুন।'],
+  managePage: ['পার্টি ও ব্যাংক', 'নতুন পার্টি বা ব্যাংকের নাম যোগ করুন — এন্ট্রি ফর্মের ড্রপডাউনে সাথে সাথে যোগ হয়ে যাবে।']
+};
+function switchTab(pageKey){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===pageKey));
+  Object.entries(pages).forEach(([k,p])=>p.classList.toggle('active', k===pageKey));
+  document.getElementById('pageTitle').textContent = titles[pageKey][0];
+  document.getElementById('pageSub').textContent = titles[pageKey][1];
+  window.scrollTo({top:0, behavior:'instant'});
+  if(pageKey === 'summaryPage' && typeof renderSummaryPage === 'function') renderSummaryPage();
 }
-
-function shareTextForEntry(dateStr, e){
-  const d = new Date(dateStr+'T00:00:00');
-  const label = `${d.getDate()} ${BN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-  return `*NASIR GLASS — TON COUNT*\n${label}\n\n`+
-    `Tempered : ${fmt(e.tempered)}\n`+
-    `Clear : ${fmt(e.clear)}\n`+
-    `Colour : ${fmt(e.colour)}\n`+
-    `Reflective : ${fmt(e.reflective)}\n`+
-    `Mirror : ${fmt(e.mirror)}\n`+
-    `Total Ton : ${fmt(entryTotal(e))}`;
-}
-function shareTextForMonth(ym){
-  const s = monthSums(ym);
-  const total = CATS.reduce((a,c)=>a+s[c],0);
-  const [y,m] = ym.split('-');
-  const label = `${BN_MONTHS[parseInt(m,10)-1]} ${y}`;
-  const days = monthEntries(ym).length;
-  return `*NASIR GLASS — MONTHLY TON COUNT*\n${label}  (${days} দিনের এন্ট্রি)\n\n`+
-    `Tempered : ${fmt(s.tempered)}\n`+
-    `Clear : ${fmt(s.clear)}\n`+
-    `Colour : ${fmt(s.colour)}\n`+
-    `Reflective : ${fmt(s.reflective)}\n`+
-    `Mirror : ${fmt(s.mirror)}\n`+
-    `Total Ton : ${fmt(total)}`;
-}
-function shareTextForYear(year){
-  let lines = [`*NASIR GLASS — YEARLY TON COUNT ${year}*`, ''];
-  let grand = {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
-  let grandTotal = 0;
-  for(let m=0;m<12;m++){
-    const ym = `${year}-${pad2(m+1)}`;
-    const s = monthSums(ym);
-    const t = CATS.reduce((a,c)=>a+s[c],0);
-    if(t<=0) continue;
-    grandTotal += t;
-    CATS.forEach(c=> grand[c]+=s[c]);
-    lines.push(`${BN_MONTHS[m]}: ${fmt(t)} টন`);
-  }
-  lines.push('');
-  lines.push(`Tempered : ${fmt(grand.tempered)}`);
-  lines.push(`Clear : ${fmt(grand.clear)}`);
-  lines.push(`Colour : ${fmt(grand.colour)}`);
-  lines.push(`Reflective : ${fmt(grand.reflective)}`);
-  lines.push(`Mirror : ${fmt(grand.mirror)}`);
-  lines.push(`Total Ton : ${fmt(grandTotal)}`);
-  return lines.join('\n');
-}
-
-/* ============================================================
-   TAB NAVIGATION
-   ============================================================ */
-const tabs = ['entry','month','overview'];
-function showTab(name){
-  tabs.forEach(t=>{
-    document.getElementById('screen-'+t).classList.toggle('active', t===name);
-  });
-  document.querySelectorAll('nav.tabbar button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.tab===name);
-  });
-  if(name==='month') renderMonth();
-  if(name==='overview') renderOverview();
-}
-document.querySelectorAll('nav.tabbar button').forEach(b=>{
-  b.addEventListener('click', ()=> showTab(b.dataset.tab));
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchTab(btn.dataset.page));
 });
 
-/* ============================================================
-   ENTRY SCREEN
-   ============================================================ */
-const entryDateInput = document.getElementById('entryDate');
-const entryTotalEl = document.getElementById('entryTotal');
-const deleteRow = document.getElementById('deleteEntryRow');
+/* ============ DASHBOARD LOGIC ============ */
+const codeInput = document.getElementById('codeInput');
+const codeSelect = document.getElementById('codeSelect');
+const suggestDrop = document.getElementById('suggestDrop');
+const partyNameDisplay = document.getElementById('partyNameDisplay');
+const emptyHint = document.getElementById('emptyHint');
+const results = document.getElementById('results');
+let currentSelectedCode = null;
 
-function loadEntryForm(dateStr){
-  const e = entries[dateStr] || {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
-  CATS.forEach(c=>{
-    const inp = document.getElementById('in-'+c);
-    inp.value = e[c] ? e[c] : '';
+function populateCodeSelect(){
+  const cur = codeSelect.value;
+  codeSelect.innerHTML = '<option value="">— পার্টি কোড সিলেক্ট করুন —</option>';
+  partyList.forEach(p=>{
+    const opt = document.createElement('option');
+    opt.value = p.code; opt.textContent = p.code + ' — ' + p.name;
+    codeSelect.appendChild(opt);
   });
-  updateEntryTotal();
-  deleteRow.style.display = entries[dateStr] ? 'flex' : 'none';
+  if(cur) codeSelect.value = cur;
 }
-function currentFormEntry(){
-  const e = {};
-  CATS.forEach(c=>{
-    e[c] = parseFloat(document.getElementById('in-'+c).value) || 0;
+populateCodeSelect();
+
+function renderSuggestions(query){
+  const q = query.trim().toLowerCase();
+  if(q === ''){ suggestDrop.classList.remove('show'); suggestDrop.innerHTML=''; return; }
+  const list = partyList.filter(p => p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
+  suggestDrop.innerHTML = list.length === 0
+    ? `<div class="suggest-item" style="cursor:default;">কোনো পার্টি পাওয়া যায়নি</div>`
+    : list.map(p=>`<div class="suggest-item" data-code="${p.code}"><span>${escapeHtml(p.name)}</span><span class="c">${escapeHtml(p.code)}</span></div>`).join('');
+  suggestDrop.classList.add('show');
+  Array.from(suggestDrop.querySelectorAll('.suggest-item[data-code]')).forEach(item=>{
+    item.addEventListener('click', ()=>{ selectParty(item.dataset.code); suggestDrop.classList.remove('show'); });
   });
-  return e;
 }
-function updateEntryTotal(){
-  entryTotalEl.textContent = fmt(entryTotal(currentFormEntry()));
+
+function renderTxCard(e, opts={}){
+  const editedTag = e.edited ? `<span class="edited-badge">সংশোধিত</span>` : '';
+  const autoTag = e.source === 'nasirglass' ? `<span class="edited-badge" style="background:#2c4b9b;">Nasir Glass থেকে অটো</span>` : '';
+  return `
+    <div class="tx-card" data-sl="${e.sl}">
+      <div class="tx-actions">
+        <button class="edit-btn" data-sl="${e.sl}" title="সংশোধন করুন">✏️</button>
+        <button class="del-btn" data-sl="${e.sl}" title="ডিলিট করুন">🗑</button>
+      </div>
+      <div class="tx-top"><div class="tx-date">${escapeHtml(e.date)} · ${MONTHS_BN[e.month]||e.month} ${editedTag} ${autoTag}</div><div class="tx-do">DO: ${escapeHtml(e.do||'-')}</div></div>
+      ${opts.showParty ? `<div style="font-weight:700; margin-bottom:6px;">${escapeHtml(e.party)} (${escapeHtml(e.code)})</div>` : ''}
+      <div class="tx-grid">
+        <div><span>গ্রস</span>৳${fmt(e.gross)}</div><div><span>নেট</span>৳${fmt(e.net)}</div><div><span>ব্যাংক পেমেন্ট</span>৳${fmt(e.bankPay)}</div>
+        <div><span>ব্যাংক</span>${escapeHtml(e.bankName||'-')}</div><div><span>কমিশন/টাইপ</span>${escapeHtml(e.comm||'-')}</div><div><span>ওজন</span>${fmt(e.weight)} টন</div>
+        ${e.cr ? `<div><span>CR</span>৳${fmt(e.cr)}</div>` : ''}
+      </div>
+      ${e.note ? `<div class="tx-note">📝 ${escapeHtml(e.note)}</div>` : ''}
+    </div>`;
 }
-CATS.forEach(c=>{
-  document.getElementById('in-'+c).addEventListener('input', updateEntryTotal);
-});
-entryDateInput.addEventListener('change', ()=> loadEntryForm(entryDateInput.value));
 
-document.getElementById('saveBtn').addEventListener('click', ()=>{
-  const dateStr = entryDateInput.value || todayStr();
-  const e = currentFormEntry();
-  entries[dateStr] = e;
-  saveEntries();
-  toast('সেভ হয়েছে ✓');
-  deleteRow.style.display = 'flex';
-  renderRecentList();
-});
-document.getElementById('shareEntryBtn').addEventListener('click', ()=>{
-  const dateStr = entryDateInput.value || todayStr();
-  const e = entries[dateStr] || currentFormEntry();
-  waShare(shareTextForEntry(dateStr, e));
-});
-document.getElementById('deleteEntryBtn').addEventListener('click', ()=>{
-  const dateStr = entryDateInput.value;
-  if(!entries[dateStr]) return;
-  if(!confirm('এই তারিখের এন্ট্রি মুছে ফেলবেন?')) return;
-  delete entries[dateStr];
-  saveEntries();
-  loadEntryForm(dateStr);
-  renderRecentList();
-  toast('মুছে ফেলা হয়েছে');
-});
+function attachTxActions(container){
+  Array.from(container.querySelectorAll('.edit-btn')).forEach(btn=>{
+    btn.addEventListener('click', ()=> startEdit(parseFloat(btn.dataset.sl)));
+  });
+  Array.from(container.querySelectorAll('.del-btn')).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(!confirm('এই এন্ট্রিটা মুছে ফেলতে চান? এটা আর ফিরিয়ে আনা যাবে না।')) return;
+      const sl = parseFloat(btn.dataset.sl);
+      allEntries = allEntries.filter(e=>e.sl !== sl);
+      saveLS(ENTRIES_KEY, allEntries);
+      rebuildIndex(); populateCodeSelect(); populateEntryPartySelect(); renderAllEntriesList(); renderPartyChips(); if(typeof refreshStmtYears==='function') refreshStmtYears();
+      if(currentSelectedCode) selectParty(currentSelectedCode);
+    });
+  });
+}
 
-function renderRecentList(){
-  const list = document.getElementById('recentList');
-  const dates = Object.keys(entries).sort().reverse().slice(0,6);
-  if(dates.length===0){
-    list.innerHTML = '<div class="empty-note">এখনও কোনো এন্ট্রি নেই — উপরে প্রথম এন্ট্রি যোগ করুন</div>';
+function selectParty(code){
+  const p = partyMap[code];
+  currentSelectedCode = code;
+  if(!p){
+    partyNameDisplay.textContent = 'এই কোডে কোনো পার্টি পাওয়া যায়নি';
+    partyNameDisplay.classList.add('empty');
+    results.classList.remove('show'); emptyHint.style.display = 'block';
     return;
   }
-  list.innerHTML = dates.map(d=>logItemHTML(d)).join('');
-  list.querySelectorAll('.log-item').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      entryDateInput.value = el.dataset.date;
-      loadEntryForm(el.dataset.date);
-      window.scrollTo({top:0, behavior:'smooth'});
+  codeInput.value = p.code; codeSelect.value = p.code;
+  partyNameDisplay.textContent = p.name; partyNameDisplay.classList.remove('empty');
+  emptyHint.style.display = 'none'; results.classList.add('show');
+
+  const totalGross = p.entries.reduce((s,e)=>s+e.gross,0);
+  const totalNet = p.entries.reduce((s,e)=>s+e.net,0);
+  const totalBank = p.entries.reduce((s,e)=>s+e.bankPay,0);
+  const totalWeight = p.entries.reduce((s,e)=>s+e.weight,0);
+
+  document.getElementById('statCount').textContent = p.entries.length;
+  document.getElementById('statWeight').textContent = fmt(totalWeight);
+  document.getElementById('statGross').textContent = '৳' + fmt(totalGross);
+  document.getElementById('statNet').textContent = '৳' + fmt(totalNet);
+  document.getElementById('statBank').textContent = '৳' + fmt(totalBank);
+  document.getElementById('statGrossTrend').innerHTML = trendChipHTML(p.entries);
+
+  const monthlyGross = MONTHS_ORDER.map(m => p.entries.filter(e=>e.month===m).reduce((s,e)=>s+e.gross,0));
+  renderBarChart('partyTrendChart', monthlyGross, MONTHS_ORDER.map(m=>MONTHS_SHORT_BN[m]));
+
+  document.getElementById('monthTableBody').innerHTML = MONTHS_ORDER.map(m=>{
+    const rows = p.entries.filter(e=>e.month===m);
+    const g = rows.reduce((s,e)=>s+e.gross,0), l = rows.reduce((s,e)=>s+e.less,0), n = rows.reduce((s,e)=>s+e.net,0);
+    const b = rows.reduce((s,e)=>s+e.bankPay,0), w = rows.reduce((s,e)=>s+e.weight,0);
+    return `<tr class="${rows.length===0?'zero':''}"><td style="text-align:right; font-weight:700;">${MONTHS_BN[m]}</td><td>${fmt(g)}</td><td>${fmt(l)}</td><td>${fmt(n)}</td><td>${fmt(b)}</td><td>${fmt(w)}</td></tr>`;
+  }).join('');
+
+  const sorted = [...p.entries].sort((a,b)=>a.sl-b.sl);
+  const txListEl = document.getElementById('txList');
+  txListEl.innerHTML = sorted.length === 0
+    ? `<div class="empty-hint" style="margin-top:6px;"><span class="big">📭</span>এই পার্টির এখনো কোনো লেনদেন নেই। "ডাটা এন্ট্রি" ট্যাব থেকে যোগ করুন।</div>`
+    : sorted.map(e=>renderTxCard(e)).join('');
+  attachTxActions(txListEl);
+
+  history.replaceState({code:code}, '', '#'+code);
+  if(typeof renderStmtPreview==='function') renderStmtPreview();
+}
+
+codeInput.addEventListener('input', e => renderSuggestions(e.target.value));
+codeInput.addEventListener('focus', e => { if(e.target.value) renderSuggestions(e.target.value); });
+document.addEventListener('click', (e)=>{ if(!e.target.closest('.field')) suggestDrop.classList.remove('show'); });
+codeSelect.addEventListener('change', ()=>{ if(codeSelect.value) selectParty(codeSelect.value); });
+
+/* ============ DATA ENTRY LOGIC ============ */
+const inMonth = document.getElementById('inMonth');
+MONTHS_ORDER.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=MONTHS_BN[m]; inMonth.appendChild(o); });
+const now = new Date();
+inMonth.value = MONTHS_ORDER[now.getMonth()];
+document.getElementById('inDate').value = now.toISOString().slice(0,10);
+
+const inBankName = document.getElementById('inBankName');
+function populateBankSelect(){
+  const cur = inBankName.value;
+  inBankName.innerHTML = '<option value="">— অন্য / নেই —</option>';
+  bankList.forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; inBankName.appendChild(o); });
+  if(cur) inBankName.value = cur;
+}
+populateBankSelect();
+
+const inPartySelect = document.getElementById('inPartySelect');
+const inCode = document.getElementById('inCode');
+function populateEntryPartySelect(){
+  const cur = inPartySelect.value;
+  inPartySelect.innerHTML = '<option value="">— পার্টি সিলেক্ট করুন —</option>';
+  partyList.forEach(p=>{
+    const o = document.createElement('option'); o.value = p.code; o.textContent = p.name + ' (' + p.code + ')';
+    inPartySelect.appendChild(o);
+  });
+  if(cur){ inPartySelect.value = cur; inCode.value = cur; }
+}
+populateEntryPartySelect();
+inPartySelect.addEventListener('change', ()=>{ inCode.value = inPartySelect.value; });
+
+const inGross = document.getElementById('inGross');
+const inLess = document.getElementById('inLess');
+const inNet = document.getElementById('inNet');
+
+function nextSl(){ return allEntries.reduce((m,e)=>Math.max(m, e.sl||0), 0) + 1; }
+
+let editingSl = null;
+const entryPanel = document.getElementById('entryPanel');
+const editingBanner = document.getElementById('editingBanner');
+const saveEntryBtn = document.getElementById('saveEntryBtn');
+
+function fillFormFromEntry(e){
+  inMonth.value = e.month;
+  document.getElementById('inDate').value = e.date && /^\d{4}-\d{2}-\d{2}$/.test(e.date) ? e.date : now.toISOString().slice(0,10);
+  inPartySelect.value = e.code; inCode.value = e.code;
+  document.getElementById('inDO').value = e.do || '';
+  inGross.value = e.gross || '';
+  inLess.value = e.less || '';
+  inNet.value = e.net || '';
+  document.getElementById('inBankPay').value = e.bankPay || '';
+  inBankName.value = e.bankName || '';
+  document.getElementById('inComm').value = e.comm || '';
+  document.getElementById('inWeight').value = e.weight || '';
+  document.getElementById('inCR').value = e.cr || '';
+  document.getElementById('inNote').value = e.note || '';
+}
+
+function startEdit(sl){
+  const e = allEntries.find(x=>x.sl===sl);
+  if(!e) return;
+  editingSl = sl;
+  fillFormFromEntry(e);
+  entryPanel.classList.add('editing');
+  editingBanner.classList.add('show');
+  document.getElementById('editingSlLabel').textContent = sl;
+  saveEntryBtn.textContent = '✔ আপডেট করুন';
+  switchTab('entryPage');
+  entryPanel.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function stopEdit(){
+  editingSl = null;
+  entryPanel.classList.remove('editing');
+  editingBanner.classList.remove('show');
+  saveEntryBtn.textContent = '✔ এন্ট্রি সেভ করুন';
+  inPartySelect.value=''; inCode.value=''; document.getElementById('inDO').value='';
+  inGross.value=''; inLess.value=''; inNet.value=''; document.getElementById('inBankPay').value=''; inBankName.value='';
+  document.getElementById('inComm').value=''; document.getElementById('inWeight').value=''; document.getElementById('inCR').value=''; document.getElementById('inNote').value='';
+}
+document.getElementById('cancelEditBtn').addEventListener('click', stopEdit);
+
+function renderAllEntriesList(filterQ){
+  const wrap = document.getElementById('allEntriesList');
+  const q = (filterQ||'').trim().toLowerCase();
+  let list = [...allEntries].sort((a,b)=>b.sl-a.sl);
+  if(q) list = list.filter(e => e.party.toLowerCase().includes(q) || String(e.code).toLowerCase().includes(q));
+  if(list.length===0){
+    wrap.innerHTML = `<div class="empty-hint" style="margin-top:6px;"><span class="big">🔎</span>কোনো এন্ট্রি পাওয়া যায়নি।</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(e=>renderTxCard(e, {showParty:true})).join('');
+  attachTxActions(wrap);
+}
+renderAllEntriesList('');
+document.getElementById('entrySearchAll').addEventListener('input', e=> renderAllEntriesList(e.target.value));
+
+document.getElementById('saveEntryBtn').addEventListener('click', ()=>{
+  const code = inPartySelect.value;
+  const p = partyMap[code];
+  const gross = parseFloat(inGross.value) || 0;
+  if(!code || !p || gross <= 0){
+    alert('পার্টি সিলেক্ট করুন এবং গ্রস অ্যামাউন্ট অবশ্যই দিতে হবে। পার্টি তালিকায় না থাকলে আগে "পার্টি ও ব্যাংক" ট্যাব থেকে যোগ করে নিন।');
+    return;
+  }
+  const less = parseFloat(inLess.value) || 0;
+  const net = parseFloat(inNet.value) || 0;
+  const fields = {
+    month: inMonth.value, date: document.getElementById('inDate').value,
+    party: p.name, code: code, do: document.getElementById('inDO').value.trim(),
+    gross: gross, less: less, net: net,
+    bankPay: parseFloat(document.getElementById('inBankPay').value) || 0,
+    bankName: inBankName.value, comm: document.getElementById('inComm').value.trim(),
+    weight: parseFloat(document.getElementById('inWeight').value) || 0,
+    cr: parseFloat(document.getElementById('inCR').value) || 0,
+    note: document.getElementById('inNote').value.trim()
+  };
+
+  if(editingSl !== null){
+    const idx = allEntries.findIndex(e=>e.sl===editingSl);
+    if(idx > -1){ allEntries[idx] = Object.assign({}, allEntries[idx], fields, {sl: editingSl, edited: true}); }
+    saveLS(ENTRIES_KEY, allEntries);
+    rebuildIndex(); populateCodeSelect(); populateEntryPartySelect(); renderAllEntriesList(document.getElementById('entrySearchAll').value); if(typeof refreshStmtYears==='function') refreshStmtYears();
+    if(currentSelectedCode) selectParty(currentSelectedCode);
+    const msg = document.getElementById('formMsg');
+    msg.textContent = '✅ এন্ট্রি সংশোধন হয়ে গেছে!';
+    msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'), 2500);
+    stopEdit();
+  } else {
+    const entry = Object.assign({sl: nextSl()}, fields);
+    allEntries.push(entry);
+    saveLS(ENTRIES_KEY, allEntries);
+    rebuildIndex(); populateCodeSelect(); populateEntryPartySelect(); renderAllEntriesList(document.getElementById('entrySearchAll').value); if(typeof refreshStmtYears==='function') refreshStmtYears();
+    inPartySelect.value=''; inCode.value=''; document.getElementById('inDO').value='';
+    inGross.value=''; inLess.value=''; inNet.value=''; document.getElementById('inBankPay').value=''; inBankName.value='';
+    document.getElementById('inComm').value=''; document.getElementById('inWeight').value=''; document.getElementById('inCR').value=''; document.getElementById('inNote').value='';
+    const msg = document.getElementById('formMsg');
+    msg.textContent = '✅ এন্ট্রি সেভ হয়েছে এবং ড্যাশবোর্ডে যোগ হয়ে গেছে!';
+    msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'), 2500);
+  }
+});
+
+/* ============ MANAGE PARTIES & BANKS ============ */
+function renderPartyChips(){
+  document.getElementById('partyCountLabel').textContent = partyList.length;
+  const list = document.getElementById('partyChipList');
+  list.innerHTML = partyList.map(p=>`
+    <div class="chip-row">
+      <div class="info">
+        <div class="name">${escapeHtml(p.name)} <span class="tag ${p.custom?'custom':'base'}">${p.custom?'নতুন':'কোড ' + escapeHtml(p.code)}</span></div>
+        <div class="meta">কোড: ${escapeHtml(p.code)} · ${p.entries.length}টি এন্ট্রি</div>
+      </div>
+      ${p.custom && p.entries.length===0 ? `<button class="rm" data-code="${p.code}" title="মুছুন">🗑</button>` : ''}
+    </div>`).join('');
+  Array.from(list.querySelectorAll('.rm')).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const code = btn.dataset.code;
+      customParties = customParties.filter(p=>p.code !== code);
+      saveLS(PARTY_KEY, customParties);
+      rebuildIndex(); populateCodeSelect(); populateEntryPartySelect(); renderPartyChips();
     });
   });
 }
-function logItemHTML(d){
-  const e = entries[d];
-  const total = entryTotal(e);
-  const dt = new Date(d+'T00:00:00');
-  const catStr = CATS.filter(c=>e[c]>0).map(c=>`${CAT_LABEL[c][0]}:${fmt(e[c])}`).join('  ');
-  let segs = '';
-  CATS.forEach(c=>{
-    if(e[c]>0){ segs += `<div class="seg" style="background:var(--c-${c});flex:${(e[c]/total).toFixed(4)}"></div>`; }
-  });
-  return `<div class="log-item" data-date="${d}">
-    <div class="date"><div class="d">${dt.getDate()}</div><div class="m">${EN_MONTHS[dt.getMonth()]}</div></div>
-    <div class="mid">
-      <div class="mini-stack">${segs}</div>
-      <div class="cats">${catStr || 'কোনো ডেটা নেই'}</div>
-    </div>
-    <div class="total">${fmt(total)}</div>
-  </div>`;
-}
-
-/* ============================================================
-   MONTH SCREEN
-   ============================================================ */
-let currentYM = todayStr().slice(0,7);
-
-function renderMonth(){
-  const [y,m] = currentYM.split('-').map(Number);
-  document.getElementById('monthLabel').textContent = BN_MONTHS[m-1];
-  document.getElementById('monthSub').textContent = y;
-
-  const sums = monthSums(currentYM);
-  buildPaneStack(document.getElementById('monthPaneStack'), sums);
-
-  const legend = document.getElementById('monthLegend');
-  legend.innerHTML = CATS.map(c=>`<span><span class="dot" style="background:var(--c-${c})"></span>${CAT_LABEL[c]}</span>`).join('');
-
-  const total = CATS.reduce((a,c)=>a+sums[c],0);
-  document.getElementById('monthSummary').innerHTML = CATS.map(c=>`
-    <div class="summary-row">
-      <span class="k"><span class="dot" style="background:var(--c-${c})"></span>${CAT_LABEL[c]}</span>
-      <span class="v">${fmt(sums[c])}</span>
-    </div>`).join('') + `
-    <div class="summary-row total">
-      <span class="k">Total Ton</span>
-      <span class="v">${fmt(total)}</span>
+function renderBankChips(){
+  document.getElementById('bankCountLabel').textContent = bankList.length;
+  const list = document.getElementById('bankChipList');
+  list.innerHTML = bankList.map(b=>{
+    const isCustom = customBanks.includes(b);
+    return `<div class="chip-row">
+      <div class="info"><div class="name">${escapeHtml(b)} <span class="tag ${isCustom?'custom':'base'}">${isCustom?'নতুন':'ডিফল্ট'}</span></div></div>
+      ${isCustom ? `<button class="rm" data-bank="${escapeHtml(b)}" title="মুছুন">🗑</button>` : ''}
     </div>`;
-
-  const dates = monthEntries(currentYM).slice().reverse();
-  document.getElementById('monthLogCount').textContent = dates.length;
-  const logEl = document.getElementById('monthLog');
-  if(dates.length===0){
-    logEl.innerHTML = '<div class="empty-note">এই মাসে কোনো এন্ট্রি নেই</div>';
-  }else{
-    logEl.innerHTML = dates.map(d=>logItemHTML(d)).join('');
-    logEl.querySelectorAll('.log-item').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        showTab('entry');
-        entryDateInput.value = el.dataset.date;
-        loadEntryForm(el.dataset.date);
-      });
+  }).join('');
+  Array.from(list.querySelectorAll('.rm')).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      customBanks = customBanks.filter(b=>b !== btn.dataset.bank);
+      saveLS(BANK_KEY, customBanks);
+      rebuildIndex(); populateBankSelect(); renderBankChips();
     });
-  }
+  });
 }
-document.getElementById('monthPrev').addEventListener('click', ()=>{ shiftMonth(-1); });
-document.getElementById('monthNext').addEventListener('click', ()=>{ shiftMonth(1); });
-function shiftMonth(delta){
-  let [y,m] = currentYM.split('-').map(Number);
-  m += delta;
-  if(m<1){ m=12; y--; } if(m>12){ m=1; y++; }
-  currentYM = `${y}-${pad2(m)}`;
-  renderMonth();
-}
-document.getElementById('shareMonthBtn').addEventListener('click', ()=>{
-  waShare(shareTextForMonth(currentYM));
+renderPartyChips(); renderBankChips();
+
+document.getElementById('addPartyBtn').addEventListener('click', ()=>{
+  const code = document.getElementById('newPartyCode').value.trim();
+  const name = document.getElementById('newPartyName').value.trim();
+  if(!code || !name){ alert('পার্টি কোড এবং নাম দুটোই দিতে হবে।'); return; }
+  if(partyMap[code]){ alert('এই কোড ইতিমধ্যে ব্যবহার হয়েছে (' + partyMap[code].name + ')। ভিন্ন কোড দিন।'); return; }
+  customParties.push({code, name});
+  saveLS(PARTY_KEY, customParties);
+  rebuildIndex(); populateCodeSelect(); populateEntryPartySelect(); renderPartyChips();
+  document.getElementById('newPartyCode').value=''; document.getElementById('newPartyName').value='';
+  const msg = document.getElementById('partyMsg'); msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'), 2200);
 });
 
-/* ============================================================
-   OVERVIEW SCREEN
-   ============================================================ */
-let currentYear = parseInt(todayStr().slice(0,4),10);
-
-function renderOverview(){
-  document.getElementById('yearLabel').textContent = currentYear;
-  let grandTotal = 0;
-  let html = '';
-  for(let m=0;m<12;m++){
-    const ym = `${currentYear}-${pad2(m+1)}`;
-    const sums = monthSums(ym);
-    const total = CATS.reduce((a,c)=>a+sums[c],0);
-    grandTotal += total;
-    const isZero = total<=0;
-    html += `<div class="month-card ${isZero?'zero':''}">
-      <div class="row-between">
-        <span class="mname">${BN_MONTHS[m]}</span>
-        <span class="mtotal">${isZero? '—' : fmt(total)+' টন'}</span>
-      </div>
-      <div class="pill-row">
-        ${CATS.map(c=>`<span class="pill ${sums[c]>0?'has':''}">${CAT_LABEL[c]} ${sums[c]>0?fmt(sums[c]):'–'}</span>`).join('')}
-      </div>
-    </div>`;
-  }
-  document.getElementById('monthsOverview').innerHTML = html;
-  document.getElementById('yearTotal').textContent = fmt(grandTotal);
-}
-document.getElementById('yearPrev').addEventListener('click', ()=>{ currentYear--; renderOverview(); });
-document.getElementById('yearNext').addEventListener('click', ()=>{ currentYear++; renderOverview(); });
-document.getElementById('shareYearBtn').addEventListener('click', ()=>{
-  waShare(shareTextForYear(currentYear));
+document.getElementById('addBankBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('newBankName').value.trim();
+  if(!name){ alert('ব্যাংকের নাম দিতে হবে।'); return; }
+  if(bankList.some(b=>b.toLowerCase() === name.toLowerCase())){ alert('এই ব্যাংক ইতিমধ্যে তালিকায় আছে।'); return; }
+  customBanks.push(name);
+  saveLS(BANK_KEY, customBanks);
+  rebuildIndex(); populateBankSelect(); renderBankChips();
+  document.getElementById('newBankName').value='';
+  const msg = document.getElementById('bankMsg'); msg.classList.add('show'); setTimeout(()=>msg.classList.remove('show'), 2200);
 });
 
-/* ============================================================
-   MENU SHEET
-   ============================================================ */
-const sheet = document.getElementById('menuSheet');
-const backdrop = document.getElementById('sheetBackdrop');
-function openSheet(){ sheet.classList.add('show'); backdrop.classList.add('show'); }
-function closeSheet(){ sheet.classList.remove('show'); backdrop.classList.remove('show'); }
-document.getElementById('menuBtn').addEventListener('click', openSheet);
-backdrop.addEventListener('click', closeSheet);
-
-document.getElementById('exportBtn').addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify(entries, null, 1)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `ton-count-backup-${todayStr()}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-  closeSheet();
-  toast('ব্যাকআপ ডাউনলোড হয়েছে');
-});
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  closeSheet();
-  if(!confirm('সব ডেটা স্থায়ীভাবে মুছে ফেলা হবে। আপনি কি নিশ্চিত?')) return;
-  entries = {};
-  localStorage.removeItem(STORE_KEY);
-  localStorage.removeItem(SEED_FLAG);
-  saveEntries();
-  loadEntryForm(entryDateInput.value);
-  renderRecentList();
-  toast('সব ডেটা মুছে ফেলা হয়েছে');
+/* ============ INIT ============ */
+window.addEventListener('DOMContentLoaded', ()=>{
+  const hash = location.hash.replace('#','');
+  if(hash && partyMap[hash]) selectParty(hash);
 });
 
-let deferredInstall = null;
+let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault();
-  deferredInstall = e;
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+  document.getElementById('installNowBtn').style.display = 'inline-block';
 });
-document.getElementById('installBtn').addEventListener('click', async ()=>{
-  closeSheet();
-  if(deferredInstall){
-    deferredInstall.prompt();
-    await deferredInstall.userChoice;
-    deferredInstall = null;
-  }else{
-    toast('ব্রাউজার মেনু থেকে "Add to Home Screen" ব্যবহার করুন');
+document.getElementById('installNowBtn').addEventListener('click', async ()=>{
+  if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null;
+});
+if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
+  document.getElementById('installBanner').classList.add('show');
+}
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+/* ============ STATEMENT: PRINT & WHATSAPP SHARE ============ */
+const stmtType = document.getElementById('stmtType');
+const stmtMonthRow = document.getElementById('stmtMonthRow');
+const stmtYearRow = document.getElementById('stmtYearRow');
+const stmtMonth = document.getElementById('stmtMonth');
+const stmtYear = document.getElementById('stmtYear');
+
+MONTHS_ORDER.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=MONTHS_BN[m]; stmtMonth.appendChild(o); });
+stmtMonth.value = MONTHS_ORDER[now.getMonth()];
+
+function refreshStmtYears(){
+  const years = new Set();
+  allEntries.forEach(e=>{ const y = (e.date||'').match(/^(\d{4})/); if(y) years.add(y[1]); });
+  const cur = stmtYear.value;
+  stmtYear.innerHTML = '';
+  Array.from(years).sort().reverse().forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y; stmtYear.appendChild(o); });
+  if(years.size===0){ const o=document.createElement('option'); o.value=String(now.getFullYear()); o.textContent=String(now.getFullYear()); stmtYear.appendChild(o); }
+  if(cur && Array.from(stmtYear.options).some(o=>o.value===cur)) stmtYear.value = cur;
+}
+refreshStmtYears();
+
+stmtType.addEventListener('change', ()=>{
+  stmtMonthRow.style.display = stmtType.value === 'month' ? 'flex' : 'none';
+  stmtYearRow.style.display = stmtType.value === 'year' ? 'flex' : 'none';
+  renderStmtPreview();
+});
+stmtMonth.addEventListener('change', renderStmtPreview);
+stmtYear.addEventListener('change', renderStmtPreview);
+
+// Show the selected period's statement right on the page — updated live as
+// the type/month/year dropdowns change — so the data is visible *before*
+// printing or sharing, not just inside the shared file itself.
+function renderStmtPreview(){
+  const box = document.getElementById('stmtPreview');
+  const data = getStatementEntries();
+  if(!data){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.innerHTML = buildStatementHTML(data);
+  box.style.display = 'block';
+}
+
+function getStatementEntries(){
+  if(!currentSelectedCode) return null;
+  const p = partyMap[currentSelectedCode];
+  if(!p) return null;
+  let list = [...p.entries];
+  let periodLabel = 'সব সময়';
+  if(stmtType.value === 'month'){
+    list = list.filter(e=>e.month === stmtMonth.value);
+    periodLabel = MONTHS_BN[stmtMonth.value];
+  } else if(stmtType.value === 'year'){
+    list = list.filter(e=>(e.date||'').startsWith(stmtYear.value));
+    periodLabel = stmtYear.value;
+  }
+  list.sort((a,b)=>a.sl-b.sl);
+  return {party:p, list, periodLabel};
+}
+
+function buildStatementHTML(data){
+  const {party, list, periodLabel} = data;
+  const totalGross = list.reduce((s,e)=>s+e.gross,0);
+  const totalLess = list.reduce((s,e)=>s+e.less,0);
+  const totalNet = list.reduce((s,e)=>s+e.net,0);
+  const totalBank = list.reduce((s,e)=>s+e.bankPay,0);
+  const totalWeight = list.reduce((s,e)=>s+e.weight,0);
+  const totalCR = list.reduce((s,e)=>s+(e.cr||0),0);
+  const rows = list.length === 0
+    ? `<tr><td colspan="9">এই সময়ে কোনো লেনদেন নেই</td></tr>`
+    : list.map(e=>`<tr>
+        <td>${escapeHtml(e.date)}</td><td>${escapeHtml(e.do||'-')}</td>
+        <td>${fmt(e.gross)}</td><td>${fmt(e.less)}</td><td>${fmt(e.net)}</td>
+        <td>${fmt(e.bankPay)}</td><td>${escapeHtml(e.bankName||'-')}</td><td>${fmt(e.weight)}</td>
+        <td>${e.cr ? fmt(e.cr) : '-'}</td>
+      </tr>`).join('');
+  return `
+    <div class="pa-head">
+      <h2>ডিস্ট্রিবিউটর স্টেটমেন্ট — ${escapeHtml(party.name)}</h2>
+      <p>পার্টি কোড: ${escapeHtml(party.code)} &nbsp;|&nbsp; সময়কাল: ${escapeHtml(periodLabel)} &nbsp;|&nbsp; তৈরির তারিখ: ${new Date().toLocaleDateString('en-GB')}</p>
+    </div>
+    <table class="pa-table">
+      <thead><tr><th>তারিখ</th><th>DO নং</th><th>গ্রস</th><th>১% লেস</th><th>নেট</th><th>ব্যাংক পেমেন্ট</th><th>ব্যাংক</th><th>ওজন</th><th>CR</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="pa-total-row">
+        <td colspan="2">সর্বমোট</td><td>${fmt(totalGross)}</td><td>${fmt(totalLess)}</td><td>${fmt(totalNet)}</td><td>${fmt(totalBank)}</td><td>-</td><td>${fmt(totalWeight)}</td><td>${fmt(totalCR)}</td>
+      </tr></tfoot>
+    </table>`;
+}
+
+document.getElementById('printStmtBtn').addEventListener('click', ()=>{
+  const data = getStatementEntries();
+  if(!data){ alert('আগে একটা পার্টি সিলেক্ট করুন।'); return; }
+  renderStmtPreview();
+  document.getElementById('printArea').innerHTML = buildStatementHTML(data);
+  window.print();
+});
+
+document.getElementById('shareStmtBtn').addEventListener('click', async ()=>{
+  const data = getStatementEntries();
+  if(!data){ alert('আগে একটা পার্টি সিলেক্ট করুন।'); return; }
+  renderStmtPreview();
+  const printArea = document.getElementById('printArea');
+  printArea.innerHTML = buildStatementHTML(data);
+  printArea.style.display = 'block';
+  printArea.style.position = 'fixed';
+  printArea.style.left = '-9999px';
+  printArea.style.background = '#fff';
+  printArea.style.color = '#000';
+  printArea.style.width = '650px';
+  printArea.style.padding = '16px';
+
+  try{
+    if(typeof html2canvas === 'undefined') throw new Error('html2canvas not loaded');
+    const canvas = await html2canvas(printArea, {backgroundColor:'#ffffff', scale:2});
+    canvas.toBlob(async (blob)=>{
+      const fileName = `statement_${data.party.code}_${data.periodLabel}.png`.replace(/\s+/g,'_');
+      const file = new File([blob], fileName, {type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:'ডিস্ট্রিবিউটর স্টেটমেন্ট', text:`${data.party.name} — স্টেটমেন্ট (${data.periodLabel})`});
+      } else {
+        // fallback: download image + open WhatsApp with text summary
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob); link.download = fileName; link.click();
+        const textSummary = `*${data.party.name}* (কোড: ${data.party.code})\nসময়কাল: ${data.periodLabel}\nমোট গ্রস: ৳${fmt(data.list.reduce((s,e)=>s+e.gross,0))}\nমোট নেট: ৳${fmt(data.list.reduce((s,e)=>s+e.net,0))}\nমোট ব্যাংক পেমেন্ট: ৳${fmt(data.list.reduce((s,e)=>s+e.bankPay,0))}\nমোট CR: ৳${fmt(data.list.reduce((s,e)=>s+(e.cr||0),0))}`;
+        window.open('https://wa.me/?text=' + encodeURIComponent(textSummary), '_blank');
+      }
+      printArea.style.display = 'none'; printArea.style.position=''; printArea.style.left='';
+    }, 'image/png');
+  }catch(err){
+    // fallback: plain text share via WhatsApp
+    const textSummary = `*${data.party.name}* (কোড: ${data.party.code})\nসময়কাল: ${data.periodLabel}\nমোট গ্রস: ৳${fmt(data.list.reduce((s,e)=>s+e.gross,0))}\nমোট নেট: ৳${fmt(data.list.reduce((s,e)=>s+e.net,0))}\nমোট ব্যাংক পেমেন্ট: ৳${fmt(data.list.reduce((s,e)=>s+e.bankPay,0))}\nমোট CR: ৳${fmt(data.list.reduce((s,e)=>s+(e.cr||0),0))}`;
+    window.open('https://wa.me/?text=' + encodeURIComponent(textSummary), '_blank');
+    printArea.style.display = 'none'; printArea.style.position=''; printArea.style.left='';
   }
 });
 
-/* ============================================================
-   INIT
-   ============================================================ */
-function boot(){
-  entryDateInput.value = todayStr();
-  loadEntryForm(todayStr());
-  renderRecentList();
+/* ============ ALL-PARTIES MONTHLY SUMMARY ============ */
+function renderSummaryPage(){
+  const totalGross = allEntries.reduce((s,e)=>s+e.gross,0);
+  const totalLess = allEntries.reduce((s,e)=>s+e.less,0);
+  const totalNet = allEntries.reduce((s,e)=>s+e.net,0);
+  const totalBank = allEntries.reduce((s,e)=>s+e.bankPay,0);
+  const totalWeight = allEntries.reduce((s,e)=>s+e.weight,0);
+
+  document.getElementById('sumStatCount').textContent = allEntries.length;
+  document.getElementById('sumStatWeight').textContent = fmt(totalWeight);
+  document.getElementById('sumStatGross').textContent = '৳' + fmt(totalGross);
+  document.getElementById('sumStatNet').textContent = '৳' + fmt(totalNet);
+  document.getElementById('sumStatBank').textContent = '৳' + fmt(totalBank);
+  document.getElementById('sumStatGrossTrend').innerHTML = trendChipHTML(allEntries);
+
+  const monthlyGrossAll = MONTHS_ORDER.map(m => allEntries.filter(e=>e.month===m).reduce((s,e)=>s+e.gross,0));
+  renderBarChart('summaryTrendChart', monthlyGrossAll, MONTHS_ORDER.map(m=>MONTHS_SHORT_BN[m]));
+
+  document.getElementById('summaryMonthBody').innerHTML = MONTHS_ORDER.map(m=>{
+    const rows = allEntries.filter(e=>e.month===m);
+    const g = rows.reduce((s,e)=>s+e.gross,0), l = rows.reduce((s,e)=>s+e.less,0), n = rows.reduce((s,e)=>s+e.net,0);
+    const b = rows.reduce((s,e)=>s+e.bankPay,0), w = rows.reduce((s,e)=>s+e.weight,0);
+    return `<tr class="${rows.length===0?'zero':''}"><td style="text-align:right; font-weight:700;">${MONTHS_BN[m]}</td><td>${rows.length}</td><td>${fmt(g)}</td><td>${fmt(l)}</td><td>${fmt(n)}</td><td>${fmt(b)}</td><td>${fmt(w)}</td></tr>`;
+  }).join('');
+
+  // ---- month filter: populate dropdown with only months that have data ----
+  const monthFilterEl = document.getElementById('partyMonthFilter');
+  const monthsWithData = MONTHS_ORDER.filter(m => allEntries.some(e=>e.month===m));
+  const prevSelected = monthFilterEl.value || 'all';
+  monthFilterEl.innerHTML = '<option value="all">সব মাস (সর্বমোট)</option>' +
+    monthsWithData.map(m=>`<option value="${m}">${MONTHS_BN[m]}</option>`).join('');
+  if(monthsWithData.includes(prevSelected) || prevSelected === 'all'){ monthFilterEl.value = prevSelected; }
+  const selectedMonth = monthFilterEl.value;
+  document.getElementById('partyTableLabel').textContent = selectedMonth === 'all'
+    ? 'পার্টি-ভিত্তিক মোট (বড় থেকে ছোট)'
+    : `${MONTHS_BN[selectedMonth]} মাসে পার্টি-ভিত্তিক সেলস (বড় থেকে ছোট)`;
+
+  const scopedEntries = selectedMonth === 'all' ? null : allEntries.filter(e=>e.month===selectedMonth);
+  const partyTotals = partyList.map(p=>{
+    const rows = selectedMonth === 'all' ? p.entries : p.entries.filter(e=>e.month===selectedMonth);
+    return {
+      name: p.name, code: p.code, count: rows.length,
+      gross: rows.reduce((s,e)=>s+e.gross,0),
+      net: rows.reduce((s,e)=>s+e.net,0),
+      bank: rows.reduce((s,e)=>s+e.bankPay,0)
+    };
+  }).filter(p=>p.count>0).sort((a,b)=>b.gross-a.gross);
+
+  document.getElementById('summaryPartyBody').innerHTML = partyTotals.map(p=>`
+    <tr><td style="text-align:right; font-weight:700;">${escapeHtml(p.name)}</td><td>${p.count}</td><td>${fmt(p.gross)}</td><td>${fmt(p.net)}</td><td>${fmt(p.bank)}</td></tr>
+  `).join('');
+
+  window.lastPartyTotals = partyTotals;
+  window.lastPartyReportMonthLabel = selectedMonth === 'all' ? 'সর্বমোট (সব মাস)' : (MONTHS_BN[selectedMonth] + ' মাস');
+
+  const monthScopedTotalGross = scopedEntries === null ? totalGross : scopedEntries.reduce((s,e)=>s+e.gross,0);
+  const leaderEl = document.getElementById('leaderboard');
+  const top5 = partyTotals.slice(0, 5);
+  const rankClass = ['r1','r2','r3','',''];
+  const rankIcon = ['🥇','🥈','🥉','','' ];
+  leaderEl.innerHTML = top5.length === 0
+    ? `<div class="empty-hint" style="margin-top:6px;"><span class="big">📭</span>${selectedMonth==='all' ? 'এখনো কোনো সেলস ডাটা নেই।' : `${MONTHS_BN[selectedMonth]} মাসে কোনো সেলস ডাটা নেই।`}</div>`
+    : top5.map((p,i)=>{
+        const pct = monthScopedTotalGross > 0 ? Math.round((p.gross/monthScopedTotalGross)*100) : 0;
+        return `
+        <div class="leader-row" style="animation-delay:${i*0.05}s;">
+          <div class="leader-rank ${rankClass[i]}">${rankIcon[i] || (i+1)}</div>
+          <div class="leader-info">
+            <div class="leader-top"><div class="leader-name">${escapeHtml(p.name)}</div><div class="leader-value">৳${fmt(p.gross)}</div></div>
+            <div class="leader-bar-track"><div class="leader-bar-fill" style="width:${pct}%"></div></div>
+          </div>
+        </div>`;
+      }).join('');
+}
+document.getElementById('partyMonthFilter').addEventListener('change', renderSummaryPage);
+renderSummaryPage();
+
+function buildSummaryStatementHTML(){
+  const totalGross = allEntries.reduce((s,e)=>s+e.gross,0);
+  const totalLess = allEntries.reduce((s,e)=>s+e.less,0);
+  const totalNet = allEntries.reduce((s,e)=>s+e.net,0);
+  const totalBank = allEntries.reduce((s,e)=>s+e.bankPay,0);
+  const totalWeight = allEntries.reduce((s,e)=>s+e.weight,0);
+  const rows = MONTHS_ORDER.map(m=>{
+    const r = allEntries.filter(e=>e.month===m);
+    const g = r.reduce((s,e)=>s+e.gross,0), l = r.reduce((s,e)=>s+e.less,0), n = r.reduce((s,e)=>s+e.net,0);
+    const b = r.reduce((s,e)=>s+e.bankPay,0), w = r.reduce((s,e)=>s+e.weight,0);
+    return `<tr><td>${MONTHS_BN[m]}</td><td>${r.length}</td><td>${fmt(g)}</td><td>${fmt(l)}</td><td>${fmt(n)}</td><td>${fmt(b)}</td><td>${fmt(w)}</td></tr>`;
+  }).join('');
+  return `
+    <div class="pa-head">
+      <h2>সব পার্টি মিলিয়ে মাসিক সেলস সামারি — ২০২৬</h2>
+      <p>মোট এন্ট্রি: ${allEntries.length} &nbsp;|&nbsp; তৈরির তারিখ: ${new Date().toLocaleDateString('en-GB')}</p>
+    </div>
+    <table class="pa-table">
+      <thead><tr><th>মাস</th><th>এন্ট্রি</th><th>গ্রস</th><th>১% লেস</th><th>নেট</th><th>ব্যাংক পেমেন্ট</th><th>ওজন</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="pa-total-row">
+        <td>সর্বমোট</td><td>${allEntries.length}</td><td>${fmt(totalGross)}</td><td>${fmt(totalLess)}</td><td>${fmt(totalNet)}</td><td>${fmt(totalBank)}</td><td>${fmt(totalWeight)}</td>
+      </tr></tfoot>
+    </table>`;
 }
 
-if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  });
+document.getElementById('printSummaryBtn').addEventListener('click', ()=>{
+  document.getElementById('printArea').innerHTML = buildSummaryStatementHTML();
+  window.print();
+});
+
+document.getElementById('shareSummaryBtn').addEventListener('click', async ()=>{
+  const printArea = document.getElementById('printArea');
+  printArea.innerHTML = buildSummaryStatementHTML();
+  printArea.style.display = 'block';
+  printArea.style.position = 'fixed';
+  printArea.style.left = '-9999px';
+  printArea.style.background = '#fff';
+  printArea.style.color = '#000';
+  printArea.style.width = '650px';
+  printArea.style.padding = '16px';
+  try{
+    if(typeof html2canvas === 'undefined') throw new Error('html2canvas not loaded');
+    const canvas = await html2canvas(printArea, {backgroundColor:'#ffffff', scale:2});
+    canvas.toBlob(async (blob)=>{
+      const file = new File([blob], 'monthly_sales_summary.png', {type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:'মাসিক সেলস সামারি', text:'সব পার্টি মিলিয়ে মাসিক সেলস সামারি'});
+      } else {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob); link.download = 'monthly_sales_summary.png'; link.click();
+        window.open('https://wa.me/?text=' + encodeURIComponent('সব পার্টি মিলিয়ে মাসিক সেলস সামারি — মোট গ্রস: ৳' + fmt(allEntries.reduce((s,e)=>s+e.gross,0))), '_blank');
+      }
+      printArea.style.display = 'none'; printArea.style.position=''; printArea.style.left='';
+    }, 'image/png');
+  }catch(err){
+    window.open('https://wa.me/?text=' + encodeURIComponent('সব পার্টি মিলিয়ে মাসিক সেলস সামারি — মোট গ্রস: ৳' + fmt(allEntries.reduce((s,e)=>s+e.gross,0))), '_blank');
+    printArea.style.display = 'none'; printArea.style.position=''; printArea.style.left='';
+  }
+});
+
+/* ============ PARTY-WISE MONTHLY REPORT: WHATSAPP SHARE ============ */
+function buildPartyReportHTML(){
+  const monthLabel = window.lastPartyReportMonthLabel || 'সর্বমোট';
+  const rows = (window.lastPartyTotals || []).map((p,i)=>`
+    <tr><td>${i+1}</td><td>${escapeHtml(p.name)}</td><td>${p.count}</td><td>${fmt(p.gross)}</td><td>${fmt(p.net)}</td><td>${fmt(p.bank)}</td></tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
+  const totalG = (window.lastPartyTotals || []).reduce((s,p)=>s+p.gross,0);
+  const totalN = (window.lastPartyTotals || []).reduce((s,p)=>s+p.net,0);
+  const totalB = (window.lastPartyTotals || []).reduce((s,p)=>s+p.bank,0);
+  return `
+    <div class="pa-header">
+      <h2>পার্টি-ভিত্তিক সেলস রিপোর্ট — ${escapeHtml(monthLabel)}</h2>
+      <p>তৈরির তারিখ: ${new Date().toLocaleDateString('en-GB')}</p>
+    </div>
+    <table class="pa-table">
+      <thead><tr><th>ক্র.</th><th>পার্টি</th><th>এন্ট্রি</th><th>গ্রস</th><th>নেট</th><th>ব্যাংক পেমেন্ট</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="pa-total-row">
+        <td colspan="2">সর্বমোট</td><td>${(window.lastPartyTotals||[]).reduce((s,p)=>s+p.count,0)}</td><td>${fmt(totalG)}</td><td>${fmt(totalN)}</td><td>${fmt(totalB)}</td>
+      </tr></tfoot>
+    </table>`;
 }
+
+document.getElementById('sharePartyReportBtn').addEventListener('click', async ()=>{
+  const monthLabel = window.lastPartyReportMonthLabel || 'সর্বমোট';
+  const textLines = (window.lastPartyTotals || []).map((p,i)=>`${i+1}. ${p.name} — ৳${fmt(p.gross)}`).join('\n');
+  const textSummary = `📊 পার্টি-ভিত্তিক সেলস রিপোর্ট — ${monthLabel}\n\n${textLines}\n\n(Nasir Glass — ডিস্ট্রিবিউটর ড্যাশবোর্ড)`;
+
+  const printArea = document.getElementById('printArea');
+  printArea.innerHTML = buildPartyReportHTML();
+  printArea.style.display = 'block';
+  printArea.style.position = 'fixed';
+  printArea.style.left = '-9999px';
+  printArea.style.background = '#fff';
+  printArea.style.color = '#000';
+  printArea.style.width = '650px';
+  printArea.style.padding = '16px';
+  try{
+    if(typeof html2canvas === 'undefined') throw new Error('html2canvas not loaded');
+    const canvas = await html2canvas(printArea, {backgroundColor:'#ffffff', scale:2});
+    canvas.toBlob(async (blob)=>{
+      const file = new File([blob], 'party_sales_report.png', {type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:'পার্টি-ভিত্তিক সেলস রিপোর্ট'});
+      } else {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob); link.download = 'party_sales_report.png'; link.click();
+        window.open('https://wa.me/', '_blank');
+      }
+      printArea.style.display = 'none'; printArea.style.position=''; printArea.style.left='';
+    }, 'image/png');
+  }catch(err){
+    window.open('https://wa.me/', '_blank');
+    printArea.style.display = 'none'; printArea.style.position=''; printArea.style.left='';
+  }
+});
 </script>
 </body>
 </html>
