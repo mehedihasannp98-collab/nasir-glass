@@ -1,0 +1,172 @@
+/* =========================================================
+   NASIR GLASS — DESIGN TOKENS
+   Palette inspired by tempered glass panes stacked over
+   deep forest-green ledger paper (the challan header color).
+   ========================================================= */
+:root {
+  /* Color */
+  --ng-green-900: #0e3d2c;   /* brand / challan header */
+  --ng-green-700: #15583f;
+  --ng-green-500: #1f7a56;
+  --ng-glass-300: #8fc7d9;   /* pale glass-blue accent */
+  --ng-glass-100: #e7f3f6;
+  --ng-paper: #f7f7f4;       /* app background, warm ledger white */
+  --ng-ink: #16241c;         /* near-black green-tinted text */
+  --ng-ink-soft: #4b5b52;
+  --ng-line: #d8ddd6;
+  --ng-amber: #c97a2b;       /* warnings / due amounts */
+  --ng-red: #b3392c;         /* delete / negative */
+  --ng-white: #ffffff;
+
+  /* Type */
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-data: "IBM Plex Mono", "Consolas", monospace;
+
+  /* Scale */
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+  --shadow-card: 0 1px 2px rgba(14,61,44,0.06), 0 6px 20px rgba(14,61,44,0.07);
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ng-paper);
+  color: var(--ng-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ng-green-900);
+  margin: 0;
+}
+
+.mono, .num, td.num, input.num {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+}
+
+a { color: var(--ng-green-700); }
+
+/* ---------- Brand mark / signature ----------
+   A faceted "pane" corner — three overlapping
+   parallelogram shards — echoes cut glass sheets.
+   Used on the login hero and the sidebar header. */
+.pane-mark {
+  width: 40px; height: 40px; position: relative; flex-shrink: 0;
+}
+.pane-mark span {
+  position: absolute; inset: 0;
+  clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
+}
+.pane-mark span:nth-child(1) { background: var(--ng-green-900); transform: translateX(-6px); opacity: .92; }
+.pane-mark span:nth-child(2) { background: var(--ng-green-500); transform: translateX(0px); opacity: .92; }
+.pane-mark span:nth-child(3) { background: var(--ng-glass-300); transform: translateX(6px); opacity: .85; }
+
+/* ---------- Layout shell ---------- */
+.app-shell { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 232px;
+  background: var(--ng-green-900);
+  color: var(--ng-white);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.sidebar .brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px 22px 8px;
+}
+.sidebar .brand-name { font-family: var(--font-display); font-size: 18px; color: var(--ng-white); line-height: 1.1; }
+.sidebar .brand-sub { font-size: 11px; color: var(--ng-glass-300); letter-spacing: .04em; }
+
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  color: #d7e6dd; text-decoration: none; font-size: 14px;
+}
+.nav-link:hover { background: rgba(255,255,255,0.06); }
+.nav-link.active { background: var(--ng-green-500); color: var(--ng-white); }
+
+.main { flex: 1; padding: 24px 28px; max-width: 1180px; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--ng-white);
+  border: 1px solid var(--ng-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 18px 20px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 600;
+  padding: 10px 16px; border-radius: var(--radius-sm);
+  border: 1px solid transparent; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--ng-green-700); color: var(--ng-white); }
+.btn-primary:hover { background: var(--ng-green-900); }
+.btn-outline { background: transparent; border-color: var(--ng-line); color: var(--ng-ink); }
+.btn-outline:hover { border-color: var(--ng-green-700); color: var(--ng-green-700); }
+.btn-danger { background: var(--ng-red); color: var(--ng-white); }
+.btn-sm { padding: 6px 10px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ---------- Forms ---------- */
+label { font-size: 12px; color: var(--ng-ink-soft); display: block; margin-bottom: 4px; }
+input, select, textarea {
+  width: 100%; font-family: var(--font-body); font-size: 14px;
+  padding: 9px 10px; border: 1px solid var(--ng-line); border-radius: var(--radius-sm);
+  background: var(--ng-white); color: var(--ng-ink);
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--ng-glass-300); outline-offset: 1px; border-color: var(--ng-green-500);
+}
+.field { margin-bottom: 12px; }
+
+/* ---------- Tables ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--ng-line); text-align: left; }
+th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ng-ink-soft); }
+tr.subtotal td { background: var(--ng-glass-100); font-weight: 600; }
+tr.grandtotal td { background: var(--ng-green-900); color: var(--ng-white); font-weight: 700; }
+
+/* ---------- Toast / status ---------- */
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--ng-green-900); color: var(--ng-white);
+  padding: 12px 18px; border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card); font-size: 14px; z-index: 999;
+}
+.toast.error { background: var(--ng-red); }
+
+/* ---------- Mobile ---------- */
+.bottom-nav { display: none; }
+
+@media (max-width: 860px) {
+  .sidebar { display: none; }
+  .main { padding: 14px; max-width: 100%; padding-bottom: 80px; }
+  .bottom-nav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--ng-green-900); z-index: 50;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav a {
+    flex: 1; text-align: center; color: #cfe3d8; text-decoration: none;
+    font-size: 10.5px; padding: 6px 2px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .bottom-nav a.active { color: var(--ng-white); }
+}
