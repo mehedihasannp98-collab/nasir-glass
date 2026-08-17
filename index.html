@@ -3,995 +3,410 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<meta name="theme-color" content="#14171A">
-<title>TON COUNT — Nasir Glass</title>
+<meta name="theme-color" content="#0f1720">
+<title>NGIL Hub</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ton Count">
+<meta name="apple-mobile-web-app-title" content="NGIL Hub">
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Roboto+Mono:wght@500;700&display=swap');
+
   :root{
-    --bg:#14171A;
-    --surface:#1D2226;
-    --surface-2:#262C31;
-    --surface-3:#2F363C;
-    --border:#363E44;
-    --text:#EDEFF1;
-    --muted:#8F9BA3;
-    --muted-2:#657078;
-    --accent:#4A90D9;
-    --accent-dim:#2E5F8C;
-    --good:#5CC98A;
-    --danger:#DE6B5F;
+    --bg:#0f1417;
+    --surface:#171e22;
+    --border:#28323638;
+    --border-solid:#283236;
+    --text:#eef2f4;
+    --muted:#8b98a0;
 
-    --c-tempered:#E3A034;
-    --c-clear:#9FDDE0;
-    --c-colour:#9385C4;
-    --c-reflective:#4A90D9;
-    --c-mirror:#C7CBCF;
+    --ng-navy:#123c3a;
+    --ng-navy-dark:#0b2b29;
+    --ng-amber:#d98c3f;
 
-    --radius:14px;
-    --radius-sm:9px;
-    --font-head:Georgia,'Noto Serif Bengali','Times New Roman',serif;
-    --font-body:'Segoe UI','Noto Sans Bengali',system-ui,-apple-system,sans-serif;
-    --font-mono:ui-monospace,'SFMono-Regular','Cascadia Mono','Roboto Mono',monospace;
+    --tc-bg:#14171A;
+    --tc-accent:#4A90D9;
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--font-body);
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Hind Siliguri','Segoe UI',sans-serif;
     -webkit-font-smoothing:antialiased;
-    padding-bottom:calc(72px + env(safe-area-inset-bottom));
-    min-height:100vh;
-  }
-  ::selection{background:var(--accent-dim);}
-
-  /* ---------- top bar ---------- */
-  .topbar{
-    position:sticky; top:0; z-index:20;
-    background:linear-gradient(180deg,var(--bg) 70%, transparent);
-    padding:18px 18px 8px;
-  }
-  .brand{
-    display:flex; align-items:baseline; justify-content:space-between;
-  }
-  .brand h1{
-    font-family:var(--font-head);
-    font-size:22px; font-weight:700; margin:0; letter-spacing:.3px;
-  }
-  .brand .sub{
-    font-size:11px; color:var(--muted-2); letter-spacing:1.5px; text-transform:uppercase;
-    font-family:var(--font-mono);
-  }
-  .menu-btn{
-    background:none;border:none;color:var(--muted);font-size:20px;padding:6px 4px;cursor:pointer;
+    overflow:hidden;
   }
 
-  main{ padding:4px 16px 24px; max-width:520px; margin:0 auto; }
-  .screen{ display:none; animation:fade .18s ease; }
-  .screen.active{ display:block; }
-  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+  /* ============ HOME SCREEN ============ */
+  #home{
+    position:fixed; inset:0; display:flex; flex-direction:column;
+    padding:calc(28px + env(safe-area-inset-top)) 22px 22px;
+    animation:fadeIn .25s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
 
-  /* ---------- glass pane stack (signature element) ---------- */
-  .pane-stack{
-    display:flex; height:14px; border-radius:7px; overflow:hidden;
-    background:var(--surface-2); border:1px solid var(--border);
+  .hub-mark{
+    width:52px; height:52px; border-radius:14px; overflow:hidden;
+    background:#fff; border:1px solid var(--border-solid); margin-bottom:18px;
   }
-  .pane-stack .seg{ height:100%; min-width:0; transition:flex-basis .3s ease; }
-  .pane-stack.empty{ background:var(--surface-2); }
-  .pane-legend{
-    display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:11.5px; color:var(--muted);
-  }
-  .pane-legend span{ display:inline-flex; align-items:center; gap:5px; }
-  .dot{ width:9px; height:9px; border-radius:3px; display:inline-block; flex:none; }
+  .hub-mark img{ width:100%; height:100%; object-fit:contain; padding:5px; box-sizing:border-box; }
 
-  /* ---------- cards ---------- */
-  .card{
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--radius); padding:16px; margin-bottom:14px;
+  .hub-title{
+    font-size:26px; font-weight:700; margin:0; letter-spacing:.2px;
   }
-  .card h2{ font-family:var(--font-head); font-size:15px; margin:0 0 12px; color:var(--text); font-weight:600;}
-  .row-between{ display:flex; align-items:center; justify-content:space-between; }
+  .hub-sub{
+    font-size:12.5px; color:var(--muted); margin-top:5px; letter-spacing:.3px;
+  }
 
-  /* ---------- big total ---------- */
-  .big-total{
-    text-align:center; padding:6px 0 14px;
+  .app-grid{
+    margin-top:34px; display:flex; flex-direction:column; gap:16px; flex:1;
   }
-  .big-total .num{
-    font-family:var(--font-mono); font-size:44px; font-weight:600; color:var(--accent);
-    letter-spacing:-1px; line-height:1;
+  .app-card{
+    position:relative; border-radius:18px; padding:22px 20px; overflow:hidden;
+    border:1px solid var(--border-solid); cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s ease;
+    display:flex; align-items:center; gap:16px;
   }
-  .big-total .label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-top:6px;}
+  .app-card:active{ transform:scale(.98); }
 
-  /* ---------- form ---------- */
-  .field{ margin-bottom:12px; }
-  .field label{
-    display:flex; align-items:center; gap:7px; font-size:13px; color:var(--muted); margin-bottom:6px;
+  .app-card.ng{
+    background:linear-gradient(135deg, var(--ng-navy) 0%, var(--ng-navy-dark) 100%);
   }
-  .field input[type=date]{
-    width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text);
-    padding:11px 12px; border-radius:var(--radius-sm); font-size:15px; font-family:var(--font-body);
+  .app-card.tc{
+    background:linear-gradient(135deg, #1c2227 0%, #14171A 100%);
+    border-color:#2c363c;
   }
-  .num-row{ display:grid; grid-template-columns:1fr; gap:10px; }
-  .num-field{
-    display:flex; align-items:center; gap:10px;
-    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
-    padding:8px 12px;
-  }
-  .num-field .dot{ width:11px; height:11px; }
-  .num-field .name{ flex:1; font-size:14.5px; }
-  .num-field input{
-    width:88px; text-align:right; background:transparent; border:none; color:var(--text);
-    font-family:var(--font-mono); font-size:17px; font-weight:600; padding:6px 2px; outline:none;
-  }
-  .num-field input:focus-visible{ outline:2px solid var(--accent); border-radius:6px; }
-  .num-field.tempered{ border-left:3px solid var(--c-tempered); }
-  .num-field.clear{ border-left:3px solid var(--c-clear); }
-  .num-field.colour{ border-left:3px solid var(--c-colour); }
-  .num-field.reflective{ border-left:3px solid var(--c-reflective); }
-  .num-field.mirror{ border-left:3px solid var(--c-mirror); }
 
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    width:100%; padding:13px; border-radius:var(--radius-sm); border:none;
-    font-size:15px; font-weight:600; cursor:pointer; font-family:var(--font-body);
+  .app-icon{
+    flex:none; width:52px; height:52px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Roboto Mono',monospace; font-weight:700; font-size:15px; color:#fff;
   }
-  .btn-primary{ background:var(--accent); color:#0C1A26; }
-  .btn-primary:active{ background:#3f7fc2; }
-  .btn-whatsapp{ background:#1E8E5A; color:#EAF8EF; }
-  .btn-whatsapp:active{ background:#187348; }
-  .btn-ghost{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
-  .btn-danger{ background:transparent; color:var(--danger); border:1px solid #5A3833; }
-  .btn-row{ display:flex; gap:10px; margin-top:14px; }
-  .btn-row .btn{ flex:1; }
-  .btn-sm{ width:auto; padding:9px 14px; font-size:13px; }
+  .app-card.ng .app-icon{ background:var(--ng-amber); }
+  .app-card.tc .app-icon{ background:var(--tc-accent); }
 
-  /* ---------- month selector ---------- */
-  .month-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .month-nav button{
-    background:var(--surface-2); border:1px solid var(--border); color:var(--text);
-    width:38px; height:38px; border-radius:10px; font-size:17px; cursor:pointer;
-  }
-  .month-nav .month-label{ font-family:var(--font-head); font-size:18px; font-weight:700; text-align:center; }
-  .month-nav .month-label small{ display:block; font-family:var(--font-mono); font-size:11px; color:var(--muted); font-weight:400; margin-top:2px;}
+  .app-info{ flex:1; min-width:0; }
+  .app-info h2{ margin:0 0 3px; font-size:17px; font-weight:700; color:#fff; }
+  .app-info p{ margin:0; font-size:12.5px; color:rgba(255,255,255,.62); line-height:1.4; }
 
-  /* ---------- summary grid (share format) ---------- */
-  .summary-grid{ display:flex; flex-direction:column; gap:9px; }
-  .summary-row{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:9px 4px; border-bottom:1px dashed var(--border); font-size:14.5px;
+  .app-arrow{
+    flex:none; width:30px; height:30px; border-radius:50%;
+    background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:16px;
   }
-  .summary-row:last-child{ border-bottom:none; }
-  .summary-row .k{ display:flex; align-items:center; gap:8px; color:var(--muted); }
-  .summary-row .v{ font-family:var(--font-mono); font-weight:600; font-size:15.5px; }
-  .summary-row.total{ margin-top:4px; padding-top:12px; border-top:1px solid var(--border); border-bottom:none;}
-  .summary-row.total .k{ color:var(--text); font-weight:700; }
-  .summary-row.total .v{ color:var(--accent); font-size:18px; }
 
-  /* ---------- entry log list ---------- */
-  .log-item{
-    display:flex; align-items:center; gap:12px;
-    padding:11px 4px; border-bottom:1px solid var(--border); cursor:pointer;
+  /* subtle stacked-pane decoration echoing glass panes, tucked in the card corner */
+  .app-card::after{
+    content:''; position:absolute; right:-18px; top:-18px; width:90px; height:90px;
+    border-radius:22px; border:1px solid rgba(255,255,255,.08); transform:rotate(18deg);
   }
-  .log-item:last-child{ border-bottom:none; }
-  .log-item .date{
-    width:44px; flex:none; text-align:center;
-  }
-  .log-item .date .d{ font-family:var(--font-mono); font-size:18px; font-weight:700; line-height:1; }
-  .log-item .date .m{ font-size:10px; color:var(--muted-2); text-transform:uppercase; letter-spacing:.5px; }
-  .log-item .mid{ flex:1; min-width:0; }
-  .log-item .mini-stack{ display:flex; height:7px; border-radius:4px; overflow:hidden; background:var(--surface-2); margin-bottom:5px;}
-  .log-item .mini-stack .seg{ height:100%; }
-  .log-item .cats{ font-size:11px; color:var(--muted-2); font-family:var(--font-mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .log-item .total{ font-family:var(--font-mono); font-weight:700; font-size:15px; flex:none; }
-  .empty-note{ text-align:center; color:var(--muted-2); font-size:13px; padding:26px 10px; }
 
-  /* ---------- overview / year table ---------- */
-  .year-nav{ display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:16px; }
-  .year-nav button{ background:var(--surface-2); border:1px solid var(--border); color:var(--text); width:34px; height:34px; border-radius:9px; font-size:15px; cursor:pointer;}
-  .year-nav .yr{ font-family:var(--font-head); font-size:19px; font-weight:700; min-width:64px; text-align:center;}
+  .hub-footer{
+    text-align:center; font-size:10.5px; color:var(--muted); letter-spacing:.4px;
+    padding-top:14px;
+  }
 
-  .month-card{
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    padding:13px 15px; margin-bottom:10px;
+  /* ============ APP FRAME VIEW ============ */
+  #frameView{
+    position:fixed; inset:0; background:var(--bg);
+    display:none; flex-direction:column;
+    animation:fadeIn .18s ease;
   }
-  .month-card.zero{ opacity:.45; }
-  .month-card .row-between{ margin-bottom:9px; }
-  .month-card .mname{ font-weight:700; font-size:14.5px; }
-  .month-card .mtotal{ font-family:var(--font-mono); font-weight:700; color:var(--accent); font-size:15px; }
-  .pill-row{ display:flex; flex-wrap:wrap; gap:6px; }
-  .pill{
-    font-size:11px; font-family:var(--font-mono); padding:3px 8px; border-radius:20px;
-    background:var(--surface-2); border:1px solid var(--border); color:var(--muted);
+  #frameView.show{ display:flex; }
+  .frame-bar{
+    flex:none; display:flex; align-items:center; gap:10px;
+    padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+    background:var(--surface); border-bottom:1px solid var(--border-solid);
   }
-  .pill.has{ color:var(--text); border-color:transparent; }
+  .back-btn{
+    background:rgba(255,255,255,.08); border:none; color:var(--text);
+    width:34px; height:34px; border-radius:10px; font-size:17px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .back-btn:active{ background:rgba(255,255,255,.16); }
+  .frame-bar .fname{ font-size:14px; font-weight:600; }
+  #appFrame{ flex:1; width:100%; border:none; background:#fff; }
 
-  .year-total-card{
-    background:linear-gradient(135deg,var(--surface-2),var(--surface)); border:1px solid var(--border);
-    border-radius:var(--radius); padding:18px; text-align:center; margin-top:6px; margin-bottom:16px;
+  /* ============ LOCK SCREEN ============ */
+  #lockScreen{
+    position:fixed; inset:0; z-index:50; background:var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:24px; text-align:center;
   }
-  .year-total-card .num{ font-family:var(--font-mono); font-size:32px; font-weight:700; color:var(--accent); }
-  .year-total-card .label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-top:4px;}
+  #lockScreen .lock-logo{
+    width:76px; height:76px; border-radius:20px; background:#fff; overflow:hidden;
+    margin-bottom:22px; border:1px solid var(--border-solid);
+  }
+  #lockScreen .lock-logo img{ width:100%; height:100%; object-fit:contain; padding:8px; box-sizing:border-box; }
+  #lockScreen h1{ font-size:19px; margin:0 0 6px; }
+  #lockScreen p{ font-size:12.5px; color:var(--muted); margin:0 0 30px; max-width:260px; line-height:1.5; }
+  .fp-btn{
+    width:76px; height:76px; border-radius:50%; border:2px solid var(--ng-amber);
+    background:rgba(217,140,63,.1); color:var(--ng-amber); font-size:32px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    margin-bottom:16px; transition:transform .15s ease;
+  }
+  .fp-btn:active{ transform:scale(.94); }
+  .fp-btn.err{ border-color:#e0554b; color:#e0554b; background:rgba(224,85,75,.1); }
+  #lockStatus{ font-size:12.5px; color:var(--muted); min-height:18px; }
+  .lock-skip{
+    margin-top:26px; background:none; border:none; color:var(--muted);
+    font-size:11.5px; text-decoration:underline; cursor:pointer; font-family:inherit;
+  }
 
-  /* ---------- bottom nav ---------- */
-  nav.tabbar{
-    position:fixed; left:0; right:0; bottom:0; z-index:30;
-    background:var(--surface); border-top:1px solid var(--border);
-    display:flex; padding:6px 10px calc(6px + env(safe-area-inset-bottom));
+  /* ============ BOTTOM TAB BAR ============ */
+  #home, #frameView{ padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+  #bottomNav{
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-around;
+    gap:6px; padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:#0e1519; border-top:1px solid var(--border-solid);
   }
-  nav.tabbar button{
-    flex:1; background:none; border:none; color:var(--muted-2); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 4px; font-family:var(--font-body);
-    font-size:11px;
+  .nav-tab{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    background:none; border:none; cursor:pointer; padding:8px 14px;
+    border-radius:16px; transition:background .15s ease;
+    font-family:inherit; color:var(--muted);
   }
-  nav.tabbar button svg{ width:21px; height:21px; }
-  nav.tabbar button.active{ color:var(--accent); }
-
-  /* ---------- toast ---------- */
-  #toast{
-    position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px);
-    background:var(--surface-3); color:var(--text); padding:10px 18px; border-radius:30px;
-    font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease; z-index:50;
-    border:1px solid var(--border); white-space:nowrap;
+  .nav-tab.active{ background:#1b2a33; color:#4A90D9; }
+  .nav-tab .tab-icon{
+    width:34px; height:34px; border-radius:10px; overflow:hidden;
+    background:#fff; flex:none;
   }
-  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-
-  /* ---------- menu sheet ---------- */
-  .sheet-backdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:40; opacity:0; pointer-events:none; transition:opacity .2s;
-  }
-  .sheet-backdrop.show{ opacity:1; pointer-events:auto; }
-  .sheet{
-    position:fixed; left:0; right:0; bottom:0; z-index:41;
-    background:var(--surface); border-radius:18px 18px 0 0; border:1px solid var(--border); border-bottom:none;
-    padding:10px 16px calc(20px + env(safe-area-inset-bottom));
-    transform:translateY(100%); transition:transform .25s ease;
-  }
-  .sheet.show{ transform:translateY(0); }
-  .sheet .handle{ width:36px; height:4px; background:var(--border); border-radius:3px; margin:6px auto 14px; }
-  .sheet button.item{
-    width:100%; text-align:left; background:none; border:none; color:var(--text); font-size:15px;
-    padding:13px 4px; border-bottom:1px solid var(--border); font-family:var(--font-body);
-  }
-  .sheet button.item:last-of-type{ border-bottom:none; }
-  .sheet button.item.danger{ color:var(--danger); }
-
-  small.hint{ display:block; color:var(--muted-2); font-size:11.5px; margin-top:8px; }
+  .nav-tab .tab-icon img{ width:100%; height:100%; object-fit:cover; }
+  .nav-tab.home-tab .tab-icon img{ object-fit:contain; padding:4px; box-sizing:border-box; }
+  .nav-tab.active .tab-icon{ box-shadow:0 0 0 2px #4A90D9; }
+  .nav-tab span{ font-size:11.5px; font-weight:600; letter-spacing:.2px; }
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
 
-<!-- BOOT CHECK: shown briefly while we ask Firebase "is anyone already logged in?" -->
-<div id="boot-check" style="position:fixed;inset:0;background:#14171A;display:flex;align-items:center;justify-content:center;z-index:9999;color:#8F9BA3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;">লোড হচ্ছে…</div>
-
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="hidden" style="position:fixed;inset:0;background:#14171A;z-index:9998;display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="width:100%;max-width:360px;">
-    <div style="text-align:center;margin-bottom:28px;">
-      <div style="font-size:20px;font-weight:700;color:#EDEFF1;">TON COUNT</div>
-      <div style="font-size:13px;color:#8F9BA3;margin-top:4px;">Nasir Glass · টন হিসাব — লগইন করুন</div>
-    </div>
-
-    <div id="login-form">
-      <input type="email" id="login-email" placeholder="ইমেইল" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <input type="password" id="login-pass" placeholder="পাসওয়ার্ড" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <div id="login-err" style="color:#DE6B5F;font-size:13px;min-height:18px;margin-bottom:6px;"></div>
-      <button id="login-btn" onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:12px;background:#4A90D9;color:#fff;font-size:15px;font-weight:700;">লগইন করুন</button>
-      <div style="text-align:center;margin-top:16px;font-size:13px;color:#8F9BA3;">অ্যাকাউন্ট নেই? <a href="#" onclick="showSignup();return false;" style="color:#4A90D9;">তৈরি করুন</a></div>
-    </div>
-
-    <div id="signup-form" style="display:none;">
-      <input type="email" id="signup-email" placeholder="ইমেইল" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <input type="password" id="signup-pass" placeholder="পাসওয়ার্ড (অন্তত ৬ অক্ষর)" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <input type="password" id="signup-pass2" placeholder="পাসওয়ার্ড আবার লিখুন" style="width:100%;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:1px solid #363E44;background:#1D2226;color:#EDEFF1;font-size:15px;">
-      <div id="signup-err" style="color:#DE6B5F;font-size:13px;min-height:18px;margin-bottom:6px;"></div>
-      <button id="signup-btn" onclick="doSignup()" style="width:100%;padding:13px;border:none;border-radius:12px;background:#4A90D9;color:#fff;font-size:15px;font-weight:700;">অ্যাকাউন্ট তৈরি করুন</button>
-      <div style="text-align:center;margin-top:16px;font-size:13px;color:#8F9BA3;">আগে থেকে অ্যাকাউন্ট আছে? <a href="#" onclick="showLogin();return false;" style="color:#4A90D9;">লগইন করুন</a></div>
-    </div>
-  </div>
-</div>
-<style>#boot-check.hidden, #login-screen.hidden{display:none !important;}</style>
-
-<div id="app-root" style="display:none;">
-
-<div class="topbar">
-  <div class="brand">
-    <div>
-      <h1>TON COUNT</h1>
-      <div class="sub">Nasir Glass · টন হিসাব</div>
-    </div>
-    <button class="menu-btn" id="menuBtn" aria-label="মেনু">⋮</button>
-  </div>
+<div id="lockScreen">
+  <div class="lock-logo"><img src="icon-192.png" alt="NGIL"></div>
+  <h1>NGIL Hub লক করা আছে</h1>
+  <p id="lockDesc">চালিয়ে যেতে ফিঙ্গারপ্রিন্ট দিয়ে যাচাই করুন</p>
+  <button class="fp-btn" id="fpBtn">👆</button>
+  <div id="lockStatus"></div>
+  <button class="lock-skip" id="lockSkip" style="display:none;">ফিঙ্গারপ্রিন্ট ছাড়া চালিয়ে যান</button>
 </div>
 
-<main>
+<div id="home">
+  <div class="hub-mark"><img src="icon-192.png" alt="NGIL"></div>
+  <h1 class="hub-title">NGIL Hub</h1>
+  <div class="hub-sub">Nasir Glass Industries — অ্যাপ লঞ্চার</div>
 
-  <!-- ================= ENTRY SCREEN ================= -->
-  <section class="screen active" id="screen-entry">
-
-    <div class="card">
-      <div class="field">
-        <label for="entryDate">তারিখ</label>
-        <input type="date" id="entryDate">
+  <div class="app-grid">
+    <div class="app-card ng" data-src="apps/nasirglass/index.html" data-name="Nasir Glass">
+      <div class="app-icon" style="background-image:url('apps/nasirglass/icon-192.png');background-size:cover;background-position:center;"></div>
+      <div class="app-info">
+        <h2>Nasir Glass</h2>
+        <p>অর্ডার, ইনভয়েস ও কমিশন</p>
       </div>
+      <div class="app-arrow">›</div>
+    </div>
 
-      <div class="num-row" id="numInputs">
-        <div class="num-field tempered">
-          <span class="dot" style="background:var(--c-tempered)"></span>
-          <span class="name">Tempered</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-tempered" placeholder="0">
-        </div>
-        <div class="num-field clear">
-          <span class="dot" style="background:var(--c-clear)"></span>
-          <span class="name">Clear</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-clear" placeholder="0">
-        </div>
-        <div class="num-field colour">
-          <span class="dot" style="background:var(--c-colour)"></span>
-          <span class="name">Colour</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-colour" placeholder="0">
-        </div>
-        <div class="num-field reflective">
-          <span class="dot" style="background:var(--c-reflective)"></span>
-          <span class="name">Reflective</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-reflective" placeholder="0">
-        </div>
-        <div class="num-field mirror">
-          <span class="dot" style="background:var(--c-mirror)"></span>
-          <span class="name">Mirror</span>
-          <input type="number" inputmode="decimal" step="0.01" min="0" id="in-mirror" placeholder="0">
-        </div>
+    <div class="app-card tc" data-src="apps/toncount/index.html" data-name="TON COUNT">
+      <div class="app-icon" style="background-image:url('apps/toncount/icon-192.png');background-size:cover;background-position:center;"></div>
+      <div class="app-info">
+        <h2>TON COUNT</h2>
+        <p>দৈনিক টনেজ হিসাব</p>
       </div>
-
-      <div class="big-total">
-        <div class="num" id="entryTotal">0.00</div>
-        <div class="label">Total Ton</div>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn btn-primary" id="saveBtn">সেভ করুন</button>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-whatsapp" id="shareEntryBtn">WhatsApp-এ শেয়ার</button>
-      </div>
-      <div class="btn-row" id="deleteEntryRow" style="display:none;">
-        <button class="btn btn-danger" id="deleteEntryBtn">এই তারিখের এন্ট্রি মুছুন</button>
-      </div>
+      <div class="app-arrow">›</div>
     </div>
+  </div>
 
-    <div class="card">
-      <div class="row-between">
-        <h2>সাম্প্রতিক এন্ট্রি</h2>
-      </div>
-      <div id="recentList"></div>
-    </div>
+  <div class="hub-footer">Md. Mehedi Hasan — Area Sales Manager, Barishal</div>
+</div>
 
-  </section>
+<div id="frameView">
+  <div class="frame-bar">
+    <button class="back-btn" id="backBtn">‹</button>
+    <span class="fname" id="frameName"></span>
+  </div>
+  <iframe id="appFrame" src=""></iframe>
+</div>
 
-  <!-- ================= MONTH SCREEN ================= -->
-  <section class="screen" id="screen-month">
-
-    <div class="month-nav">
-      <button id="monthPrev">‹</button>
-      <div class="month-label"><span id="monthLabel">—</span><small id="monthSub">&nbsp;</small></div>
-      <button id="monthNext">›</button>
-    </div>
-
-    <div class="card">
-      <div class="pane-stack empty" id="monthPaneStack"></div>
-      <div class="pane-legend" id="monthLegend"></div>
-    </div>
-
-    <div class="card">
-      <div class="row-between">
-        <h2>মাসিক সামারি</h2>
-        <button class="btn btn-whatsapp btn-sm" id="shareMonthBtn">Share</button>
-      </div>
-      <div class="summary-grid" id="monthSummary"></div>
-    </div>
-
-    <div class="card">
-      <h2>দৈনিক লগ (<span id="monthLogCount">0</span> এন্ট্রি)</h2>
-      <div id="monthLog"></div>
-    </div>
-
-  </section>
-
-  <!-- ================= OVERVIEW SCREEN ================= -->
-  <section class="screen" id="screen-overview">
-
-    <div class="year-nav">
-      <button id="yearPrev">‹</button>
-      <div class="yr" id="yearLabel">2026</div>
-      <button id="yearNext">›</button>
-    </div>
-
-    <div class="year-total-card">
-      <div class="num" id="yearTotal">0.00</div>
-      <div class="label">বছরের মোট টন</div>
-    </div>
-
-    <div id="monthsOverview"></div>
-
-    <div class="btn-row">
-      <button class="btn btn-whatsapp" id="shareYearBtn">বছরের সামারি শেয়ার করুন</button>
-    </div>
-
-  </section>
-
-</main>
-
-<nav class="tabbar">
-  <button data-tab="entry" class="active">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-    এন্ট্রি
+<nav id="bottomNav">
+  <button class="nav-tab home-tab active" data-tab="home">
+    <span class="tab-icon"><img src="icon-192.png" alt="হোম"></span>
+    <span>হোম</span>
   </button>
-  <button data-tab="month">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
-    মাসের হিসাব
+  <button class="nav-tab" data-tab="nasirglass" data-src="apps/nasirglass/index.html" data-name="Nasir Glass">
+    <span class="tab-icon"><img src="profile.jpg" alt="Nasir Glass"></span>
+    <span>Nasir Glass</span>
   </button>
-  <button data-tab="overview">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
-    ওভারভিউ
+  <button class="nav-tab" data-tab="toncount" data-src="apps/toncount/index.html" data-name="TON COUNT">
+    <span class="tab-icon"><img src="profile.jpg" alt="TON COUNT"></span>
+    <span>TON COUNT</span>
   </button>
 </nav>
 
-<div id="toast"></div>
-<div class="sheet-backdrop" id="sheetBackdrop"></div>
-<div class="sheet" id="menuSheet">
-  <div class="handle"></div>
-  <button class="item" id="exportBtn">ডেটা ব্যাকআপ (JSON) ডাউনলোড</button>
-  <button class="item" id="installBtn">অ্যাপ ইনস্টল করুন</button>
-  <button class="item danger" id="resetBtn">সব ডেটা মুছে ফেলুন</button>
-  <button class="item" id="logoutBtn" onclick="doLogout()">লগআউট</button>
-</div>
-
-</div><!-- /#app-root -->
-
 <script>
-/* ============================================================
-   DATA LAYER
-   ============================================================ */
-const STORE_KEY = 'tonCountEntries_v1';
-const SEED_FLAG = 'tonCountSeeded_v1';
-const CATS = ['tempered','clear','colour','reflective','mirror'];
-const CAT_LABEL = {tempered:'Tempered', clear:'Clear', colour:'Colour', reflective:'Reflective', mirror:'Mirror'};
+  // ============ FINGERPRINT LOCK (WebAuthn platform authenticator) ============
+  const lockScreen = document.getElementById('lockScreen');
+  const fpBtn = document.getElementById('fpBtn');
+  const lockStatus = document.getElementById('lockStatus');
+  const lockDesc = document.getElementById('lockDesc');
+  const lockSkip = document.getElementById('lockSkip');
+  const CRED_KEY = 'ngil-hub-cred-id';
 
-const SEED_DATA = {"2026-07-08": {"tempered": 0.58, "clear": 0.0, "colour": 0.0, "reflective": 0.0, "mirror": 0.0}, "2026-07-09": {"tempered": 0.0, "clear": 7.67, "colour": 0.0, "reflective": 0.55, "mirror": 1.03}, "2026-07-13": {"tempered": 0.0, "clear": 1.7, "colour": 1.25, "reflective": 7.54, "mirror": 0.0}, "2026-07-16": {"tempered": 0.0, "clear": 0.61, "colour": 0.0, "reflective": 4.35, "mirror": 0.0}, "2026-07-20": {"tempered": 0.0, "clear": 11.1, "colour": 0.0, "reflective": 0.0, "mirror": 0.0}, "2026-07-21": {"tempered": 0.0, "clear": 4.5, "colour": 0.0, "reflective": 2.07, "mirror": 0.0}, "2026-07-23": {"tempered": 0.0, "clear": 5.42, "colour": 0.0, "reflective": 6.61, "mirror": 1.03}, "2026-07-27": {"tempered": 0.0, "clear": 6.24, "colour": 0.0, "reflective": 5.54, "mirror": 0.68}, "2026-06-02": {"tempered": 0.19, "clear": 10.49, "colour": 0.0, "reflective": 0.0, "mirror": 1.98}, "2026-06-03": {"tempered": 0.29, "clear": 14.63, "colour": 0.0, "reflective": 0.0, "mirror": 2.1}, "2026-06-04": {"tempered": 0, "clear": 2.5, "colour": 0.0, "reflective": 8.02, "mirror": 1.15}, "2026-06-08": {"tempered": 0.22, "clear": 10.83, "colour": 0.0, "reflective": 0.0, "mirror": 1.54}, "2026-06-09": {"tempered": 0.19, "clear": 10.91, "colour": 0.0, "reflective": 0.0, "mirror": 1.37}, "2026-06-10": {"tempered": 6.6, "clear": 0.0, "colour": 0.0, "reflective": 0.0, "mirror": 0}, "2026-06-21": {"tempered": 0.46, "clear": 11.68, "colour": 0.0, "reflective": 0.0, "mirror": 0.49}, "2026-06-28": {"tempered": 0.0, "clear": 4.37, "colour": 8.21, "reflective": 0.0, "mirror": 0.0}, "2026-06-29": {"tempered": 0.0, "clear": 6.42, "colour": 12.12, "reflective": 0.0, "mirror": 0.0}, "2026-06-30": {"tempered": 0.0, "clear": 0.0, "colour": 5.64, "reflective": 9.88, "mirror": 0.0}, "2026-05-14": {"tempered": 0, "clear": 9.37, "colour": 0, "reflective": 0, "mirror": 0}, "2026-05-17": {"tempered": 0, "clear": 5.92, "colour": 0, "reflective": 0, "mirror": 2.49}, "2026-04-12": {"tempered": 0, "clear": 0, "colour": 7.89, "reflective": 0, "mirror": 0}, "2026-04-13": {"tempered": 0, "clear": 0, "colour": 8.62, "reflective": 0, "mirror": 0}, "2026-04-23": {"tempered": 0, "clear": 0, "colour": 2.66, "reflective": 0, "mirror": 0}, "2026-04-30": {"tempered": 0, "clear": 0, "colour": 7.85, "reflective": 0, "mirror": 0}, "2026-03-01": {"tempered": 0, "clear": 0.0, "colour": 7.02, "reflective": 140.67, "mirror": 1.46}, "2026-03-05": {"tempered": 0, "clear": 0, "colour": 1.65, "reflective": 0, "mirror": 0}, "2026-02-01": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 35.64, "mirror": 2.08}, "2026-02-02": {"tempered": 0, "clear": 1.38, "colour": 0.0, "reflective": 52.5, "mirror": 0.74}, "2026-02-03": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 19.5, "mirror": 0.0}, "2026-02-05": {"tempered": 0, "clear": 0.0, "colour": 1.35, "reflective": 11.03, "mirror": 0.0}, "2026-02-08": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 14.92, "mirror": 0.0}, "2026-02-16": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 8.018, "mirror": 0.0}, "2026-02-25": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 12.53, "mirror": 0.0}, "2026-01-03": {"tempered": 0, "clear": 3.14, "colour": 0.39, "reflective": 8.63, "mirror": 0.0}, "2026-01-04": {"tempered": 0, "clear": 0.0, "colour": 1.16, "reflective": 11.37, "mirror": 0.0}, "2026-01-05": {"tempered": 0, "clear": 5.27, "colour": 0.0, "reflective": 17.6, "mirror": 1.39}, "2026-01-06": {"tempered": 0, "clear": 1.79, "colour": 0.0, "reflective": 9.97, "mirror": 0.0}, "2026-01-07": {"tempered": 0, "clear": 1.17, "colour": 0.0, "reflective": 3.64, "mirror": 0.0}, "2026-01-08": {"tempered": 0, "clear": 0.74, "colour": 0.34, "reflective": 11.38, "mirror": 0.0}, "2026-01-11": {"tempered": 0, "clear": 0.0, "colour": 0.49, "reflective": 11.9, "mirror": 0.0}, "2026-01-13": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 12.03, "mirror": 0.0}, "2026-01-14": {"tempered": 0, "clear": 1.04, "colour": 0.0, "reflective": 11.03, "mirror": 0.52}, "2026-01-18": {"tempered": 0, "clear": 1.1, "colour": 0.0, "reflective": 21.53, "mirror": 0.0}, "2026-01-27": {"tempered": 0, "clear": 1.04, "colour": 3.6, "reflective": 8.15, "mirror": 0.0}, "2026-01-28": {"tempered": 0, "clear": 0.0, "colour": 0.0, "reflective": 11.29, "mirror": 0.0}};
-
-function loadEntries(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    let data = raw ? JSON.parse(raw) : {};
-    if(!localStorage.getItem(SEED_FLAG)){
-      data = Object.assign({}, SEED_DATA, data); // existing user data wins over seed
-      localStorage.setItem(SEED_FLAG, '1');
-      localStorage.setItem(STORE_KEY, JSON.stringify(data));
-    }
-    return data;
-  }catch(e){ console.error('load error', e); return {}; }
-}
-function saveEntries(){
-  try{ localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }
-  catch(e){ toast('সেভ করতে সমস্যা হয়েছে'); }
-  pushToCloud();
-}
-
-let entries = loadEntries();
-
-// ---------- Firebase (Firestore) — syncs data across every device (same account as Nasir Glass) ----------
-const firebaseConfig = {
-  apiKey: "AIzaSyAW72RV5Bt9zOZlwBkfneh3ulIZWSuhgtU",
-  authDomain: "nasir-glass-3edec.firebaseapp.com",
-  projectId: "nasir-glass-3edec",
-  storageBucket: "nasir-glass-3edec.firebasestorage.app",
-  messagingSenderId: "234065972210",
-  appId: "1:234065972210:web:0fea8c849e98901377396b",
-  measurementId: "G-78F0FG0D51"
-};
-let db = null;
-let auth = null;
-try{
-  firebase.initializeApp(firebaseConfig);
-  db = firebase.firestore();
-  auth = firebase.auth();
-}catch(e){ console.error('Firebase init failed', e); }
-
-async function pushToCloud(){
-  if(!db) return;
-  try{ await db.collection('toncount').doc('entries').set({data: entries}); }
-  catch(e){
-    console.error('Firestore save failed (toncount):', e);
-    toast('⚠️ ক্লাউডে সেভ হয়নি — এই ডিভাইসে সেভ আছে');
+  function b64url(buf){
+    return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
-}
-async function pullFromCloud(){
-  if(!db) return;
-  try{
-    const snap = await db.collection('toncount').doc('entries').get();
-    if(snap.exists){
-      // Cloud is the single source of truth (every save uploads the FULL data set),
-      // so we replace local data with it — this makes deletions sync correctly too.
-      entries = snap.data().data || {};
-      localStorage.setItem(STORE_KEY, JSON.stringify(entries));
-    } else {
-      // nothing in the cloud yet — push whatever we have locally so it becomes the baseline
-      await pushToCloud();
-    }
-  }catch(e){ console.error('Firestore load failed (toncount):', e); }
-}
-
-// ---------- login gate ----------
-function showApp(){
-  document.getElementById('boot-check').classList.add('hidden');
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('app-root').style.display = '';
-  boot();
-}
-function showLoginScreen(){
-  document.getElementById('boot-check').classList.add('hidden');
-  document.getElementById('app-root').style.display = 'none';
-  document.getElementById('login-screen').classList.remove('hidden');
-}
-function showLogin(){
-  document.getElementById('signup-form').style.display = 'none';
-  document.getElementById('login-form').style.display = '';
-  document.getElementById('signup-err').textContent = '';
-}
-function showSignup(){
-  document.getElementById('login-form').style.display = 'none';
-  document.getElementById('signup-form').style.display = '';
-  document.getElementById('login-err').textContent = '';
-}
-async function doLogin(){
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const errBox = document.getElementById('login-err');
-  const btn = document.getElementById('login-btn');
-  errBox.textContent = '';
-  if(!email || !pass){ errBox.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
-  btn.disabled = true; btn.textContent = 'লগইন হচ্ছে...';
-  try{ await auth.signInWithEmailAndPassword(email, pass); }
-  catch(e){ errBox.textContent = loginErrorMessage(e); }
-  finally{ btn.disabled = false; btn.textContent = 'লগইন করুন'; }
-}
-async function doSignup(){
-  const email = document.getElementById('signup-email').value.trim();
-  const pass = document.getElementById('signup-pass').value;
-  const pass2 = document.getElementById('signup-pass2').value;
-  const errBox = document.getElementById('signup-err');
-  const btn = document.getElementById('signup-btn');
-  errBox.textContent = '';
-  if(!email || !pass){ errBox.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
-  if(pass.length < 6){ errBox.textContent = 'পাসওয়ার্ড অন্তত ৬ ডিজিট/অক্ষর হতে হবে'; return; }
-  if(pass !== pass2){ errBox.textContent = 'দুই পাসওয়ার্ড মিলছে না'; return; }
-  btn.disabled = true; btn.textContent = 'তৈরি হচ্ছে...';
-  try{ await auth.createUserWithEmailAndPassword(email, pass); }
-  catch(e){ errBox.textContent = loginErrorMessage(e); }
-  finally{ btn.disabled = false; btn.textContent = 'অ্যাকাউন্ট তৈরি করুন'; }
-}
-function loginErrorMessage(e){
-  const code = e && e.code || '';
-  if(code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'ইমেইল বা পাসওয়ার্ড ভুল';
-  if(code.includes('invalid-email')) return 'সঠিক ইমেইল দিন';
-  if(code.includes('email-already-in-use')) return 'এই ইমেইলে আগে থেকে অ্যাকাউন্ট আছে — লগইন করুন';
-  if(code.includes('weak-password')) return 'পাসওয়ার্ড খুব দুর্বল, আরেকটু শক্ত পাসওয়ার্ড দিন';
-  if(code.includes('network-request-failed')) return 'ইন্টারনেট সংযোগ পাওয়া যাচ্ছে না';
-  if(code.includes('too-many-requests')) return 'অনেকবার চেষ্টা হয়েছে, একটু পর আবার চেষ্টা করুন';
-  return 'কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন';
-}
-async function doLogout(){
-  if(!confirm('আপনি কি লগআউট করতে চান?')) return;
-  try{ await auth.signOut(); }catch(e){}
-}
-
-if(auth){
-  auth.onAuthStateChanged(async user => {
-    if(user){
-      await pullFromCloud();
-      showApp();
-      startEntriesLiveSync();
-    } else {
-      showLoginScreen();
-    }
-  });
-} else {
-  document.getElementById('logoutBtn').style.display = 'none';
-  showApp();
-}
-
-// ---------- live auto-sync: keep this device's screen updated the instant
-// entries are saved/deleted from ANY device or app (e.g. Nasir Glass auto-sync), no reload needed ----------
-let entriesLiveUnsub = null;
-function startEntriesLiveSync(){
-  if(!db || entriesLiveUnsub) return;
-  entriesLiveUnsub = db.collection('toncount').doc('entries').onSnapshot(snap=>{
-    if(!snap.exists) return;
-    entries = snap.data().data || {};
-    try{ localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }catch(_){}
-    renderRecentList();
-    if(typeof renderMonth==='function') renderMonth();
-    if(typeof renderOverview==='function') renderOverview();
-  }, err=>console.error('toncount live sync error', err));
-}
-
-/* ============================================================
-   HELPERS
-   ============================================================ */
-const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
-const EN_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-
-function pad2(n){ return n.toString().padStart(2,'0'); }
-function todayStr(){
-  const d = new Date();
-  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-}
-function fmt(n){
-  n = Number(n)||0;
-  return n.toFixed(2);
-}
-function entryTotal(e){
-  return CATS.reduce((s,c)=> s + (Number(e[c])||0), 0);
-}
-function monthKey(dateStr){ return dateStr.slice(0,7); }
-function monthEntries(ym){
-  return Object.keys(entries).filter(d => d.startsWith(ym)).sort();
-}
-function monthSums(ym){
-  const sums = {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
-  monthEntries(ym).forEach(d=>{
-    CATS.forEach(c => sums[c] += Number(entries[d][c])||0);
-  });
-  return sums;
-}
-function catColor(c){ return getComputedStyle(document.documentElement).getPropertyValue('--c-'+c).trim(); }
-
-function buildPaneStack(el, sums){
-  const total = CATS.reduce((s,c)=>s+sums[c],0);
-  el.innerHTML = '';
-  el.classList.toggle('empty', total<=0);
-  if(total<=0) return;
-  CATS.forEach(c=>{
-    if(sums[c]<=0) return;
-    const seg = document.createElement('div');
-    seg.className = 'seg';
-    seg.style.background = `var(--c-${c})`;
-    seg.style.flex = (sums[c]/total).toFixed(4);
-    el.appendChild(seg);
-  });
-}
-
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(()=> t.classList.remove('show'), 1800);
-}
-
-function waShare(text){
-  const url = 'https://wa.me/?text=' + encodeURIComponent(text);
-  window.open(url, '_blank');
-}
-
-function shareTextForEntry(dateStr, e){
-  const d = new Date(dateStr+'T00:00:00');
-  const label = `${d.getDate()} ${BN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-  return `*NASIR GLASS — TON COUNT*\n${label}\n\n`+
-    `Tempered : ${fmt(e.tempered)}\n`+
-    `Clear : ${fmt(e.clear)}\n`+
-    `Colour : ${fmt(e.colour)}\n`+
-    `Reflective : ${fmt(e.reflective)}\n`+
-    `Mirror : ${fmt(e.mirror)}\n`+
-    `Total Ton : ${fmt(entryTotal(e))}`;
-}
-function shareTextForMonth(ym){
-  const s = monthSums(ym);
-  const total = CATS.reduce((a,c)=>a+s[c],0);
-  const [y,m] = ym.split('-');
-  const label = `${BN_MONTHS[parseInt(m,10)-1]} ${y}`;
-  const days = monthEntries(ym).length;
-  return `*NASIR GLASS — MONTHLY TON COUNT*\n${label}  (${days} দিনের এন্ট্রি)\n\n`+
-    `Tempered : ${fmt(s.tempered)}\n`+
-    `Clear : ${fmt(s.clear)}\n`+
-    `Colour : ${fmt(s.colour)}\n`+
-    `Reflective : ${fmt(s.reflective)}\n`+
-    `Mirror : ${fmt(s.mirror)}\n`+
-    `Total Ton : ${fmt(total)}`;
-}
-function shareTextForYear(year){
-  let lines = [`*NASIR GLASS — YEARLY TON COUNT ${year}*`, ''];
-  let grand = {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
-  let grandTotal = 0;
-  for(let m=0;m<12;m++){
-    const ym = `${year}-${pad2(m+1)}`;
-    const s = monthSums(ym);
-    const t = CATS.reduce((a,c)=>a+s[c],0);
-    if(t<=0) continue;
-    grandTotal += t;
-    CATS.forEach(c=> grand[c]+=s[c]);
-    lines.push(`${BN_MONTHS[m]}: ${fmt(t)} টন`);
+  function b64urlToBuf(str){
+    str = str.replace(/-/g,'+').replace(/_/g,'/');
+    while(str.length % 4) str += '=';
+    const bin = atob(str);
+    const buf = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) buf[i] = bin.charCodeAt(i);
+    return buf;
   }
-  lines.push('');
-  lines.push(`Tempered : ${fmt(grand.tempered)}`);
-  lines.push(`Clear : ${fmt(grand.clear)}`);
-  lines.push(`Colour : ${fmt(grand.colour)}`);
-  lines.push(`Reflective : ${fmt(grand.reflective)}`);
-  lines.push(`Mirror : ${fmt(grand.mirror)}`);
-  lines.push(`Total Ton : ${fmt(grandTotal)}`);
-  return lines.join('\n');
-}
 
-/* ============================================================
-   TAB NAVIGATION
-   ============================================================ */
-const tabs = ['entry','month','overview'];
-function showTab(name){
-  tabs.forEach(t=>{
-    document.getElementById('screen-'+t).classList.toggle('active', t===name);
-  });
-  document.querySelectorAll('nav.tabbar button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.tab===name);
-  });
-  if(name==='month') renderMonth();
-  if(name==='overview') renderOverview();
-}
-document.querySelectorAll('nav.tabbar button').forEach(b=>{
-  b.addEventListener('click', ()=> showTab(b.dataset.tab));
-});
+  const webAuthnSupported = !!(window.PublicKeyCredential && navigator.credentials);
 
-/* ============================================================
-   ENTRY SCREEN
-   ============================================================ */
-const entryDateInput = document.getElementById('entryDate');
-const entryTotalEl = document.getElementById('entryTotal');
-const deleteRow = document.getElementById('deleteEntryRow');
-
-function loadEntryForm(dateStr){
-  const e = entries[dateStr] || {tempered:0,clear:0,colour:0,reflective:0,mirror:0};
-  CATS.forEach(c=>{
-    const inp = document.getElementById('in-'+c);
-    inp.value = e[c] ? e[c] : '';
-  });
-  updateEntryTotal();
-  deleteRow.style.display = entries[dateStr] ? 'flex' : 'none';
-}
-function currentFormEntry(){
-  const e = {};
-  CATS.forEach(c=>{
-    e[c] = parseFloat(document.getElementById('in-'+c).value) || 0;
-  });
-  return e;
-}
-function updateEntryTotal(){
-  entryTotalEl.textContent = fmt(entryTotal(currentFormEntry()));
-}
-CATS.forEach(c=>{
-  document.getElementById('in-'+c).addEventListener('input', updateEntryTotal);
-});
-entryDateInput.addEventListener('change', ()=> loadEntryForm(entryDateInput.value));
-
-document.getElementById('saveBtn').addEventListener('click', ()=>{
-  const dateStr = entryDateInput.value || todayStr();
-  const e = currentFormEntry();
-  entries[dateStr] = e;
-  saveEntries();
-  toast('সেভ হয়েছে ✓');
-  deleteRow.style.display = 'flex';
-  renderRecentList();
-});
-document.getElementById('shareEntryBtn').addEventListener('click', ()=>{
-  const dateStr = entryDateInput.value || todayStr();
-  const e = entries[dateStr] || currentFormEntry();
-  waShare(shareTextForEntry(dateStr, e));
-});
-document.getElementById('deleteEntryBtn').addEventListener('click', ()=>{
-  const dateStr = entryDateInput.value;
-  if(!entries[dateStr]) return;
-  if(!confirm('এই তারিখের এন্ট্রি মুছে ফেলবেন?')) return;
-  delete entries[dateStr];
-  saveEntries();
-  loadEntryForm(dateStr);
-  renderRecentList();
-  toast('মুছে ফেলা হয়েছে');
-});
-
-function renderRecentList(){
-  const list = document.getElementById('recentList');
-  const dates = Object.keys(entries).sort().reverse().slice(0,6);
-  if(dates.length===0){
-    list.innerHTML = '<div class="empty-note">এখনও কোনো এন্ট্রি নেই — উপরে প্রথম এন্ট্রি যোগ করুন</div>';
-    return;
-  }
-  list.innerHTML = dates.map(d=>logItemHTML(d)).join('');
-  list.querySelectorAll('.log-item').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      entryDateInput.value = el.dataset.date;
-      loadEntryForm(el.dataset.date);
-      window.scrollTo({top:0, behavior:'smooth'});
-    });
-  });
-}
-function logItemHTML(d){
-  const e = entries[d];
-  const total = entryTotal(e);
-  const dt = new Date(d+'T00:00:00');
-  const catStr = CATS.filter(c=>e[c]>0).map(c=>`${CAT_LABEL[c][0]}:${fmt(e[c])}`).join('  ');
-  let segs = '';
-  CATS.forEach(c=>{
-    if(e[c]>0){ segs += `<div class="seg" style="background:var(--c-${c});flex:${(e[c]/total).toFixed(4)}"></div>`; }
-  });
-  return `<div class="log-item" data-date="${d}">
-    <div class="date"><div class="d">${dt.getDate()}</div><div class="m">${EN_MONTHS[dt.getMonth()]}</div></div>
-    <div class="mid">
-      <div class="mini-stack">${segs}</div>
-      <div class="cats">${catStr || 'কোনো ডেটা নেই'}</div>
-    </div>
-    <div class="total">${fmt(total)}</div>
-  </div>`;
-}
-
-/* ============================================================
-   MONTH SCREEN
-   ============================================================ */
-let currentYM = todayStr().slice(0,7);
-
-function renderMonth(){
-  const [y,m] = currentYM.split('-').map(Number);
-  document.getElementById('monthLabel').textContent = BN_MONTHS[m-1];
-  document.getElementById('monthSub').textContent = y;
-
-  const sums = monthSums(currentYM);
-  buildPaneStack(document.getElementById('monthPaneStack'), sums);
-
-  const legend = document.getElementById('monthLegend');
-  legend.innerHTML = CATS.map(c=>`<span><span class="dot" style="background:var(--c-${c})"></span>${CAT_LABEL[c]}</span>`).join('');
-
-  const total = CATS.reduce((a,c)=>a+sums[c],0);
-  document.getElementById('monthSummary').innerHTML = CATS.map(c=>`
-    <div class="summary-row">
-      <span class="k"><span class="dot" style="background:var(--c-${c})"></span>${CAT_LABEL[c]}</span>
-      <span class="v">${fmt(sums[c])}</span>
-    </div>`).join('') + `
-    <div class="summary-row total">
-      <span class="k">Total Ton</span>
-      <span class="v">${fmt(total)}</span>
-    </div>`;
-
-  const dates = monthEntries(currentYM).slice().reverse();
-  document.getElementById('monthLogCount').textContent = dates.length;
-  const logEl = document.getElementById('monthLog');
-  if(dates.length===0){
-    logEl.innerHTML = '<div class="empty-note">এই মাসে কোনো এন্ট্রি নেই</div>';
-  }else{
-    logEl.innerHTML = dates.map(d=>logItemHTML(d)).join('');
-    logEl.querySelectorAll('.log-item').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        showTab('entry');
-        entryDateInput.value = el.dataset.date;
-        loadEntryForm(el.dataset.date);
+  async function registerFingerprint(){
+    lockStatus.textContent = 'সেটআপ হচ্ছে...';
+    try{
+      const cred = await navigator.credentials.create({
+        publicKey:{
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          rp:{ name:'NGIL Hub' },
+          user:{ id: crypto.getRandomValues(new Uint8Array(16)), name:'mehedi@ngil', displayName:'Md. Mehedi Hasan' },
+          pubKeyCredParams:[{type:'public-key', alg:-7}, {type:'public-key', alg:-257}],
+          authenticatorSelection:{ authenticatorAttachment:'platform', userVerification:'required' },
+          timeout:60000
+        }
       });
+      localStorage.setItem(CRED_KEY, b64url(cred.rawId));
+      lockStatus.textContent = 'সেট হয়ে গেছে ✓';
+      setTimeout(unlock, 400);
+    }catch(err){
+      fpBtn.classList.add('err');
+      lockStatus.textContent = 'সেটআপ ব্যর্থ — আবার চেষ্টা করুন';
+    }
+  }
+
+  async function verifyFingerprint(credId){
+    lockStatus.textContent = 'যাচাই হচ্ছে...';
+    fpBtn.classList.remove('err');
+    try{
+      await navigator.credentials.get({
+        publicKey:{
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          allowCredentials:[{ id:b64urlToBuf(credId), type:'public-key' }],
+          userVerification:'required',
+          timeout:60000
+        }
+      });
+      lockStatus.textContent = '';
+      unlock();
+    }catch(err){
+      fpBtn.classList.add('err');
+      lockStatus.textContent = 'যাচাই ব্যর্থ — আবার চেষ্টা করুন';
+    }
+  }
+
+  function unlock(){
+    lockScreen.style.display = 'none';
+  }
+
+  fpBtn.addEventListener('click', ()=>{
+    const existing = localStorage.getItem(CRED_KEY);
+    if(existing){ verifyFingerprint(existing); } else { registerFingerprint(); }
+  });
+
+  lockSkip.addEventListener('click', unlock);
+
+  (function initLock(){
+    if(!webAuthnSupported){
+      // device/browser can't do platform biometrics — don't lock the person out
+      unlock();
+      return;
+    }
+    const existing = localStorage.getItem(CRED_KEY);
+    if(!existing){
+      lockDesc.textContent = 'প্রথমবার — ফিঙ্গারপ্রিন্ট সেট করতে বাটনে চাপুন';
+      lockSkip.style.display = 'block';
+    } else {
+      lockDesc.textContent = 'চালিয়ে যেতে ফিঙ্গারপ্রিন্ট দিয়ে যাচাই করুন';
+    }
+  })();
+
+  const frameView = document.getElementById('frameView');
+  const appFrame = document.getElementById('appFrame');
+  const frameName = document.getElementById('frameName');
+  const home = document.getElementById('home');
+  const navTabs = document.querySelectorAll('.nav-tab');
+
+  function setActiveTab(tab){
+    navTabs.forEach(t=> t.classList.toggle('active', t.dataset.tab === tab));
+  }
+
+  function openApp(src, name, tab){
+    frameName.textContent = name;
+    appFrame.src = src;
+    frameView.classList.add('show');
+    home.style.display = 'none';
+    setActiveTab(tab);
+    history.pushState({app:src}, '', '#'+tab);
+  }
+
+  document.querySelectorAll('.app-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const src = card.dataset.src;
+      const name = card.dataset.name;
+      const tab = src.includes('nasirglass') ? 'nasirglass' : 'toncount';
+      openApp(src, name, tab);
+    });
+  });
+
+  function goHome(){
+    frameView.classList.remove('show');
+    home.style.display = '';
+    appFrame.src = '';
+    setActiveTab('home');
+  }
+
+  navTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      const t = tab.dataset.tab;
+      if(t === 'home'){
+        if(frameView.classList.contains('show')){ history.back(); } else { goHome(); }
+        return;
+      }
+      // already on this app — do nothing
+      if(frameView.classList.contains('show') && tab.classList.contains('active')) return;
+      openApp(tab.dataset.src, tab.dataset.name, t);
+    });
+  });
+
+  document.getElementById('backBtn').addEventListener('click', ()=>{
+    history.back();
+  });
+  window.addEventListener('popstate', (e)=>{
+    if(!e.state || !e.state.app){ goHome(); }
+  });
+
+  // deep-link support: NGIL-Hub/#nasirglass or #toncount opens directly
+  window.addEventListener('load', ()=>{
+    const hash = location.hash.replace('#','');
+    const map = { nasirglass: {src:'apps/nasirglass/index.html', name:'Nasir Glass'}, toncount: {src:'apps/toncount/index.html', name:'TON COUNT'} };
+    if(map[hash]){
+      frameName.textContent = map[hash].name;
+      appFrame.src = map[hash].src;
+      frameView.classList.add('show');
+      home.style.display = 'none';
+      setActiveTab(hash);
+    }
+  });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
     });
   }
-}
-document.getElementById('monthPrev').addEventListener('click', ()=>{ shiftMonth(-1); });
-document.getElementById('monthNext').addEventListener('click', ()=>{ shiftMonth(1); });
-function shiftMonth(delta){
-  let [y,m] = currentYM.split('-').map(Number);
-  m += delta;
-  if(m<1){ m=12; y--; } if(m>12){ m=1; y++; }
-  currentYM = `${y}-${pad2(m)}`;
-  renderMonth();
-}
-document.getElementById('shareMonthBtn').addEventListener('click', ()=>{
-  waShare(shareTextForMonth(currentYM));
-});
-
-/* ============================================================
-   OVERVIEW SCREEN
-   ============================================================ */
-let currentYear = parseInt(todayStr().slice(0,4),10);
-
-function renderOverview(){
-  document.getElementById('yearLabel').textContent = currentYear;
-  let grandTotal = 0;
-  let html = '';
-  for(let m=0;m<12;m++){
-    const ym = `${currentYear}-${pad2(m+1)}`;
-    const sums = monthSums(ym);
-    const total = CATS.reduce((a,c)=>a+sums[c],0);
-    grandTotal += total;
-    const isZero = total<=0;
-    html += `<div class="month-card ${isZero?'zero':''}">
-      <div class="row-between">
-        <span class="mname">${BN_MONTHS[m]}</span>
-        <span class="mtotal">${isZero? '—' : fmt(total)+' টন'}</span>
-      </div>
-      <div class="pill-row">
-        ${CATS.map(c=>`<span class="pill ${sums[c]>0?'has':''}">${CAT_LABEL[c]} ${sums[c]>0?fmt(sums[c]):'–'}</span>`).join('')}
-      </div>
-    </div>`;
-  }
-  document.getElementById('monthsOverview').innerHTML = html;
-  document.getElementById('yearTotal').textContent = fmt(grandTotal);
-}
-document.getElementById('yearPrev').addEventListener('click', ()=>{ currentYear--; renderOverview(); });
-document.getElementById('yearNext').addEventListener('click', ()=>{ currentYear++; renderOverview(); });
-document.getElementById('shareYearBtn').addEventListener('click', ()=>{
-  waShare(shareTextForYear(currentYear));
-});
-
-/* ============================================================
-   MENU SHEET
-   ============================================================ */
-const sheet = document.getElementById('menuSheet');
-const backdrop = document.getElementById('sheetBackdrop');
-function openSheet(){ sheet.classList.add('show'); backdrop.classList.add('show'); }
-function closeSheet(){ sheet.classList.remove('show'); backdrop.classList.remove('show'); }
-document.getElementById('menuBtn').addEventListener('click', openSheet);
-backdrop.addEventListener('click', closeSheet);
-
-document.getElementById('exportBtn').addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify(entries, null, 1)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `ton-count-backup-${todayStr()}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-  closeSheet();
-  toast('ব্যাকআপ ডাউনলোড হয়েছে');
-});
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  closeSheet();
-  if(!confirm('সব ডেটা স্থায়ীভাবে মুছে ফেলা হবে। আপনি কি নিশ্চিত?')) return;
-  entries = {};
-  localStorage.removeItem(STORE_KEY);
-  localStorage.removeItem(SEED_FLAG);
-  saveEntries();
-  loadEntryForm(entryDateInput.value);
-  renderRecentList();
-  toast('সব ডেটা মুছে ফেলা হয়েছে');
-});
-
-let deferredInstall = null;
-window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault();
-  deferredInstall = e;
-});
-document.getElementById('installBtn').addEventListener('click', async ()=>{
-  closeSheet();
-  if(deferredInstall){
-    deferredInstall.prompt();
-    await deferredInstall.userChoice;
-    deferredInstall = null;
-  }else{
-    toast('ব্রাউজার মেনু থেকে "Add to Home Screen" ব্যবহার করুন');
-  }
-});
-
-/* ============================================================
-   INIT
-   ============================================================ */
-function boot(){
-  entryDateInput.value = todayStr();
-  loadEntryForm(todayStr());
-  renderRecentList();
-}
-
-if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  });
-}
 </script>
 </body>
 </html>
